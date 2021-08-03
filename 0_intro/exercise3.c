@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 double
-my_sqrt (int x)
+my_sqrt (double x)
 {
     // Compute the sqare root of x, using the Newton-Raphson method
     double approx = 0.0 ;
@@ -25,7 +25,7 @@ my_sqrt (int x)
 }
 
 double
-my_sqrt_fixed(int x)
+my_sqrt_fixed(double x)
 {
     assert(x >= 0) ;
     if (x == 0) return 0 ;
@@ -49,7 +49,6 @@ my_sqrt_fixed(int x)
 double *
 quadratic_solver (int a, int b, int c)
 {
-    // if (a == 0) return 0 ;
     double * solutions = (double *) malloc(sizeof(double) * 2) ;
     if (a == 0) {
         if (b == 0) {
@@ -79,18 +78,7 @@ quadratic_solver (int a, int b, int c)
 }
 
 void
-part3_odd_and_ends ()
-{
-    uint64_t combinations = pow(2, 32) * pow(2, 32) ;  // Q. 
-    uint64_t test_per_sec = 1000000000 ;
-    uint64_t sec_per_year = 60 * 60 * 24 * 365 ;
-    uint64_t test_per_year = test_per_sec * sec_per_year ;
-
-    printf("%Lf\n", (long double)combinations / test_per_year) ;    // cannot calculate the result
-}
-
-int
-main ()
+part2_fix_the_problem ()
 {
     double * solutions ;
     if ((solutions = quadratic_solver(3, 4, 1)) != 0x0){ 
@@ -127,6 +115,32 @@ main ()
         printf("There's no solution\n") ;
     }
     free(solutions) ;
+}
 
+void
+part3_odd_and_ends ()
+{
+    // for the first condition, a == 0 && b == 0
+    uint64_t combinations = pow(2, 63) ;  // Q. 
+    uint64_t test_per_sec = 1000000000 ;
+    uint64_t sec_per_year = 60 * 60 * 24 * 365 ;
+    uint64_t test_per_year = test_per_sec * sec_per_year ;
+
+    // Q. how about the second condition "b^2 - ac < 0" ?
+
+    printf("%Lf years\n", ((long double)combinations / test_per_year) * 2) ;  
+}
+
+void
+part4_to_infinity_and_beyond ()
+{
+    printf("%f\n", my_sqrt_fixed(__FLT_MAX__ * 1000)) ;
+}
+
+int
+main ()
+{  
+    part2_fix_the_problem() ;
     part3_odd_and_ends() ;
+    part4_to_infinity_and_beyond() ;
 }
