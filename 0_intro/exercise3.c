@@ -46,8 +46,6 @@ my_sqrt_fixed(int x)
     how long would one have to wait on average until a bug gets triggered?
 */
 
-
-// need to fix !
 double *
 quadratic_solver (int a, int b, int c)
 {
@@ -56,9 +54,9 @@ quadratic_solver (int a, int b, int c)
     if (a == 0) {
         if (b == 0) {
             if (c == 0) {
-                // return 0 ?
+                // return 0 ? (for all x, true)
                 solutions[0] = 0.0 ;
-                solutions[1] = 0.0 ;
+                solutions[1] = 0x0 ;
             }
             else {
                 return 0x0 ;
@@ -83,7 +81,7 @@ quadratic_solver (int a, int b, int c)
 void
 part3_odd_and_ends ()
 {
-    uint64_t combinations = pow(2, 32) ;  // Q. 2^32 * 2^32 ?
+    uint64_t combinations = pow(2, 32) * pow(2, 32) ;  // Q. 
     uint64_t test_per_sec = 1000000000 ;
     uint64_t sec_per_year = 60 * 60 * 24 * 365 ;
     uint64_t test_per_year = test_per_sec * sec_per_year ;
