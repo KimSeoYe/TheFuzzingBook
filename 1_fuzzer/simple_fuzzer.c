@@ -42,6 +42,7 @@ write_data (char * path)
         printf("Write to the end!\n") ; // TODO. to the end ?
     }
 
+    free(data) ;
     fclose(fp) ;
     return data_size ;
 }
@@ -86,7 +87,9 @@ create_input_files ()
 #endif
 
     int data_size = write_data(path) ;
-    read_data(path, data_size) ;
+    if (data_size != -1) {
+        read_data(path, data_size) ;
+    }
     
     if (remove(path) == -1) {
         perror("remove") ;
