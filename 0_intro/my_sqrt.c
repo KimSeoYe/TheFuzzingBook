@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <ctype.h>
 
 // #define DEBUG
 #define EPSILON 1e-8
@@ -72,14 +73,33 @@ my_sqrt_checked (int x)
     return root ;
 }
 
-void
-sqrt_program(char * arg[])
+int
+is_number(char * arg)
 {
-    // validity check
-    // 1. not a number
-    // *** Cannot simply use atoi() because it omits the character
-    // 2. negative number
-    // 3. positive number (valid input)
+    for(int i = 0; arg[i] != 0x0; i++) {
+        if (arg[i] == '-' || arg[i] == '+') continue ;
+        if (isdigit(arg[i]) == 0) return 0 ;
+    }
+
+    return 1 ;
+}
+
+void
+sqrt_program(char * arg)
+{
+    if (!is_number(arg)) 
+        goto err_exit ;
+    
+    int x = atoi(arg) ;
+    if (x < 0)
+        goto err_exit ;
+    else
+        printf("The root of %d is %f\n", x, my_sqrt(x)) ;
+    
+    return ;
+
+err_exit:
+    printf("Illegal Input\n") ;
 }
 
 double
@@ -107,6 +127,10 @@ main ()
     // assert_equals(my_sqrt(100), 10, 1e-8) ;
 
     generating_tests() ;
+
+    sqrt_program("4") ;
+    sqrt_program("-4") ;
+    sqrt_program("xjfdsa") ;
 
     return 0 ;
 }
