@@ -46,10 +46,9 @@ my_sqrt_fixed(double x)
     how long would one have to wait on average until a bug gets triggered?
 */
 
-double *
-quadratic_solver (int a, int b, int c)
+int
+quadratic_solver (double a, double b, double c, double * solutions)
 {
-    double * solutions = (double *) malloc(sizeof(double) * 2) ;
     if (a == 0) {
         if (b == 0) {
             if (c == 0) {
@@ -58,63 +57,63 @@ quadratic_solver (int a, int b, int c)
                 solutions[1] = 0x0 ;
             }
             else {
-                return 0x0 ;
+                solutions = 0x0 ;
+                return 0 ;
             }
         }
         else {
-            solutions[0] = -c / (double)b ;
+            solutions[0] = -c / b ;
             solutions[1] = 0x0 ;
         }
     }
     else {
         int q = b * b - 4 * a * c ;
-        if (q < 0) return 0x0 ;
+        if (q < 0) {
+            solutions = 0x0 ;
+            return 0 ;
+        }
 
-        solutions[0] = (-1 * b + my_sqrt_fixed(q)) / (double)(2 * a) ;
-        solutions[1] = (-1 * b - my_sqrt_fixed(q)) / (double)(2 * a) ;
+        solutions[0] = (-1 * b + my_sqrt_fixed(q)) / (2 * a) ;
+        solutions[1] = (-1 * b - my_sqrt_fixed(q)) / (2 * a) ;
     }
 
-    return solutions ;
+    return 1 ;
 }
 
 void
 part2_fix_the_problem ()
 {
-    double * solutions ;
-    if ((solutions = quadratic_solver(3, 4, 1)) != 0x0){ 
-        printf("%f %f\n", solutions[0], solutions[1]) ;
-    } else {
-        printf("There's no solution\n") ;
-    }
-    free(solutions) ;
+    double solutions[2] ;
 
-    if ((solutions = quadratic_solver(1, 1, 1)) != 0x0){ 
+    if (quadratic_solver(3, 4, 1, solutions)){ 
         printf("%f %f\n", solutions[0], solutions[1]) ;
     } else {
         printf("There's no solution\n") ;
     }
-    free(solutions) ;
 
-    if ((solutions = quadratic_solver(0, 1, 1)) != 0x0){ 
+    if (quadratic_solver(1, 1, 1, solutions)){ 
         printf("%f %f\n", solutions[0], solutions[1]) ;
     } else {
         printf("There's no solution\n") ;
     }
-    free(solutions) ;
 
-    if ((solutions = quadratic_solver(0, 0, 1)) != 0x0){ 
+    if (quadratic_solver(0, 1, 1, solutions)){ 
         printf("%f %f\n", solutions[0], solutions[1]) ;
     } else {
         printf("There's no solution\n") ;
     }
-    free(solutions) ;
 
-    if ((solutions = quadratic_solver(0, 0, 0)) != 0x0){ 
+    if (quadratic_solver(0, 0, 1, solutions)){ 
         printf("%f %f\n", solutions[0], solutions[1]) ;
     } else {
         printf("There's no solution\n") ;
     }
-    free(solutions) ;
+
+    if (quadratic_solver(0, 0, 0, solutions)){ 
+        printf("%f %f\n", solutions[0], solutions[1]) ;
+    } else {
+        printf("There's no solution\n") ;
+    }
 }
 
 void
