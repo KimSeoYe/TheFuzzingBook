@@ -73,7 +73,7 @@ part3_odd_and_ends ()
 void
 part4_to_infinity_and_beyond ()
 {
-    printf("%f\n", my_sqrt_fixed(__FLT_MAX__ * 1000)) ;
+    printf("%f\n", my_sqrt_fixed(__FLT_MAX__ * 1000)) ; // Q. infinite number in C ?
 }
 
 int
