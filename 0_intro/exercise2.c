@@ -6,7 +6,6 @@
 int
 shellsort (int * elems, int n, int * sorted_elems)
 {
-    // int * sorted_elems = (int *) malloc (sizeof(int) * n) ;
     for (int i = 0; i < n; i++) {
         sorted_elems[i] = elems[i] ;
     }
@@ -23,8 +22,7 @@ shellsort (int * elems, int n, int * sorted_elems)
             sorted_elems[j] = temp ;
         }
     }
-    
-    // return sorted_elems ;
+
     return n ;
 }
 
