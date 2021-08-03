@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <math.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 double
 my_sqrt (int x)
@@ -45,24 +46,44 @@ my_sqrt_fixed(int x)
     how long would one have to wait on average until a bug gets triggered?
 */
 
-int
-quadratic_solver (int a, int b, int c, double * solution_1, double * solution_2)
+
+// need to fix !
+double *
+quadratic_solver (int a, int b, int c)
 {
-    if (a == 0) return 0 ;
+    // if (a == 0) return 0 ;
+    double * solutions = (double *) malloc(sizeof(double) * 2) ;
+    if (a == 0) {
+        if (b == 0) {
+            if (c == 0) {
+                // return 0 ?
+                solutions[0] = 0.0 ;
+                solutions[1] = 0.0 ;
+            }
+            else {
+                return 0x0 ;
+            }
+        }
+        else {
+            solutions[0] = -c / (double)b ;
+            solutions[1] = 0x0 ;
+        }
+    }
+    else {
+        int q = b * b - 4 * a * c ;
+        if (q < 0) return 0x0 ;
 
-    int q = b * b - 4 * a * c ;
-    if (q < 0) return 0 ;
+        solutions[0] = (-1 * b + my_sqrt_fixed(q)) / (double)(2 * a) ;
+        solutions[1] = (-1 * b - my_sqrt_fixed(q)) / (double)(2 * a) ;
+    }
 
-    *solution_1 = (-1 * b + my_sqrt_fixed(q)) / (double)(2 * a) ;
-    *solution_2 = (-1 * b - my_sqrt_fixed(q)) / (double)(2 * a) ;
-
-    return 1 ;
+    return solutions ;
 }
 
 void
 part3_odd_and_ends ()
 {
-    uint64_t combinations = pow(2, 32) ;  // Q.
+    uint64_t combinations = pow(2, 32) ;  // Q. 2^32 * 2^32 ?
     uint64_t test_per_sec = 1000000000 ;
     uint64_t sec_per_year = 60 * 60 * 24 * 365 ;
     uint64_t test_per_year = test_per_sec * sec_per_year ;
@@ -73,24 +94,41 @@ part3_odd_and_ends ()
 int
 main ()
 {
-    double sol_1, sol_2 ;
-    if (quadratic_solver(3, 4, 1, &sol_1, &sol_2)){ 
-        printf("%f %f\n", sol_1, sol_2) ;
+    double * solutions ;
+    if ((solutions = quadratic_solver(3, 4, 1)) != 0x0){ 
+        printf("%f %f\n", solutions[0], solutions[1]) ;
     } else {
-        printf("There's no solution or it's not a quadratic.\n") ;
+        printf("There's no solution\n") ;
     }
+    free(solutions) ;
 
-    if (quadratic_solver(1, 1, 1, &sol_1, &sol_2)){ 
-        printf("%f %f\n", sol_1, sol_2) ;
+    if ((solutions = quadratic_solver(1, 1, 1)) != 0x0){ 
+        printf("%f %f\n", solutions[0], solutions[1]) ;
     } else {
-        printf("There's no solution or it's not a quadratic.\n") ;
+        printf("There's no solution\n") ;
     }
+    free(solutions) ;
 
-    if (quadratic_solver(0, 1, 1, &sol_1, &sol_2)){ 
-        printf("%f %f\n", sol_1, sol_2) ;
+    if ((solutions = quadratic_solver(0, 1, 1)) != 0x0){ 
+        printf("%f %f\n", solutions[0], solutions[1]) ;
     } else {
-        printf("There's no solution or it's not a quadratic.\n") ;
+        printf("There's no solution\n") ;
     }
+    free(solutions) ;
+
+    if ((solutions = quadratic_solver(0, 0, 1)) != 0x0){ 
+        printf("%f %f\n", solutions[0], solutions[1]) ;
+    } else {
+        printf("There's no solution\n") ;
+    }
+    free(solutions) ;
+
+    if ((solutions = quadratic_solver(0, 0, 0)) != 0x0){ 
+        printf("%f %f\n", solutions[0], solutions[1]) ;
+    } else {
+        printf("There's no solution\n") ;
+    }
+    free(solutions) ;
 
     part3_odd_and_ends() ;
 }
