@@ -49,6 +49,8 @@ invoking_extern_prog ()
 void
 long_running_fuzzing ()
 {
+    srand(time(NULL)) ; // Q
+    
     int trials = 100 ;
     char * program = "bc" ;
 

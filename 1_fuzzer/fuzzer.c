@@ -11,7 +11,7 @@
 char *
 fuzzer (int max_length, int char_start, int char_range)
 {
-    srand(clock()) ;    // Q.
+    // srand(clock()) ;    // Q.
 
     int string_length = rand() % (max_length + 1) ;
     char * out = (char *) malloc(sizeof(char) * string_length) ;    // Q. Is it okay to use malloc() here?

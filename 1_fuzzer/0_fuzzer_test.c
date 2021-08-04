@@ -12,6 +12,8 @@
 int
 write_fuzzer_data (char * path)
 {            
+    srand(time(NULL)) ; // Q
+    
     FILE * fp = fopen(path, "wb") ;
     if (fp == 0x0) {
         perror("fopen") ;
