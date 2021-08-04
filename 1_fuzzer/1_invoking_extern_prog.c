@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "fuzzer.h"
 #include "fileio.h"
@@ -10,7 +11,7 @@ void
 execute_command (char * program, char * path)
 {
     char * command = (char *) malloc(sizeof(char) * (strlen(path) + 32)) ;
-    sprintf(command, "cat %s | %s", path, program) ;
+    sprintf(command, "cat %s | %s 2>> error", path, program) ;
 
     FILE * fp = popen(command, "r") ;
     if (fp == 0x0) {
@@ -47,16 +48,18 @@ invoking_extern_prog ()
 void
 long_running_fuzzing ()
 {
-    // TODO. 
+    int trials = 100 ;
     char * program = "bc" ;
 
     char dir_name[32] ;
     char path[32] ;
     create_input_files(dir_name, path) ;
 
-    char * data = fuzzer(MAX_LEN, CHAR_START, CHAR_RANGE) ;
-    if (write_data(path, data) == -1)  return ;
-    execute_command(program, path) ;
+    for (int i = 0; i < trials; i++) {
+        char * data = fuzzer(MAX_LEN, CHAR_START, CHAR_RANGE) ;
+        if (write_data(path, data) == -1)  return ;
+        execute_command(program, path) ;
+    }
 
     remove_input_files(dir_name, path) ;
 }
