@@ -7,6 +7,7 @@
 #include "../include/fuzzer.h"
 #include "../include/fileio.h"
 
+#define DEBUG
 
 int pipes[2] ;
 
@@ -20,7 +21,6 @@ child_proc (char * program, char * path)
     // close(pipes[1]) ;
 
     execlp(program, program, path, 0x0) ;
-	// get error code!
 }
 
 void
@@ -39,9 +39,10 @@ parent_proc ()
     return ;
 }
 
-void
+int
 my_popen (char * program, char * path)
 {
+    // TODO. position?
     if (pipe(pipes) != 0) {
         perror("pipe") ;
         exit(1) ;
@@ -56,7 +57,7 @@ my_popen (char * program, char * path)
     }
     else {
         perror("fork") ;
-        return ;
+        return -1 ;
     }
 
     int exit_code ;
@@ -65,6 +66,8 @@ my_popen (char * program, char * path)
 #ifdef DEBUG
     printf("execution end %d %d\n", term_pid, exit_code) ;
 #endif
+
+    return exit_code ;
 }
 
 void
@@ -97,13 +100,12 @@ long_running_fuzzing ()
     create_input_dir(dir_name) ;
 
     char path[32] ;
-    char * basename = "input" ;
 
     for (int i = 0; i < trials; i++) {
-        sprintf(path, "%s/%s%d", dir_name, basename, i) ;
+        sprintf(path, "%s/%s%d", dir_name, "input", i) ;
         char * data = fuzzer(MAX_LEN, CHAR_START, CHAR_RANGE) ;
         if (write_data(path, data) == -1)  return ;
-        my_popen(program, path) ;
+        int exit_code = my_popen(program, path) ;   // TODO. something with error code
         free(data) ;
     }
 }
@@ -113,6 +115,6 @@ main ()
 {
     srand(time(NULL)) ; 
 
-    invoking_extern_prog() ;
+    // invoking_extern_prog() ;
     long_running_fuzzing() ;
 }
