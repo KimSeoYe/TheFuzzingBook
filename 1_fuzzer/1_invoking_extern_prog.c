@@ -11,7 +11,7 @@ void
 execute_command (char * program, char * path)
 {
     char * command = (char *) malloc(sizeof(char) * (strlen(path) + 32)) ;  // TODO. use local variable 
-    sprintf(command, "cat %s | %s", path, program) ;    // TODO. modify -> "bc file"
+    sprintf(command, "cat %s | %s", path, program) ;    // TODO. modify -> "bc file" -> how to check error?
 
     FILE * fp = popen(command, "r") ;
     if (fp == 0x0) {
