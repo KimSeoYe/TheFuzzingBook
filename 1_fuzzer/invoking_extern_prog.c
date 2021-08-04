@@ -4,28 +4,11 @@
 #include <string.h>
 
 #include "fuzzer.h"
+#include "fileio.h"
 
 #define MAX_LEN 100
 #define CHAR_START 32
 #define CHAR_RANGE 32
-
-int
-write_data (char * path, char * data)
-{            
-    FILE * fp = fopen(path, "wb") ;
-    if (fp == 0x0) {
-        perror("fopen") ;
-        return -1 ;
-    }
-
-    int data_size = fwrite(data, 1, strlen(data), fp) ; 
-    if (data_size != strlen(data)) {
-        printf("Write to the end!\n") ; // TODO. to the end ?
-    }
-
-    fclose(fp) ;
-    return data_size ;
-}
 
 void
 execute_command (char * program, char * path)
