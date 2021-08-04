@@ -6,10 +6,6 @@
 #include "fuzzer.h"
 #include "fileio.h"
 
-#define MAX_LEN 100
-#define CHAR_START 32
-#define CHAR_RANGE 32
-
 void
 execute_command (char * program, char * path)
 {
