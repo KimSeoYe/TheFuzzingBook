@@ -17,6 +17,7 @@ child_proc (char * program, char * path)
     close(pipes[1]) ;
 
     execlp(program, program, path, 0x0) ;
+	// get error code!
 
     exit(0) ;
 }
