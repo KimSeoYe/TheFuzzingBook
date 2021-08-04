@@ -59,6 +59,7 @@ long_running_fuzzing ()
         char * data = fuzzer(MAX_LEN, CHAR_START, CHAR_RANGE) ;
         if (write_data(path, data) == -1)  return ;
         execute_command(program, path) ;
+        free(data) ;
     }
 
     remove_input_files(dir_name, path) ;
