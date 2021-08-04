@@ -10,15 +10,16 @@
 #define DEBUG
 
 int pipes[2] ;
+int error_pipes[2] ;
 
 void
 child_proc (char * program, char * path)
 {
     close(pipes[0]) ;
-    dup2(pipes[1], 0) ;
+    close(error_pipes[0]) ;
+    dup2(pipes[1], 0) ; // Q. close(0) ?
     dup2(pipes[1], 1) ;
-    dup2(pipes[1], 2) ;
-    // close(pipes[1]) ;
+    dup2(error_pipes[1], 2) ;
 
     execlp(program, program, path, 0x0) ;
 }
@@ -26,7 +27,15 @@ child_proc (char * program, char * path)
 void
 parent_proc ()
 {
+    int exit_code ;
+    pid_t term_pid = wait(&exit_code) ;
+
+#ifdef DEBUG
+    printf("execution end %d %d\n", term_pid, exit_code) ;
+#endif
+
     close(pipes[1]) ;
+    close(error_pipes[1]) ;
 
     char buf[1024] ;
     int s ;
@@ -36,6 +45,12 @@ parent_proc ()
 	}
     close(pipes[0]) ;
 
+    while ((s = read(error_pipes[0], buf, 1023)) > 0) {
+        buf[s] = 0x0 ;
+        printf("%s", buf) ;
+	}
+    close(error_pipes[0]) ;
+
     return ;
 }
 
@@ -44,6 +59,10 @@ my_popen (char * program, char * path)
 {
     // TODO. position?
     if (pipe(pipes) != 0) {
+        perror("pipe") ;
+        exit(1) ;
+    }
+    if (pipe(error_pipes) != 0) {
         perror("pipe") ;
         exit(1) ;
     }
@@ -60,14 +79,7 @@ my_popen (char * program, char * path)
         return -1 ;
     }
 
-    int exit_code ;
-    pid_t term_pid = wait(&exit_code) ;
-
-#ifdef DEBUG
-    printf("execution end %d %d\n", term_pid, exit_code) ;
-#endif
-
-    return exit_code ;
+    return 1 ;
 }
 
 void
