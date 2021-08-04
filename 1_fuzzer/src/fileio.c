@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "fileio.h"
+#include "../include/fileio.h"
 
 int
 write_data (char * path, char * data)
@@ -48,9 +48,8 @@ read_data (char * path, int data_size)
 
 
 void
-create_input_files (char * dir_name, char * path)
+create_input_dir (char * dir_name)
 {
-    char * basename = "input.txt" ;
     char template[] = "tmp.XXXXXX" ;
     char * temp_dir = mkdtemp(template) ;
     if (temp_dir == 0x0) {
@@ -58,17 +57,11 @@ create_input_files (char * dir_name, char * path)
         exit(1) ;
     }
     strcpy(dir_name, temp_dir) ;
-
-    sprintf(path, "%s/%s", dir_name, basename) ;
 }
 
 void
-remove_input_files (char * dir_name, char * path)
+remove_input_dir (char * dir_name)
 {
-    if (remove(path) == -1) {
-        perror("remove") ;
-        exit(1) ;
-    }
     if (rmdir(dir_name) == -1) {
         perror("rmdir") ;
         exit(1) ;

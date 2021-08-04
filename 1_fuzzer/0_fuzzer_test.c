@@ -4,8 +4,8 @@
 #include <time.h>
 #include <string.h>
 
-#include "fileio.h" 
-#include "fuzzer.h"
+#include "include/fileio.h" 
+#include "include/fuzzer.h"
 
 #define DEBUG
 
@@ -58,7 +58,8 @@ fuzzer_with_files ()
 {
     char path[32] ;
     char dir_name[32] ;
-    create_input_files(dir_name, path) ;
+    create_input_dir(dir_name) ;
+    sprintf(path, "%s/%s", dir_name, "input") ;
 #ifdef DEBUG
     printf("path: %s\n", path) ;
     printf("dir_name: %s\n", dir_name) ;
@@ -68,8 +69,6 @@ fuzzer_with_files ()
     if (data_size != -1) {
         read_fuzzer_data(path, data_size) ;
     }
-
-    remove_input_files(dir_name, path) ;
 }
 
 int
