@@ -11,6 +11,7 @@ void
 child_proc (char * program, char * path)
 {
     close(pipes[0]) ;
+	// pipes[1], 0
     dup2(pipes[1], 1) ;
     dup2(pipes[1], 2) ;
     close(pipes[1]) ;
