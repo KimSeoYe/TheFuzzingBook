@@ -17,7 +17,7 @@ child_proc (char * program, char * path)
 {
     close(pipes[0]) ;
     close(error_pipes[0]) ;
-    dup2(pipes[1], 0) ; // Q. close(0) ?
+    dup2(pipes[1], 0) ; // Q.
     dup2(pipes[1], 1) ;
     dup2(error_pipes[1], 2) ;
 
@@ -25,7 +25,7 @@ child_proc (char * program, char * path)
 }
 
 void
-parent_proc ()
+parent_proc (int i)
 {
     int exit_code ;
     pid_t term_pid = wait(&exit_code) ;
@@ -41,13 +41,13 @@ parent_proc ()
     int s ;
     while ((s = read(pipes[0], buf, 1023)) > 0) {
         buf[s] = 0x0 ;
-        printf("%s", buf) ;
+        printf("***** [%d] %s", i, buf) ;
 	}
     close(pipes[0]) ;
 
     while ((s = read(error_pipes[0], buf, 1023)) > 0) {
         buf[s] = 0x0 ;
-        printf("%s", buf) ;
+        printf("***** ERROR [%d] : %s", i, buf) ;
 	}
     close(error_pipes[0]) ;
 
@@ -55,15 +55,14 @@ parent_proc ()
 }
 
 int
-my_popen (char * program, char * path)
+my_popen (char * program, char * path, int i)
 {
-    // TODO. position?
     if (pipe(pipes) != 0) {
         perror("pipe") ;
         exit(1) ;
     }
     if (pipe(error_pipes) != 0) {
-        perror("pipe") ;
+        perror("error pipe") ;
         exit(1) ;
     }
 
@@ -72,7 +71,7 @@ my_popen (char * program, char * path)
         child_proc(program, path) ;
     }
     else if (child_pid > 0) {
-        parent_proc() ;
+        parent_proc(i) ;
     }
     else {
         perror("fork") ;
@@ -93,7 +92,7 @@ invoking_extern_prog ()
     sprintf(path, "%s/%s", dir_name, "input") ;
 
     if (write_data(path, "2 + 2\n") == -1)  return ;
-    my_popen(program, path) ;
+    my_popen(program, path, 0) ;
     
     if (remove(path) == -1) {
         perror("remove") ;
@@ -113,11 +112,12 @@ long_running_fuzzing ()
 
     char path[32] ;
 
+    // Q. 100 input files and 100 output files..?
     for (int i = 0; i < trials; i++) {
         sprintf(path, "%s/%s%d", dir_name, "input", i) ;
         char * data = fuzzer(MAX_LEN, CHAR_START, CHAR_RANGE) ;
         if (write_data(path, data) == -1)  return ;
-        int exit_code = my_popen(program, path) ;   // TODO. something with error code
+        int exit_code = my_popen(program, path, i) ;   // TODO. something with error code
         free(data) ;
     }
 }
