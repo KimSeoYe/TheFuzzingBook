@@ -10,7 +10,7 @@
 void
 execute_command (char * program, char * path)
 {
-    char * command = (char *) malloc(sizeof(char) * (strlen(path) + 32)) ;
+    char * command = (char *) malloc(sizeof(char) * (strlen(path) + 32)) ;  // TODO. use local variable 
     sprintf(command, "cat %s | %s 2>> error", path, program) ;
 
     FILE * fp = popen(command, "r") ;
@@ -26,6 +26,7 @@ execute_command (char * program, char * path)
 
     int exit_status = pclose(fp) ;
     printf("exit_status : %d\n", exit_status) ;
+    // TODO. handle error !
 
     free(command) ;
 }
