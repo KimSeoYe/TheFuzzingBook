@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "fileio.h"
+
 int
 write_data (char * path, char * data)
 {            
