@@ -28,7 +28,7 @@ fuzzer (int max_length, int char_start, int char_range)
 }
 
 int
-write_data (char * path)
+write_fuzzer_data (char * path)
 {            
     FILE * fp = fopen(path, "wb") ;
     if (fp == 0x0) {
@@ -48,7 +48,7 @@ write_data (char * path)
 }
 
 void
-read_data (char * path, int data_size)
+read_fuzzer_data (char * path, int data_size)
 {            
     FILE * fp = fopen(path, "rb") ;
     if (fp == 0x0) {
@@ -70,27 +70,23 @@ read_data (char * path, int data_size)
 }
 
 void
-create_input_files ()
+create_input_files (char * dir_name, char * path)
 {
     char * basename = "input.txt" ;
     char template[] = "tmp.XXXXXX" ;
-    char * dir_name = mkdtemp(template) ;
-    if (dir_name == 0x0) {
+    char * temp_dir = mkdtemp(template) ;
+    if (temp_dir == 0x0) {
         perror("mkdtemp") ;
         exit(1) ;
     }
+    strcpy(dir_name, temp_dir) ;
 
-    char * path = (char *) malloc(sizeof(char) * (strlen(dir_name) + strlen(basename) + 2)) ;
     sprintf(path, "%s/%s", dir_name, basename) ;
-#ifdef DEBUG
-    printf("path: %s\n", path) ;
-#endif
+}
 
-    int data_size = write_data(path) ;
-    if (data_size != -1) {
-        read_data(path, data_size) ;
-    }
-    
+void
+remove_input_files (char * dir_name, char * path)
+{
     if (remove(path) == -1) {
         perror("remove") ;
         exit(1) ;
@@ -101,10 +97,21 @@ create_input_files ()
     }
 }
 
-int
-main ()
+void
+fuzzer_with_files ()
 {
-    // fuzzer(MAX_LEN, CHAR_START, CHAR_RANGE) ;
-    // fuzzer(1000, 'a', 26) ;
-    create_input_files() ;
+    char path[32] ;
+    char dir_name[32] ;
+    create_input_files(dir_name, path) ;
+#ifdef DEBUG
+    printf("path: %s\n", path) ;
+    printf("dir_name: %s\n", dir_name) ;
+#endif
+
+    int data_size = write_fuzzer_data(path) ;
+    if (data_size != -1) {
+        read_fuzzer_data(path, data_size) ;
+    }
+
+    remove_input_files(dir_name, path) ;
 }
