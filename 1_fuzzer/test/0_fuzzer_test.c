@@ -4,8 +4,8 @@
 #include <time.h>
 #include <string.h>
 
-#include "include/fileio.h" 
-#include "include/fuzzer.h"
+#include "../include/fileio.h" 
+#include "../include/fuzzer.h"
 
 #define DEBUG
 

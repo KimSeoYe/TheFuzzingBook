@@ -4,8 +4,8 @@
 #include <string.h>
 #include <time.h>
 
-#include "include/fuzzer.h"
-#include "include/fileio.h"
+#include "../include/fuzzer.h"
+#include "../include/fileio.h"
 
 
 int pipes[2] ;
@@ -17,7 +17,7 @@ child_proc (char * program, char * path)
     dup2(pipes[1], 0) ;
     dup2(pipes[1], 1) ;
     dup2(pipes[1], 2) ;
-    close(pipes[1]) ;
+    // close(pipes[1]) ;
 
     execlp(program, program, path, 0x0) ;
 	// get error code!
