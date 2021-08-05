@@ -66,10 +66,9 @@ parent_proc (char * dir_name, int i)
         }
 	}
     close(stderr_pipes[0]) ;
+    fclose(fp) ;
 
     if (exit_code != 0) flag = -1 ;
-
-    fclose(fp) ;
 
     return flag ;
 }
