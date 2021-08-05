@@ -1,11 +1,15 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
+#include <signal.h>
+#include <sys/time.h>
 
 #include "../include/fuzzer.h"
 
 const int trials = 100 ;
 
-// 1. buffer overflow
+// 1. Buffer Overflow
 
 int
 crash_if_too_long (char * s)
@@ -28,7 +32,16 @@ buffer_overflows ()
     }
 }
 
-// 2. missing error checks
+// 2. Missing Error Checks
+
+void
+handler (int sig)
+{
+    if (sig == SIGALRM) {
+        perror("timeout") ;
+        exit(1) ;
+    }
+}
 
 void
 hang_if_no_space (char * s)
@@ -44,11 +57,24 @@ hang_if_no_space (char * s)
 void
 missing_error_checks ()
 {
+    struct itimerval t ;
+    signal(SIGALRM, handler) ;
+
+    t.it_value.tv_sec = 2 ;
+    t.it_value.tv_usec = 0 ;
+    t.it_interval = t.it_value ;
+
+    setitimer(ITIMER_REAL, &t, 0x0) ;
+
     for (int i = 0; i < trials; i++) {
         char * s = fuzzer(MAX_LEN, CHAR_START, CHAR_RANGE) ;
         hang_if_no_space(s) ;
     }
 }
+
+// 3. Rogue Numbers
+
+
 
 int
 main ()
