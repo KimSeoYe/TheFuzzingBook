@@ -5,14 +5,14 @@
 - src/my_sqrt.c
 - test/my_sqrt_test.c
 
-It generates manual tests and random tests for my_sqrt function.
+It generates manual tests and random tests for `my_sqrt` program.
 
 ## Exercise 2
 
 - src/shellsort.c
 - test/exercise2.c
 
-It also generates manual tests and random tests for shellsort function.
+It also generates manual tests and random tests for `shellsort` program.
 
 ## Exercise 3
 
