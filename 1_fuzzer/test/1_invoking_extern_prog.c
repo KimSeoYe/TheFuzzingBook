@@ -29,9 +29,10 @@ child_proc (char * program, char * path)
         child에서, write하는 파이프를 close하지 않으면 read하는 파이프로 eof가 넘어오지 않는다.
         * read-write operation은 atomic하다... OK
         * kernel에 의해 manage되는 버퍼
+        * 프로세스가 pipe가 비었을 때 read()를 호출하면, write pipe를 통해 데이터가 전송되거나 write pipe가 close될 때 까지 프로세스가 block된다.
 
         이 코드에서 만약 pipes[0]에 stdin을 연결한다면,
-        child에서 stdout에 연결된 파이프에 write를 마치고 close를 해줘야 stdin에 연결된 파이프(read end)에 eof가 넘어올 수 있다?
+        child에서 stdout에 연결된 파이프에 write를 마치고 close를 해줘야 stdin에 연결된 파이프(read end)에 eof가 넘어올 수 있다
         
         execlp :
         현재의 프로세스 이미지를 새로운 프로세스 이미지로 replace한다.
