@@ -10,16 +10,20 @@
 
 #define DEBUG
 
-int pipes[2] ;
+int stdout_pipes[2] ;
 int stderr_pipes[2] ;
+// int stdin_pipes[2] ;
 
 void
 child_proc (char * program, char * path)
 {
     int dev_null = open("/dev/null", O_RDONLY) ;    // /dev/null : eof... >> check man4 null
     dup2(dev_null, 0) ;
+    // close(stdin_pipes[1]) ;
+    // dup2(stdin_pipes[0], 0) ;
+    // close(stdin_pipes[0]) ;
 
-    dup2(pipes[1], 1) ;
+    dup2(stdout_pipes[1], 1) ;
     dup2(stderr_pipes[1], 2) ;
 
     execlp(program, program, path, 0x0) ;
@@ -33,6 +37,8 @@ child_proc (char * program, char * path)
 
         이 코드에서 만약 pipes[0]에 stdin을 연결한다면,
         child에서 stdout에 연결된 파이프에 write를 마치고 close를 해줘야 stdin에 연결된 파이프(read end)에 eof가 넘어올 수 있다 (read from stdin!)
+        (현재 코드의 경우, /dev/null을 읽으면 eof가 넘어오기 때문에 bc가 잘 종료되는 상태 >> 파이프로도 같은 효과를 내야 한다)
+        * 아까의 경우, pipes[0]을 close한 후 pipe[0]에 stdin을 연결해서 동작하지 않았을 것이다.
         
         execlp :
         현재의 프로세스 이미지를 새로운 프로세스 이미지로 replace한다.
@@ -40,13 +46,14 @@ child_proc (char * program, char * path)
         * Process image : 프로세스를 실행하는 동안 필요한 executable file으로, 프로세스의 실행과 관련된 몇몇 segment들로 구성되어 있다.
 
         Q. child process 안에서 write pipe를 어떻게 close해주지..?
+        Q. dev_null 대신 다른 파이프(pipes도 stderr_pipes도 아닌 것)를 만들어서 연결해주면? >> (standard_in) 1: read() in flex scanner failed ?
     */
 }
 
 int
 parent_proc (char * dir_name, int i) 
 {
-    close(pipes[1]) ;
+    close(stdout_pipes[1]) ;
     close(stderr_pipes[1]) ;
 
     char out_path[32] ;
@@ -64,12 +71,12 @@ parent_proc (char * dir_name, int i)
 
     char buf[1024] ;
     int s = 0 ;
-    while ((s = read(pipes[0], buf, 1024)) > 0) {
+    while ((s = read(stdout_pipes[0], buf, 1024)) > 0) {
         if (fwrite(buf, 1, s, fp) < s) {
             perror("fwrite") ;
         }
 	}
-    close(pipes[0]) ;
+    close(stdout_pipes[0]) ;
 
     while ((s = read(stderr_pipes[0], buf, 1024)) > 0) {
         flag = 2 ;  // TODO. inefficiant..
@@ -86,7 +93,7 @@ parent_proc (char * dir_name, int i)
 int
 my_popen (char * program, char * dir_name, char * in_path, int i)
 {
-    if (pipe(pipes) != 0) {
+    if (pipe(stdout_pipes) != 0) {
         perror("pipe") ;
         exit(1) ;
     }
