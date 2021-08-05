@@ -19,7 +19,7 @@ child_proc (char * program, char * path)
     close(pipes[0]) ;
     close(stderr_pipes[0]) ;
 
-    int dev_null = open("/dev/null", O_CLOEXEC) ;    // Q. ... close on exec
+    int dev_null = open("/dev/null", O_RDONLY) ;    // /dev/null : eof... >> check man4 null
     dup2(dev_null, 0) ;
     dup2(pipes[1], 1) ;
     dup2(stderr_pipes[1], 2) ;
