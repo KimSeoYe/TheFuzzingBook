@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "lib/quadratic_solver.h" 
+#include "src/quadratic_solver.h" 
 
 /*
     part1. Find bug-trigerring inputs

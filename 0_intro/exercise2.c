@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <time.h>
 
-#include "lib/shellsort.h"
+#include "src/shellsort.h"
 
 int
 is_same_array (int * x, int * y, int x_n, int y_n)
