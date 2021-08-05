@@ -9,10 +9,10 @@
 
 ### test
 
-**`fuzzer_test`** <br>
+**fuzzer_test** <br>
 It creates a random string using fuzzer and write to the file `input.txt` under a unique temporary directory.
 
-**`invoking_extern_prog`** <br>
+**invoking_extern_prog** <br>
 The function `invoking_exter_prog()` simply invoke `bc`.
 The most important is `long_running_fuzzing()`.
 - It executes `bc` 100 times using the simple fuzzer, and checks the results.
