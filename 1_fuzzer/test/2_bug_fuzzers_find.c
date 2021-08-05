@@ -28,6 +28,7 @@ buffer_overflows ()
         char * s = fuzzer(MAX_LEN, CHAR_START, CHAR_RANGE) ;
         if (crash_if_too_long(s) == -1) {
             perror("crash_if_too_long") ;
+            return ;
         }
     }
 }
@@ -74,11 +75,31 @@ missing_error_checks ()
 
 // 3. Rogue Numbers
 
+int
+collapse_if_too_large (char * s)
+{
+    int s_num = atoi(s) ;
+    if (s_num > 1000) return -1 ;
+    return 0 ;
+}
+
+void
+rogue_numbers ()
+{
+    char * long_number = fuzzer(10, '0' - 0, 10) ;
+    printf("%s\n", long_number) ;
+
+    if (collapse_if_too_large(long_number) == -1) {
+        perror("collapse_if_too_large") ;
+        return ;
+    }
+}
 
 
 int
 main ()
 {
     buffer_overflows() ;
+    rogue_numbers() ;
     missing_error_checks() ;
 }
