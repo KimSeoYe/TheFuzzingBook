@@ -1,19 +1,18 @@
 # Fuzzing: Breaking Things with Random Inputs
 
-## Fuzzing External Programs with a Simple Fuzzer
-
 ### src & include
 
 `fileio` : It has some functions for I/O executions. <br>
 `fuzzer` : It has a simple fuzzer
 
-### test
 
-**0_fuzzer_test.c** <br>
+## Fuzzing External Programs with a Simple Fuzzer
+
+### 0_fuzzer_test.c
 It is for the chpater *Simple Fuzzer* .
 It creates a random string using fuzzer and write to the file `input.txt` under a unique temporary directory.
 
-**1_invoking_extern_prog.c** <br>
+### 1_invoking_extern_prog.c
 It is for the chapter *Invoking External Programs* and *Long Running Fuzzing*.
 The function `invoking_exter_prog()` simply invoke `bc`.
 The most important is `long_running_fuzzing()`.
@@ -22,3 +21,7 @@ The most important is `long_running_fuzzing()`.
   - Because we can find and use meaningful input later on.
   - Thus, it pass an argument to `bc` as an input file.
 - After each execution, it sorts the results (stdout, stderr, exitcode non-zero(fault)), counts them, and saves thier indexes as an array.
+
+## Bugs Fuzzers Find
+
+### 2_bug_fuzzer_find.c
