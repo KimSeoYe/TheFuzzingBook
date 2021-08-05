@@ -5,7 +5,7 @@
 #include <time.h>
 #include <ctype.h>
 
-#include "src/my_sqrt.h"
+#include "../include/my_sqrt.h"
 
 // #define DEBUG
 
