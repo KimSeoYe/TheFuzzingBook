@@ -34,8 +34,6 @@ parent_proc (char * dir_name, int i)
     int exit_code ;
     wait(&exit_code) ;
 
-    if (exit_code != 0) return -1 ;
-
     close(pipes[1]) ;
     close(stderr_pipes[1]) ;
 
@@ -50,15 +48,11 @@ parent_proc (char * dir_name, int i)
 
     // Q. possible to get results from both stderr and stdout ? : >> if the fuzzer string has \n in the middle?
 
-    // int w = fwrite(&exit_code, 1, sizeof(exit_code), fp) ;   // TODO. use it later
-    char header[32] ;
-    sprintf(header, "%d\n", exit_code) ;
-    int w = fwrite(header, 1, strlen(header), fp) ;
-
     int flag = 1 ;  // treat empty input as a normal
 
     char buf[1024] ;
     int s = 0 ;
+    int w ;
     while ((s = read(pipes[0], buf, 1024)) > 0) {
         if ((w = fwrite(buf, 1, s, fp)) < s) {
             perror("fwrite") ;
@@ -67,12 +61,14 @@ parent_proc (char * dir_name, int i)
     close(pipes[0]) ;
 
     while ((s = read(stderr_pipes[0], buf, 1024)) > 0) {
-        flag = 2 ;
+        flag = 2 ;  // TODO. inefficiant..
         if ((w = fwrite(buf, 1, s, fp)) < s) {
             perror("fwrite") ;
         }
 	}
     close(stderr_pipes[0]) ;
+
+    if (exit_code != 0) flag = -1 ;
 
     fclose(fp) ;
 
@@ -168,7 +164,7 @@ long_running_fuzzing ()
         }
     }
 
-    printf("STDOUT: %d\nSTDERR: %d\nNON_ZERO_EXIT: %d\n", stdout_num, stderr_num, nonzero_ret_num) ;
+    printf("STDOUT: %d\nSTDERR: %d\nCRASH: %d\n", stdout_num, stderr_num, nonzero_ret_num) ;
 #ifdef DEBUG
     printf("STDOUT executions: \n") ;
     for (int j = 0; j < stdout_num; j++) {
