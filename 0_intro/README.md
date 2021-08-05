@@ -3,21 +3,21 @@
 ## Simple Testing
 
 - src/my_sqrt.c
-- my_sqrt_test.c
+- test/my_sqrt_test.c
 
 It generates manual tests and random tests for my_sqrt function.
 
 ## Exercise 2
 
 - src/shellsort.c
-- exercise2.c
+- test/exercise2.c
 
 It also generates manual tests and random tests for shellsort function.
 
 ## Exercise 3
 
 - src/quadratic_solver.c
-- exercise3.c
+- test/exercise3.c
 
 ### Part1 & Part 2. Find Bug-Trigerring Inputs & Fix The Problem
 
