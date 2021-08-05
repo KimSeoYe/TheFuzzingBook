@@ -30,11 +30,11 @@ child_proc (char * program, char * path)
 int
 parent_proc (char * dir_name, int i) 
 {
-    int exit_code ; 
-    wait(&exit_code) ;
-
     close(pipes[1]) ;
     close(stderr_pipes[1]) ;
+
+    int exit_code ; 
+    wait(&exit_code) ;
 
     char out_path[32] ;
     sprintf(out_path, "%s/%s%d", dir_name, "output", i) ;
