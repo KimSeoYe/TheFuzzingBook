@@ -35,7 +35,7 @@ int stderr_pipes[2] ;
     * Process image : 프로세스를 실행하는 동안 필요한 executable file으로, 프로세스의 실행과 관련된 몇몇 segment들로 구성되어 있다.
 
     Q. child process 안에서 write pipe를 어떻게 close해주지..?
-    Q. dev_null 대신 다른 파이프(pipes도 stderr_pipes도 아닌 것)를 만들어서 연결해주면? >> (standard_in) 1: read() in flex scanner failed ?
+    Q. dev_null 대신 다른 파이프(pipes도 stderr_pipes도 아닌 것)를 만들어서 연결해주면?
 */
 
 void
