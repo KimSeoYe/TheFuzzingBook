@@ -15,6 +15,8 @@ int stderr_pipes[2] ;
 // int stdin_pipes[2] ;
 
 /*
+    http://csit.udc.edu/~byu/COSC4740-01/Lecture6add1.pdf
+
     pipe : 
     single channel이고, read end와 write end가 있다. (files)
     child에서, write하는 파이프를 close하지 않으면 read하는 파이프로 eof가 넘어오지 않는다.
@@ -97,6 +99,10 @@ parent_proc (char * dir_name, int i)
 int
 my_popen (char * program, char * dir_name, char * in_path, int i)
 {
+    // if (pipe(stdin_pipes) != 0) {
+    //     perror("pipe") ;
+    //     exit(1) ;
+    // }
     if (pipe(stdout_pipes) != 0) {
         perror("pipe") ;
         exit(1) ;
