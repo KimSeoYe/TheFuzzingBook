@@ -19,9 +19,9 @@ child_proc (char * program, char * path)
     close(pipes[0]) ;
     close(stderr_pipes[0]) ;
 
-    dup2(pipes[1], 0) ; // ERROR (standard_in) 1: read() in flex scanner failed
-    // int dev_null = open("/dev/null", O_CLOEXEC) ;    // Q. ... close on exec
-    // dup2(dev_null, 0) ;
+    // dup2(pipes[1], 0) ; // ERROR (standard_in) 1: read() in flex scanner failed
+    int dev_null = open("/dev/null", O_CLOEXEC) ;    // Q. ... close on exec
+    dup2(dev_null, 0) ;
     dup2(pipes[1], 1) ;
     dup2(stderr_pipes[1], 2) ;
 
