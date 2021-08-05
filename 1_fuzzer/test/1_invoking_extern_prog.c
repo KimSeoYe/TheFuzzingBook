@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <fcntl.h>
 
 #include "../include/fuzzer.h"
 #include "../include/fileio.h"
@@ -17,7 +18,9 @@ child_proc (char * program, char * path)
 {
     close(pipes[0]) ;
     close(error_pipes[0]) ;
-    dup2(pipes[1], 0) ; // Q.
+    // dup2(pipes[1], 0) ; // ERROR (standard_in) 1: read() in flex scanner failed
+    int dev_null = open("/dev/null", O_CLOEXEC) ;    // Q. ... close on exec
+    dup2(dev_null, 0) ;
     dup2(pipes[1], 1) ;
     dup2(error_pipes[1], 2) ;
 
@@ -25,37 +28,57 @@ child_proc (char * program, char * path)
 }
 
 void
-parent_proc (int i)
+parent_proc (char * dir_name, int i) 
 {
     int exit_code ;
-    pid_t term_pid = wait(&exit_code) ;
+    wait(&exit_code) ;
 
 #ifdef DEBUG
-    printf("execution end %d %d\n", term_pid, exit_code) ;
+    printf("[%d] execution end with exit code %d\n", i, exit_code) ;
 #endif
 
     close(pipes[1]) ;
     close(error_pipes[1]) ;
 
+    char out_path[32] ;
+    sprintf(out_path, "%s/%s%d", dir_name, "output", i) ;
+
+    FILE * fp = fopen(out_path, "wb") ;
+    if (fp == 0x0) {
+        perror("fopen") ;
+        return ;
+    }   
+
+    // Q. possible to get results from both stdout and stderr ?
+    // Q. can i choose a pipe ...?
+    // int w = fwrite(&exit_code, 1, sizeof(exit_code), fp) ;   // TODO. use it later
+    char header[32] ;
+    sprintf(header, "%d\n", exit_code) ;
+    int w = fwrite(header, 1, strlen(header), fp) ;
+
     char buf[1024] ;
     int s ;
-    while ((s = read(pipes[0], buf, 1023)) > 0) {
-        buf[s] = 0x0 ;
-        printf("***** [%d] %s", i, buf) ;
+    while ((s = read(pipes[0], buf, 1024)) > 0) {
+        if ((w = fwrite(buf, 1, s, fp)) != s) {
+            perror("fwrite") ;
+        }
 	}
     close(pipes[0]) ;
 
-    while ((s = read(error_pipes[0], buf, 1023)) > 0) {
-        buf[s] = 0x0 ;
-        printf("***** ERROR [%d] : %s", i, buf) ;
+    while ((s = read(error_pipes[0], buf, 1024)) > 0) {
+        if ((w = fwrite(buf, 1, s, fp)) != s) {
+            perror("fwrite") ;
+        }
 	}
     close(error_pipes[0]) ;
+
+    fclose(fp) ;
 
     return ;
 }
 
 int
-my_popen (char * program, char * path, int i)
+my_popen (char * program, char * dir_name, char * in_path, int i)
 {
     if (pipe(pipes) != 0) {
         perror("pipe") ;
@@ -68,15 +91,16 @@ my_popen (char * program, char * path, int i)
 
     pid_t child_pid = fork() ;
     if (child_pid == 0) {
-        child_proc(program, path) ;
+        child_proc(program, in_path) ;
     }
     else if (child_pid > 0) {
-        parent_proc(i) ;
+        parent_proc(dir_name, i) ;
     }
     else {
         perror("fork") ;
         return -1 ;
     }
+
 
     return 1 ;
 }
@@ -92,13 +116,13 @@ invoking_extern_prog ()
     sprintf(path, "%s/%s", dir_name, "input") ;
 
     if (write_data(path, "2 + 2\n") == -1)  return ;
-    my_popen(program, path, 0) ;
+    my_popen(program, dir_name, path, 0) ;
     
     if (remove(path) == -1) {
         perror("remove") ;
         exit(1) ;
     }
-    remove_input_dir(dir_name) ;
+    // remove_input_dir(dir_name) ;
 }
 
 void
@@ -110,14 +134,14 @@ long_running_fuzzing ()
     char dir_name[32] ;
     create_input_dir(dir_name) ;
 
-    char path[32] ;
+    char in_path[32] ;
 
     // Q. 100 input files and 100 output files..?
     for (int i = 0; i < trials; i++) {
-        sprintf(path, "%s/%s%d", dir_name, "input", i) ;
+        sprintf(in_path, "%s/%s%d", dir_name, "input", i) ;
         char * data = fuzzer(MAX_LEN, CHAR_START, CHAR_RANGE) ;
-        if (write_data(path, data) == -1)  return ;
-        int exit_code = my_popen(program, path, i) ;   // TODO. something with error code
+        if (write_data(in_path, data) == -1)  return ;
+        int exit_code = my_popen(program, dir_name, in_path, i) ;   // TODO. something with error code
         free(data) ;
     }
 }

@@ -6,7 +6,7 @@
 
 #include "../include/fuzzer.h"
 
-#define DEBUG
+// #define DEBUG
 
 char *
 fuzzer (int max_length, int char_start, int char_range)
