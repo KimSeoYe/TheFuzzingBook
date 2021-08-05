@@ -31,7 +31,7 @@ child_proc (char * program, char * path)
 int
 parent_proc (char * dir_name, int i) 
 {
-    int exit_code ;
+    int exit_code ; 
     wait(&exit_code) ;
 
     close(pipes[1]) ;
@@ -52,9 +52,8 @@ parent_proc (char * dir_name, int i)
 
     char buf[1024] ;
     int s = 0 ;
-    int w ;
     while ((s = read(pipes[0], buf, 1024)) > 0) {
-        if ((w = fwrite(buf, 1, s, fp)) < s) {
+        if (fwrite(buf, 1, s, fp) < s) {
             perror("fwrite") ;
         }
 	}
@@ -62,7 +61,7 @@ parent_proc (char * dir_name, int i)
 
     while ((s = read(stderr_pipes[0], buf, 1024)) > 0) {
         flag = 2 ;  // TODO. inefficiant..
-        if ((w = fwrite(buf, 1, s, fp)) < s) {
+        if (fwrite(buf, 1, s, fp) < s) {
             perror("fwrite") ;
         }
 	}
