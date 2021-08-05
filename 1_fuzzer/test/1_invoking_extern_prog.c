@@ -8,7 +8,7 @@
 #include "../include/fuzzer.h"
 #include "../include/fileio.h"
 
-// #define DEBUG
+#define DEBUG
 
 int pipes[2] ;
 int stderr_pipes[2] ;
@@ -34,9 +34,7 @@ parent_proc (char * dir_name, int i)
     int exit_code ;
     wait(&exit_code) ;
 
-#ifdef DEBUG
-    printf("[%d] execution end with exit code %d\n", i, exit_code) ;
-#endif
+    if (exit_code != 0) return -1 ;
 
     close(pipes[1]) ;
     close(stderr_pipes[1]) ;
@@ -53,7 +51,6 @@ parent_proc (char * dir_name, int i)
     // Q. possible to get results from both stderr and stdout ? : >> if the fuzzer string has \n in the middle?
 
     // int w = fwrite(&exit_code, 1, sizeof(exit_code), fp) ;   // TODO. use it later
-    // TODO. stderr중에 exit code가 0이 아닌 것(ex. 127)에 대해 따로 어떤 일을 해 주어야 할 것 같다.
     char header[32] ;
     sprintf(header, "%d\n", exit_code) ;
     int w = fwrite(header, 1, strlen(header), fp) ;
@@ -140,8 +137,10 @@ long_running_fuzzing ()
 
     int stdout_num = 0 ;
     int stderr_num = 0 ;
+    int nonzero_ret_num = 0 ;
     int stdout_results[100] ; 
     int stderr_results[100] ;
+    int nonzero_ret_results[100] ;
 
     for (int i = 0; i < trials; i++) {
         sprintf(in_path, "%s/%s%d", dir_name, "input", i) ;
@@ -163,8 +162,13 @@ long_running_fuzzing ()
             stderr_results[stderr_num] = i ;
             stderr_num++ ;
         }
+        else if (flag == -1) {
+            nonzero_ret_results[nonzero_ret_num] = i ;
+            nonzero_ret_num++ ;
+        }
     }
-    printf("STDOUT: %d\nSTDERR: %d\n", stdout_num, stderr_num) ;
+
+    printf("STDOUT: %d\nSTDERR: %d\nNON_ZERO_EXIT: %d\n", stdout_num, stderr_num, nonzero_ret_num) ;
 #ifdef DEBUG
     printf("STDOUT executions: \n") ;
     for (int j = 0; j < stdout_num; j++) {
