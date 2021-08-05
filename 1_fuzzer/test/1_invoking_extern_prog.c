@@ -31,7 +31,7 @@ int stderr_pipes[2] ;
     
     execlp :
     현재의 프로세스 이미지를 새로운 프로세스 이미지로 replace한다.
-    따라서 이 코드에서 25번 라인 아래 있는 코드는 실행되지 않는다.
+    따라서 이 코드에서 execlp 아래 있는 코드는 실행되지 않는다.
     * Process image : 프로세스를 실행하는 동안 필요한 executable file으로, 프로세스의 실행과 관련된 몇몇 segment들로 구성되어 있다.
 
     Q. child process 안에서 write pipe를 어떻게 close해주지..?
