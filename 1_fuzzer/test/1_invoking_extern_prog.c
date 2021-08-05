@@ -16,15 +16,30 @@ int stderr_pipes[2] ;
 void
 child_proc (char * program, char * path)
 {
-    close(pipes[0]) ;
-    close(stderr_pipes[0]) ;
-
     int dev_null = open("/dev/null", O_RDONLY) ;    // /dev/null : eof... >> check man4 null
     dup2(dev_null, 0) ;
+
     dup2(pipes[1], 1) ;
     dup2(stderr_pipes[1], 2) ;
 
     execlp(program, program, path, 0x0) ;
+    /*
+        pipe : 
+        single channel이고, read end와 write end가 있다.
+        child에서, write하는 파이프를 close하지 않으면 read하는 파이프로 eof가 넘어오지 않는다.
+        * read-write operation은 atomic하다... OK
+        * kernel에 의해 manage되는 버퍼
+
+        이 코드에서 만약 pipes[0]에 stdin을 연결한다면,
+        child에서 stdout에 연결된 파이프에 write를 마치고 close를 해줘야 stdin에 연결된 파이프(read end)에 eof가 넘어올 수 있다?
+        
+        execlp :
+        현재의 프로세스 이미지를 새로운 프로세스 이미지로 replace한다.
+        따라서 이 코드에서 25번 라인 아래 있는 코드는 실행되지 않는다.
+        * Process image : 프로세스를 실행하는 동안 필요한 executable file으로, 프로세스의 실행과 관련된 몇몇 segment들로 구성되어 있다.
+
+        Q. child process 안에서 write pipe를 어떻게 close해주지..?
+    */
 }
 
 int
@@ -32,9 +47,6 @@ parent_proc (char * dir_name, int i)
 {
     close(pipes[1]) ;
     close(stderr_pipes[1]) ;
-
-    int exit_code ; 
-    wait(&exit_code) ;
 
     char out_path[32] ;
     sprintf(out_path, "%s/%s%d", dir_name, "output", i) ;
@@ -47,7 +59,7 @@ parent_proc (char * dir_name, int i)
 
     // Q. possible to get results from both stderr and stdout ? : >> if the fuzzer string has \n in the middle?
 
-    int flag = 1 ;  // treat empty input as a normal
+    int flag = 1 ;  // treat empty input as a normal or comments
 
     char buf[1024] ;
     int s = 0 ;
@@ -66,8 +78,6 @@ parent_proc (char * dir_name, int i)
 	}
     close(stderr_pipes[0]) ;
     fclose(fp) ;
-
-    if (exit_code != 0) flag = -1 ;
 
     return flag ;
 }
@@ -97,6 +107,11 @@ my_popen (char * program, char * dir_name, char * in_path, int i)
         perror("fork") ;
         exit(1) ;
     }
+
+    int exit_code ; 
+    wait(&exit_code) ;
+
+    if (exit_code == -1) flag = -1 ;
 
     return flag ;
 }
