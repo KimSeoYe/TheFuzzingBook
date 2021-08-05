@@ -9,10 +9,12 @@
 
 ### test
 
-**fuzzer_test** <br>
+**0_fuzzer_test.c** <br>
+It is for the chpater *Simple Fuzzer* .
 It creates a random string using fuzzer and write to the file `input.txt` under a unique temporary directory.
 
-**invoking_extern_prog** <br>
+**1_invoking_extern_prog.c** <br>
+It is for the chapter *Invoking External Programs* and *Long Running Fuzzing*.
 The function `invoking_exter_prog()` simply invoke `bc`.
 The most important is `long_running_fuzzing()`.
 - It executes `bc` 100 times using the simple fuzzer, and checks the results.
