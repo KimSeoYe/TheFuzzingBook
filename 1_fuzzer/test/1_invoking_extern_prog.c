@@ -73,7 +73,7 @@ parent_proc (char * dir_name, int i)
 
     // Q. possible to get results from both stderr and stdout ? : >> if the fuzzer string has \n in the middle?
 
-    int flag = 1 ;  // treat empty input as a normal or comments
+    int flag = 1 ;  // treat empty output or comments as a normal
 
     char buf[1024] ;
     int s = 0 ;
