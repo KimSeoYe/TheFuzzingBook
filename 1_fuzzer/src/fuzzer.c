@@ -18,6 +18,7 @@ fuzzer (int max_length, int char_start, int char_range)
     for (int i = 0; i < string_length; i++) {
         out[i] = rand() % char_range + char_start ;
     }
+    out[string_length] = 0x0 ;
 #ifdef DEBUG
     printf("fuzzer: %s\n", out) ;
 #endif
