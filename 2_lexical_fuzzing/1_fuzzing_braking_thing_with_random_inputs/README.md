@@ -2,19 +2,18 @@
 
 ## Simple fuzzer
 
-#### src/fileio.c 
-It has some functions for I/O executions. 
+### Creating Input Files
 
-#### src/fuzzer.c 
+#### src/fileio.c & include/fileio.h
+It has some functions for I/O executions. 
+#### src/fuzzer.c & include/fuzzer.h
 It has a simple fuzzer.
 <!-- TODO. add a detailed description -->
 
-## Fuzzing External Programs with a Simple Fuzzer
-
-### Creating Input Files
 #### test/0_fuzzer_test.c
-It is for the chpater *Simple Fuzzer* .
 It creates a random string using fuzzer and write to the file `input.txt` under a unique temporary directory.
+
+## Fuzzing External Programs with a Simple Fuzzer
 
 ### Invoking External Program
 #### test/1_invoking_extern_prog.c
@@ -49,5 +48,12 @@ $ ./checking_mem_access 110
 
 #### test/4_information_leaks.c
 It simulates a simple Heartbleed-Bug like scenario.<br>
-The program to be tested is `src/heartbeats.c`, which takes its name from the SSL *heartbeat* service. It gets a messege to reply to the caller, replace the front part of its fake memory, then returns a string as long as requested.<br>
-Thus, it tests `heartbeat()` manually and randomly with a fuzzer.
+The program to be tested is `heartbeats` in `src/heartbeats.c` and `include/heartbeats.h`, which takes its name from the SSL *heartbeat* service. It gets a messege to reply to the caller, replace the front part of its fake memory, then returns a string as long as requested.<br>
+Thus, it tests `heartbeats()` manually and randomly with a fuzzer.
+
+
+### Program-Specific Checkers
+
+#### src/airport_code.c & include/airport_code.h
+
+#### test/5_program_specific_chekers.c
