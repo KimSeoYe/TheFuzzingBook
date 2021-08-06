@@ -4,6 +4,8 @@
 #include <string.h>
 #include <time.h>
 #include <fcntl.h>
+#include <sys/wait.h>
+#include <sys/types.h>
 
 #include "../include/fuzzer.h"
 #include "../include/fileio.h"
