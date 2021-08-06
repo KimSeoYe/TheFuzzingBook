@@ -1,20 +1,23 @@
-# Fuzzing: Breaking Things with Random Inputs
+# 1. Fuzzing: Breaking Things with Random Inputs
 
-### src & include
+## Simple fuzzer
 
-`fileio` : It has some functions for I/O executions. <br>
-`fuzzer` : It has a simple fuzzer
+#### src/fileio.c 
+It has some functions for I/O executions. 
 
+#### src/fuzzer.c 
+It has a simple fuzzer.
+<!-- TODO. add a detailed description -->
 
 ## Fuzzing External Programs with a Simple Fuzzer
 
 ### Creating Input Files
-#### 0_fuzzer_test.c
+#### test/0_fuzzer_test.c
 It is for the chpater *Simple Fuzzer* .
 It creates a random string using fuzzer and write to the file `input.txt` under a unique temporary directory.
 
 ### Invoking External Program
-#### 1_invoking_extern_prog.c
+#### test/1_invoking_extern_prog.c
 It is for the chapter *Invoking External Programs* and *Long Running Fuzzing*.
 The function `invoking_exter_prog()` simply invoke `bc`.
 The most important is `long_running_fuzzing()`.
@@ -26,7 +29,7 @@ The most important is `long_running_fuzzing()`.
 
 
 ## Bugs Fuzzers Find
-#### 2_bug_fuzzer_find.c
+#### test/2_bug_fuzzer_find.c
 It lists the bugs that fuzzers could find, and simulates that scenarios.
 1. Buffer overflow
 2. Missing error checks
@@ -36,12 +39,15 @@ It lists the bugs that fuzzers could find, and simulates that scenarios.
 ## Catching Errors
 
 ### Generic Checkers
-#### 3_checking_mem_access.c
-It is a simple program to practice complilling with memory sanitizer and check the result.
+#### test/3_checking_mem_access.c
+It is a simple program to practice complilling with memory sanitizer to check out-of-bound memory access.
 ```
 $ clang -fsanitize=address -g -o checking_mem_access 3_checking_mem_access.c
 $ ./checking_mem_access 99; echo $?
 $ ./checking_mem_access 110
 ```
 
-#### 4_information_leaks.c
+#### test/4_information_leaks.c
+It simulates a simple Heartbleed-Bug like scenario.<br>
+The program to be tested is `src/heartbeats.c`, which takes its name from the SSL *heartbeat* service. It gets a messege to reply to the caller, replace the front part of its fake memory, then returns a string as long as requested.<br>
+Thus, it tests `heartbeat()` manually and randomly with a fuzzer.
