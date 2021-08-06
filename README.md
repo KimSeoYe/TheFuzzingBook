@@ -4,5 +4,7 @@ This is a repository for studying [The Fuzzing Book](https://www.fuzzingbook.org
 I re-coded the example code implemented in Python to C.<br>
 Please find detailed descriptions at the README.md of each repository.
 
-- [Introduction to Software Testing](https://github.com/KimSeoYe/TheFuzzingBook/tree/main/0_intro#readme)
-- [Fuzzing: Breaking Things with Random Inputs](https://github.com/KimSeoYe/TheFuzzingBook/tree/main/1_fuzzer#readme)
+1. [Introduction to Software Testing](https://github.com/KimSeoYe/TheFuzzingBook/tree/main/1_introduction_to_software_testing#readme)
+
+2. Lexical Fuzzing
+   - [Fuzzing: Breaking Things with Random Inputs](https://github.com/KimSeoYe/TheFuzzingBook/tree/main/2_lexical_fuzzing/1_fuzzing_braking_thing_with_random_inputs#readme)
