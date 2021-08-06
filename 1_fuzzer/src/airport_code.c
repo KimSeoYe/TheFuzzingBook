@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
+#include <ctype.h>
 
 #include "../include/airport_code.h"
 
@@ -83,4 +85,26 @@ find_code (Node * airport_code, char * code, char * ret)
     }
 
     return 0 ;
+}
+
+int 
+code_rep_ok (char * code) 
+{
+    if (strlen(code) != 3) {
+        printf("Airport code must have three characters: '%s'\n", code) ;
+        exit(1) ;
+    }
+
+    for (int i = 0; i < 3; i++) {
+        if (!isalpha(code[i])) {
+            printf("Non-letter in airport code: '%s'\n", code) ;
+            exit(1) ;
+        }
+        if (!isupper(code[i])) {
+            printf("Lowercase letter in airport code: '%s'\n", code) ;
+            exit(1) ;
+        }
+    }
+
+    return 1 ;
 }

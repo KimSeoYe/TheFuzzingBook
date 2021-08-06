@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "../include/airport_code.h"
 
-#define DEBUG
+// #define DEBUG
+#define TEST
 
 void
 initializer (Node * airport_code)
@@ -22,7 +24,16 @@ initializer (Node * airport_code)
 }
 
 void
-_test_find_code (Node * airport_code, char * code)
+test_is_exist_code (Node * airport_code, char * code)
+{
+    if (is_exist_code (airport_code, code)) {
+        printf("Ture\n") ;
+    }
+    else printf("False\n") ;
+}
+
+void
+test_find_code (Node * airport_code, char * code)
 {
     char target_city[CITY_MAX] ;
     if (!find_code(airport_code, code, target_city)) {
@@ -37,8 +48,11 @@ program_specific_checkers ()
     Node * airport_code = make_header() ;
     initializer(airport_code) ;
 
-#ifdef DEBUG
-    _test_find_code(airport_code, "YVR") ;
+#ifdef TEST
+    test_is_exist_code(airport_code, "YVR") ;
+    test_find_code(airport_code, "YVR") ;
+
+    assert(code_rep_ok("SEA")) ;
 #endif
 
     free_list(airport_code) ;

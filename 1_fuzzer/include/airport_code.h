@@ -19,3 +19,5 @@ void print_list (Node * airport_code) ;
 int is_exist_code (Node * airport_code, char * code) ;
 
 int find_code (Node * airport_code, char * code, char * ret) ;
+
+int code_rep_ok (char * code) ;
