@@ -99,7 +99,7 @@ collapse_if_too_large (char * s)
 void
 rogue_numbers ()
 {
-    char * long_number = fuzzer(10, '0' - 0, 10) ;
+    char * long_number = fuzzer(10, '0', 10) ;
     printf("%s\n", long_number) ;
 
     if (collapse_if_too_large(long_number) == -1) {
