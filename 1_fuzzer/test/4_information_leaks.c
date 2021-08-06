@@ -36,6 +36,7 @@ make_secrets_sentence (char * secrets)
     
     int marker_len = strlen(uninitialized_memory_marker) ;
     int secrets_len = strlen(secrets) ;
+    
     while (secrets_len + marker_len + 1 < BUF_MAX) {
         strcat(secrets, uninitialized_memory_marker) ;
         secrets_len += marker_len ;
