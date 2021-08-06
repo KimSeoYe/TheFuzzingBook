@@ -16,9 +16,7 @@ heartbeats (char * reply, int length, char * memory, char * s)
     printf("MEMORY: %s\n", memory) ;
 #endif
 
-    for (int i = 0; i < length; i++) {
-        s[i] = memory[i] ;
-    }
+    strncpy(s, memory, length) ;
     s[length] = 0x0 ;
 
     return s ;    
