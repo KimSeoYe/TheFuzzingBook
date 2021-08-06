@@ -8,11 +8,13 @@
 
 ## Fuzzing External Programs with a Simple Fuzzer
 
-### 0_fuzzer_test.c
+### Creating Input Files
+#### 0_fuzzer_test.c
 It is for the chpater *Simple Fuzzer* .
 It creates a random string using fuzzer and write to the file `input.txt` under a unique temporary directory.
 
-### 1_invoking_extern_prog.c
+### Invoking External Program
+#### 1_invoking_extern_prog.c
 It is for the chapter *Invoking External Programs* and *Long Running Fuzzing*.
 The function `invoking_exter_prog()` simply invoke `bc`.
 The most important is `long_running_fuzzing()`.
@@ -22,6 +24,26 @@ The most important is `long_running_fuzzing()`.
   - Thus, it pass an argument to `bc` as an input file.
 - After each execution, it sorts the results (stdout, stderr, exitcode non-zero(fault)), counts them, and saves thier indexes as an array.
 
+
 ## Bugs Fuzzers Find
 
-### 2_bug_fuzzer_find.c
+### Bug Fuzzer Find
+#### 2_bug_fuzzer_find.c
+It lists the bugs that fuzzers could find, and simulates that scenarios.
+1. Buffer overflow
+2. Missing error checks
+3. Rogue numbers
+
+
+## Catching Errors
+
+### Generic Checkers
+#### 3_checking_mem_access.c
+It is a simple program to practice complilling with memory sanitizer and check the result.
+```
+$ clang -fsanitize=address -g -o checking_mem_access 3_checking_mem_access.c
+$ ./checking_mem_access 99; echo $?
+$ ./checking_mem_access 110
+```
+
+#### 4_information_leaks.c
