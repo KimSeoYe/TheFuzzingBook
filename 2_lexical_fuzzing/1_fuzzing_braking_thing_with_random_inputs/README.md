@@ -1,5 +1,7 @@
 # Fuzzing: Breaking Things with Random Inputs
 
+<!-- How To Build and Run -->
+
 ## Simple fuzzer
 
 ### Creating Input Files
@@ -7,19 +9,21 @@
 #### src/fileio.c & include/fileio.h
 It has some functions for I/O executions. 
 #### src/fuzzer.c & include/fuzzer.h
-It has a simple fuzzer.
-<!-- TODO. add a detailed description -->
+It has a simple fuzzer that generates a random string.<br>
+You need to use `srand()` before using fuzzer.
 
 #### test/0_fuzzer_test.c
 It creates a random string using fuzzer and write to the file `input.txt` under a unique temporary directory.
 
 ## Fuzzing External Programs with a Simple Fuzzer
 
-### Invoking External Program
+### Invoking External Program & Long Running Fuzzing
+
 #### test/1_invoking_extern_prog.c
-It is for the chapter *Invoking External Programs* and *Long Running Fuzzing*.
-The function `invoking_exter_prog()` simply invoke `bc`.
-The most important is `long_running_fuzzing()`.
+
+**invoking_exter_prog()** : simply invoke `bc`.
+
+**long_running_fuzzing()**
 - It executes `bc` 100 times using the simple fuzzer, and checks the results.
 - It creates one input file and one output file for each execution (total: 100 input files & 100 ouput files).
   - Because we can find and use meaningful input later on.
@@ -46,14 +50,20 @@ $ ./checking_mem_access 99; echo $?
 $ ./checking_mem_access 110
 ```
 
+#### src/heartbeats.c & include/heartbeats.h
+It is a program to be tested, which takes its name from the SSL *heartbeat* service. It gets a messege to reply to the caller, replaces the front part of its fake memory, then returns a string as long as requested.
+
 #### test/4_information_leaks.c
-It simulates a simple Heartbleed-Bug like scenario.<br>
-The program to be tested is `heartbeats` in `src/heartbeats.c` and `include/heartbeats.h`, which takes its name from the SSL *heartbeat* service. It gets a messege to reply to the caller, replace the front part of its fake memory, then returns a string as long as requested.<br>
-Thus, it tests `heartbeats()` manually and randomly with a fuzzer.
+It simulates a simple HeartBleed-Bug like scenario.<br>
+Thus, it tests `heartbeats()` manually, and also tests randomly with a fuzzer.
 
 
 ### Program-Specific Checkers
 
 #### src/airport_code.c & include/airport_code.h
+In airport_code.h, a structure `Node` for linked list is declared.<br>
+It also has some functions to maintain and manipulate a linked list.<br>
+Moreover, it has functions for checking its own consistency by testing important conditions.
 
 #### test/5_program_specific_chekers.c
+This is a program for testing if the `airport_code` works well, by executing its built-in functions.
