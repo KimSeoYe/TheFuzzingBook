@@ -33,7 +33,13 @@ buffer_overflows ()
     }
 }
 
-// 2. Missing Error Checks
+/**
+ * 2. Missing Error Checks
+ * 
+ * getchar() : returns a carachter from stdin, or EOF (if no input is available)
+ * BUG SCENARIO: while (getchar() != ' ') {}
+ * >> break if the string s has a ' '. if not, fall in to infinite loop
+*/
 
 void
 handler (int sig)
@@ -47,11 +53,6 @@ handler (int sig)
 void
 hang_if_no_space (char * s)
 {
-    /**
-     * getchar() : returns a carachter from stdin, or EOF (if no input is available)
-     * BUG SCENARIO: while (getchar() != ' ') {}
-     * >> break if the string s has a ' '. if not, fall in to infinite loop
-    */
     for (int i = 0; i >= strlen(s) || s[i] != ' '; i++) ;
 }
 
@@ -73,7 +74,19 @@ missing_error_checks ()
     }
 }
 
-// 3. Rogue Numbers
+/**
+ * 3. Rogue Numbers
+ * 
+ * char *read_input() {
+ *   size_t size = read_buffer_size();
+ *   char *buffer = (char *)malloc(size);
+ *   // fill buffer
+ *   return (buffer);
+ * }
+ * 
+ * >> What if the size is less than the # of characters following?
+ * >> What if the size is negative ?
+*/
 
 int
 collapse_if_too_large (char * s)
