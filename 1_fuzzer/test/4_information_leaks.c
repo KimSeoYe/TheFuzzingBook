@@ -2,11 +2,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <assert.h>
 
 #include "../include/fuzzer.h"
 
 #define BUF_MAX 2048
 // #define DEBUG
+
+const char * uninitialized_memory_marker = "deadbeef" ;
 
 char *
 heartbeats (char * reply, int length, char * memory, char * s) 
@@ -25,40 +28,65 @@ heartbeats (char * reply, int length, char * memory, char * s)
 void
 make_secrets_sentence (char * secrets)
 {
-    sprintf(secrets, "<space-for-reply>%s<secret-certificate>%s<secret-key>%s<other-secrets>", fuzzer(100, CHAR_START, CHAR_RANGE), fuzzer(100, CHAR_START, CHAR_RANGE), fuzzer(100, CHAR_START, CHAR_RANGE)) ;
-
-    char * uninitialized_memory_marker = "deadbeef" ;
+    char ** fuzzer_data = (char **) malloc(sizeof(char *) * 3) ;
+    for (int i = 0; i < 3; i++) {
+        fuzzer_data[i] = fuzzer(100, CHAR_START, CHAR_RANGE) ;
+    }
+    sprintf(secrets, "<space-for-reply>%s<secret-certificate>%s<secret-key>%s<other-secrets>", fuzzer_data[0], fuzzer_data[1], fuzzer_data[2]) ;
+    
     int marker_len = strlen(uninitialized_memory_marker) ;
     while (strlen(secrets) + marker_len + 1 < BUF_MAX) {    // TODO. strlen(secrets)
         strcat(secrets, uninitialized_memory_marker) ;
     }
+
+    for (int i = 0; i < 3; i++) {
+        free(fuzzer_data[i]) ;
+    }
+    free(fuzzer_data) ;
 }
 
 void
-execute_heartbeats (char * reply, int length)
+execute_heartbeats (char * reply, int length, char * result)
 {
     char secrets[BUF_MAX] ;
     make_secrets_sentence(secrets) ;
 
-    char * result = (char *) malloc(sizeof(char) * (length + 1)) ;
     heartbeats(reply, length, secrets, result) ;
+
     printf("REPLY: %s\n", result) ;
-    free(result) ;
+    return ;
 }
 
 void
-information_leaks ()
+manual_test ()
 {
-    execute_heartbeats("potato", 6) ;
-    execute_heartbeats("bird", 4) ;
-    execute_heartbeats("hat", 500) ;
+    char result[512] ;
+    execute_heartbeats("potato", 6, result) ;
+    execute_heartbeats("bird", 4, result) ;
+    execute_heartbeats("hat", 500, result) ;
+}
+
+void
+random_test_with_fuzzer ()
+{
+    for (int i = 0; i < 10; i++) {
+        char * fuzzer_data = fuzzer(MAX_LEN, CHAR_START, CHAR_RANGE) ;
+
+        char result[512] = "" ;
+        execute_heartbeats(fuzzer_data, rand() % 500 + 1, result) ;
+        free(fuzzer_data) ;
+
+        assert(strstr(result, uninitialized_memory_marker) == NULL) ;
+        assert(strstr(result, "secret") == NULL) ;
+    }
 }
 
 int
 main ()
 {
     srand(time(NULL)) ;
-    information_leaks() ;
+    manual_test() ;
+    random_test_with_fuzzer() ;
 
     return 0 ;
 }
