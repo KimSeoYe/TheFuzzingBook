@@ -31,7 +31,7 @@ make_secrets_sentence (char * secrets)
 
     char * uninitialized_memory_marker = "deadbeef" ;
     int marker_len = strlen(uninitialized_memory_marker) ;
-    while (strlen(secrets) + marker_len + 1 < BUF_MAX) {
+    while (strlen(secrets) + marker_len + 1 < BUF_MAX) {    // TODO. strlen(secrets)
         strcat(secrets, uninitialized_memory_marker) ;
     }
 }
