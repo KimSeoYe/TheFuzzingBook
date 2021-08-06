@@ -118,3 +118,12 @@ airport_codes_rep_ok (Node * airport_code)
     }
     return 1 ;
 }
+
+void
+add_new_airport (Node * airport_code, char * code, char * city)
+{
+    assert(code_rep_ok(code)) ;
+    assert(airport_codes_rep_ok(airport_code)) ;    // Q. overlaped assert ?
+    append(airport_code, code, city) ;
+    assert(airport_codes_rep_ok(airport_code)) ;
+}

@@ -23,3 +23,5 @@ int find_code (Node * airport_code, char * code, char * ret) ;
 int code_rep_ok (char * code) ;
 
 int airport_codes_rep_ok (Node * airport_code) ;
+
+void add_new_airport (Node * airport_code, char * code, char * city) ;

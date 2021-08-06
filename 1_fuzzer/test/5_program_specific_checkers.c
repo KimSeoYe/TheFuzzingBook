@@ -24,22 +24,30 @@ initializer (Node * airport_code)
 }
 
 void
-test_is_exist_code (Node * airport_code, char * code)
+test_is_exist_code (Node * airport_code)
 {
-    if (is_exist_code (airport_code, code)) {
+    if (is_exist_code (airport_code, "YVR")) {
         printf("Ture\n") ;
     }
     else printf("False\n") ;
 }
 
 void
-test_find_code (Node * airport_code, char * code)
+test_find_code (Node * airport_code)
 {
     char target_city[CITY_MAX] ;
-    if (!find_code(airport_code, code, target_city)) {
+    if (!find_code(airport_code, "YVR", target_city)) {
         printf("code not exist\n") ;
     }
     else printf("%s\n", target_city) ;
+}
+
+void
+test_add_new_airport(Node * airport_code)
+{
+    add_new_airport(airport_code, "BER", "Berlin") ;
+    // add_new_airport(airport_code, "London-Heathrow", "LHR") ;
+    add_new_airport(airport_code, "IST", "Istanbul Yeni Havalimanı") ;
 }
 
 void
@@ -49,11 +57,13 @@ program_specific_checkers ()
     initializer(airport_code) ;
 
 #ifdef TEST
-    test_is_exist_code(airport_code, "YVR") ;
-    test_find_code(airport_code, "YVR") ;
+    test_is_exist_code(airport_code) ;
+    test_find_code(airport_code) ;
 
     assert(code_rep_ok("SEA")) ;
     assert(airport_codes_rep_ok(airport_code)) ;
+
+    test_add_new_airport(airport_code) ;
 #endif
 
     free_list(airport_code) ;
