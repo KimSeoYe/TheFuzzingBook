@@ -71,6 +71,7 @@ missing_error_checks ()
     for (int i = 0; i < trials; i++) {
         char * s = fuzzer(MAX_LEN, CHAR_START, CHAR_RANGE) ;
         hang_if_no_space(s) ;
+        free(s) ;
     }
 }
 
@@ -106,6 +107,8 @@ rogue_numbers ()
         perror("collapse_if_too_large") ;
         return ;
     }
+
+    free(long_number) ;
 }
 
 
