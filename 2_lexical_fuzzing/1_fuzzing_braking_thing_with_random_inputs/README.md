@@ -1,4 +1,4 @@
-# 1. Fuzzing: Breaking Things with Random Inputs
+# Fuzzing: Breaking Things with Random Inputs
 
 ## Simple fuzzer
 
