@@ -26,8 +26,6 @@ The most important is `long_running_fuzzing()`.
 
 
 ## Bugs Fuzzers Find
-
-### Bug Fuzzer Find
 #### 2_bug_fuzzer_find.c
 It lists the bugs that fuzzers could find, and simulates that scenarios.
 1. Buffer overflow
