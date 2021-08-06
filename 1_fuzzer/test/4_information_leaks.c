@@ -35,8 +35,10 @@ make_secrets_sentence (char * secrets)
     sprintf(secrets, "<space-for-reply>%s<secret-certificate>%s<secret-key>%s<other-secrets>", fuzzer_data[0], fuzzer_data[1], fuzzer_data[2]) ;
     
     int marker_len = strlen(uninitialized_memory_marker) ;
-    while (strlen(secrets) + marker_len + 1 < BUF_MAX) {    // TODO. strlen(secrets)
+    int secrets_len = strlen(secrets) ;
+    while (secrets_len + marker_len + 1 < BUF_MAX) {
         strcat(secrets, uninitialized_memory_marker) ;
+        secrets_len += marker_len ;
     }
 
     for (int i = 0; i < 3; i++) {
@@ -78,6 +80,12 @@ random_test_with_fuzzer ()
 
         assert(strstr(result, uninitialized_memory_marker) == NULL) ;
         assert(strstr(result, "secret") == NULL) ;
+        /**
+         * Cannot detect a BUG case 
+         * if the length of fuzzer_data is bigger then the randomly generated length (rand() % 500 + 1),
+         * the result does not have both "deadbeef" and "secret".
+         * however, it is okay now because it is for testing the information leaks from sender...
+        */
     }
 }
 
