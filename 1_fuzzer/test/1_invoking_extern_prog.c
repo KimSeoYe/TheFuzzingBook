@@ -29,6 +29,7 @@ int stderr_pipes[2] ;
     이 코드에서 만약 pipes[0]에 stdin을 연결한다면,
     child에서 stdout에 연결된 파이프에 write를 마치고 close를 해줘야 stdin에 연결된 파이프(read end)에 eof가 넘어올 수 있다 (read from stdin!)
     (현재 코드의 경우, /dev/null을 읽으면 eof가 넘어오기 때문에 bc가 잘 종료되는 상태 >> 파이프로도 같은 효과를 내야 한다)
+    (parent process에서 close하는 것은 관련 X - file descriptor table is per-process)
     * 아까의 경우, pipes[0]을 close한 후 pipe[0]에 stdin을 연결해서 동작하지 않았을 것이다.
     
     execlp :
