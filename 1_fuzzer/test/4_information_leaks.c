@@ -5,6 +5,7 @@
 
 #include "../include/fuzzer.h"
 
+#define BUF_MAX 2048
 // #define DEBUG
 
 char *
@@ -30,7 +31,7 @@ make_secrets_sentence (char * secrets)
 
     char * uninitialized_memory_marker = "deadbeef" ;
     int marker_len = strlen(uninitialized_memory_marker) ;
-    while (strlen(secrets) + marker_len + 1 < 2048) {
+    while (strlen(secrets) + marker_len + 1 < BUF_MAX) {
         strcat(secrets, uninitialized_memory_marker) ;
     }
 }
@@ -38,7 +39,7 @@ make_secrets_sentence (char * secrets)
 void
 execute_heartbeats (char * reply, int length)
 {
-    char secrets[2048] ;
+    char secrets[BUF_MAX] ;
     make_secrets_sentence(secrets) ;
 
     char * result = (char *) malloc(sizeof(char) * (length + 1)) ;
