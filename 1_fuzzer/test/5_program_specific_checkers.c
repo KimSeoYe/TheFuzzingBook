@@ -53,6 +53,7 @@ program_specific_checkers ()
     test_find_code(airport_code, "YVR") ;
 
     assert(code_rep_ok("SEA")) ;
+    assert(airport_codes_rep_ok(airport_code)) ;
 #endif
 
     free_list(airport_code) ;

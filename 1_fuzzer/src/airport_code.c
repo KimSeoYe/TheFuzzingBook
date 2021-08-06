@@ -92,7 +92,7 @@ code_rep_ok (char * code)
 {
     if (strlen(code) != 3) {
         printf("Airport code must have three characters: '%s'\n", code) ;
-        exit(1) ;
+        exit(1) ;   // Q.
     }
 
     for (int i = 0; i < 3; i++) {
@@ -106,5 +106,15 @@ code_rep_ok (char * code)
         }
     }
 
+    return 1 ;
+}
+
+int
+airport_codes_rep_ok (Node * airport_code)
+{
+    Node * itr ;
+    for (itr = airport_code->next; itr != 0x0; itr = itr->next) {
+        assert(code_rep_ok(itr->code)) ;
+    }
     return 1 ;
 }
