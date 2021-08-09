@@ -24,7 +24,6 @@ void
 child_proc (char * program, char * path)
 {
     dup2(stdin_pipes[0], 0) ;
-    close(stdin_pipes[0]) ;
     close(stdin_pipes[1]) ;
 
     close(stdout_pipes[0]) ;
