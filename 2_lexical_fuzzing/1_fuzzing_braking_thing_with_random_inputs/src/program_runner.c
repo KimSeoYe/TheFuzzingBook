@@ -91,11 +91,3 @@ program_runner_run (char * program, char * inp, pr_ret_t * ret)
 
     return ;
 }
-
-void
-binary_program_runner_run (char * program, int inp, pr_ret_t * ret)
-{
-    char str_inp[16] ;
-    sprintf(str_inp, "%d", inp) ;
-    program_runner_run(program, str_inp, ret) ;
-}

@@ -24,15 +24,6 @@ program_runner_test ()
     free(ret.result) ;
 }
 
-void
-binary_program_runner_test ()
-{
-    pr_ret_t ret ;
-    binary_program_runner_run("echo", 123, &ret) ;
-    printf("result: %s", ret.result) ;
-    printf("out: %d\n", ret.outcome) ;
-    free(ret.result) ;
-}
 
 int
 main ()
@@ -41,5 +32,4 @@ main ()
     printf("-----------------------------\n") ;
     program_runner_test() ;
     printf("-----------------------------\n") ;
-    binary_program_runner_test() ;
 }

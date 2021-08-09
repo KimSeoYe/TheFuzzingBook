@@ -6,5 +6,3 @@ typedef struct pr_ret_t {
 } pr_ret_t ;
 
 void program_runner_run (char * program, char * inp, pr_ret_t * ret) ;
-
-void binary_program_runner_run (char * program, int inp, pr_ret_t * ret) ;
