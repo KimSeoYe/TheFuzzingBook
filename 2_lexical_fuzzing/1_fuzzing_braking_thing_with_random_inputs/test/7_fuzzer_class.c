@@ -51,7 +51,7 @@ int
 main ()
 {
     // fuzzer_test() ;
-    rand_fuzzer_test() ;
+    // rand_fuzzer_test() ;
     rand_fuzzer_test_with_prog_runner() ;
     random_fuzzer_run("cat") ;
     random_fuzzer_runs("cat", 10) ;
