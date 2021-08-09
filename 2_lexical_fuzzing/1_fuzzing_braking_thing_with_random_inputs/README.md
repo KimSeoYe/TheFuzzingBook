@@ -67,3 +67,24 @@ Moreover, it has functions for checking its own consistency by checking importan
 
 #### test/5_program_specific_chekers.c
 This is a program for testing if the `airport_code` works well, by executing its built-in functions.
+
+
+## A Fuzzing Architecture
+
+### Runner Classes
+
+#### src/runner.c & include/runner.h 
+It is a really simplified version of runner.
+
+#### src/program_runner.c & include/program_runner.h
+It execute an external program and return the results.<br>
+It passes arguments of the program through standard input.
+
+#### test/6_runner_class.c
+It just executes the runner programs and checks the results.
+
+### Fuzzer Classes
+
+#### src/fuzzer.c & include/fuzzer.h
+
+#### test/7_fuzzer_class.c
