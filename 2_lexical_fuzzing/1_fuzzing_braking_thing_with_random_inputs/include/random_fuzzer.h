@@ -2,6 +2,7 @@
 #define RANDOM_FUZZER
 
 #include "./runner.h"
+#include "./program_runner.h"
 
 #define MIN_LEN 10
 #define MAX_LEN 100
@@ -21,6 +22,8 @@ void random_fuzzer_init (fuzarg_t * dst, int min_length, int max_length, int cha
 
 char * random_fuzzer_fuzz (fuzarg_t args) ;
 
-ret_t random_fuzzer_run (runners_p runner, fuzarg_t args) ;
+void random_fuzzer_run (char * program) ;
+
+void random_fuzzer_runs (char * program, int trials) ;
 
 #endif

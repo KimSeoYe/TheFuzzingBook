@@ -11,7 +11,7 @@ all: $(TARGETS) $(SRCS)
 	gcc -o information_leaks 4_information_leaks.c ../src/simplefuzzer.c ../src/heartbeats.c
 	gcc -o program_specific_checkers 5_program_specific_checkers.c ../src/airport_code.c
 	gcc -o runner_class 6_runner_class.c ../src/runner.c ../src/program_runner.c
-	gcc -o fuzzer_class 7_fuzzer_class.c ../src/runner.c ../src/fuzzer.c ../src/random_fuzzer.c
+	gcc -o fuzzer_class 7_fuzzer_class.c ../src/runner.c ../src/fuzzer.c ../src/random_fuzzer.c ../src/program_runner.c
 
 fuzzer_test: 0_fuzzer_test.c ../src/fileio.c ../src/simplefuzzer.c
 	gcc -o fuzzer_test 0_fuzzer_test.c ../src/fileio.c ../src/simplefuzzer.c
@@ -31,8 +31,8 @@ program_specific_checkers: 5_program_specific_checkers.c ../src/airport_code.c
 runner_class: 6_runner_class.c ../src/runner.c ../src/program_runner.c
 	gcc -o runner_class 6_runner_class.c ../src/runner.c ../src/program_runner.c
 
-fuzzer_class: 7_fuzzer_class.c ../src/runner.c ../src/fuzzer.c ../src/random_fuzzer.c
-	gcc -o fuzzer_class 7_fuzzer_class.c ../src/runner.c ../src/fuzzer.c ../src/random_fuzzer.c
+fuzzer_class: 7_fuzzer_class.c ../src/runner.c ../src/fuzzer.c ../src/random_fuzzer.c ../src/program_runner.c
+	gcc -o fuzzer_class 7_fuzzer_class.c ../src/runner.c ../src/fuzzer.c ../src/random_fuzzer.c ../src/program_runner.c
 
 clean:
 	rm -rf $(EXECS) $(OBJS)

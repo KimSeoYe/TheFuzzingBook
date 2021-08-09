@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <assert.h>
 
 #include "../include/random_fuzzer.h"
 
@@ -26,11 +28,37 @@ random_fuzzer_fuzz (fuzarg_t args)
     return out ;
 }
 
-ret_t 
-random_fuzzer_run (runners_p runner, fuzarg_t args)
+void 
+random_fuzzer_run (char * program)
 {
-    ret_t ret ;
-    runner(&ret, random_fuzzer_fuzz(args)) ;
-    
-    return ret ;
+    fuzarg_t args ;
+    random_fuzzer_init(&args, 20, 20, CHAR_START, CHAR_RANGE) ;
+    char * inp = random_fuzzer_fuzz(args) ;
+
+    pr_ret_t ret ;
+    program_runner_run(&ret, program, inp) ;
+
+    assert(strcmp(ret.result, inp) == 0) ;
+    assert(ret.outcome == PASS) ;
+
+    free(inp) ;
+}
+
+void 
+random_fuzzer_runs (char * program, int trials)
+{
+    fuzarg_t args ;
+    random_fuzzer_init(&args, 20, 20, CHAR_START, CHAR_RANGE) ;
+    for (int i = 0; i < trials; i++) {
+        char * inp = random_fuzzer_fuzz(args) ;
+
+        pr_ret_t ret ;
+        program_runner_run(&ret, program, inp) ;
+
+        assert(strcmp(ret.result, inp) == 0) ;
+        assert(ret.outcome == PASS) ;
+
+        free(inp) ;
+        // random_fuzzer_run(program) ;
+    }
 }
