@@ -9,8 +9,6 @@
 #define CHAR_START 32
 #define CHAR_RANGE 32
 
-typedef void (* runners_p) (ret_t *, char *) ;
-
 typedef struct fuzarg {
     int min_length ;
     int max_length ;
