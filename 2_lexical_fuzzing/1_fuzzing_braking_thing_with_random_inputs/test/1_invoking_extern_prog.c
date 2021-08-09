@@ -40,6 +40,8 @@ int
 parent_proc (char * dir_name, int i) 
 {
     close(stdin_pipes[1]) ;
+    close(stdin_pipes[0]) ;
+    
     close(stdout_pipes[1]) ;
     close(stderr_pipes[1]) ;
 
