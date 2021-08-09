@@ -30,7 +30,7 @@ ret_t
 random_fuzzer_run (runners_p runner, fuzarg_t args)
 {
     ret_t ret ;
-    runner(random_fuzzer_fuzz(args), &ret) ;
+    runner(&ret, random_fuzzer_fuzz(args)) ;
     
     return ret ;
 }

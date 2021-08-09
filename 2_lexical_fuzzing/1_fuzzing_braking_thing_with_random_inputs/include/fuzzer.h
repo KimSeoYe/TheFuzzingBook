@@ -3,6 +3,6 @@
 
 #include "./runner.h"
 
-void fuzzer_runs (int trials, ret_t * outcomes) ;
+void fuzzer_runs (ret_t * outcomes, int trials) ;
 
 #endif

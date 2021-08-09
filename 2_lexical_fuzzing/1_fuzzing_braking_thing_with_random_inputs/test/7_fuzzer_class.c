@@ -8,7 +8,7 @@ void
 fuzzer_test ()
 {
     ret_t outcomes[10] ;
-    fuzzer_runs(10, outcomes) ;
+    fuzzer_runs(outcomes, 10) ;
     for (int i = 0; i < 10; i++) {
         printf("[%d] %d\n", i, outcomes[i].out) ; 
     }
@@ -23,6 +23,11 @@ rand_fuzzer_test ()
         char * result = random_fuzzer_fuzz(args) ;
         printf("%s\n", result) ;
         free(result) ;
+    }
+
+    for (int i = 0; i < 10; i++) {
+        char * inp = random_fuzzer_fuzz(args) ;
+
     }
 }
 

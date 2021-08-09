@@ -10,8 +10,8 @@ typedef struct ret_t {
     enum outs out ;
 } ret_t ;
 
-void runner_run (char * inp, ret_t * ret) ;
+void runner_run (ret_t * ret, char * inp) ;
 
-void print_runner_run (char * inp, ret_t * ret) ;
+void print_runner_run (ret_t * ret, char * inp) ;
 
 #endif

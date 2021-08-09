@@ -8,7 +8,7 @@
 #define CHAR_START 32
 #define CHAR_RANGE 32
 
-typedef void (* runners_p) (char *, ret_t *) ;
+typedef void (* runners_p) (ret_t *, char *) ;
 
 typedef struct fuzarg {
     int min_length ;

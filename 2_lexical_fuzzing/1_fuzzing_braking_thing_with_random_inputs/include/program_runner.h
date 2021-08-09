@@ -8,6 +8,6 @@ typedef struct pr_ret_t {
     char * result ;
 } pr_ret_t ;
 
-void program_runner_run (char * program, char * inp, pr_ret_t * ret) ;
+void program_runner_run (pr_ret_t * ret, char * program, char * inp) ;
 
 #endif

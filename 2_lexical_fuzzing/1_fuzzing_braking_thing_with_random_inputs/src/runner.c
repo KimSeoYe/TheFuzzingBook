@@ -4,7 +4,7 @@
 #include "../include/runner.h"
 
 void
-runner_run (char * inp, ret_t * ret)
+runner_run (ret_t * ret, char * inp)
 {
     strcpy(ret->inp, inp) ;
     ret->out = UNRESOLVED ;
@@ -12,9 +12,9 @@ runner_run (char * inp, ret_t * ret)
 }
 
 void
-print_runner_run (char * inp, ret_t * ret)
+print_runner_run (ret_t * ret, char * inp)
 {
     printf("%s\n", inp) ;
-    runner_run(inp, ret) ;
+    runner_run(ret, inp) ;
     return ;
 }

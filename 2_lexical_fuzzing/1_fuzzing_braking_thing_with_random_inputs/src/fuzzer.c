@@ -8,19 +8,19 @@ fuzz ()
     return "" ;
 }
 
-typedef void (* runners_p) (char *, ret_t *) ;
+typedef void (* runners_p) (ret_t *, char *) ;
 
 ret_t 
 fuzzer_run (runners_p runner)
 {
     ret_t ret ;
-    runner(fuzz(), &ret) ;
+    runner(&ret, fuzz()) ;
     
     return ret ;
 }
 
 void
-fuzzer_runs (int trials, ret_t * outcomes)
+fuzzer_runs (ret_t * outcomes, int trials)
 {
     for (int i = 0; i < trials; i++) {
         outcomes[i] = fuzzer_run(print_runner_run) ;

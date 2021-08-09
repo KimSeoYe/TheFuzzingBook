@@ -53,7 +53,7 @@ parent_proc (pr_ret_t * ret, char * inp)
 }
 
 int
-run_process (char * program, char * inp, pr_ret_t * ret)
+run_process (pr_ret_t * ret ,char * program, char * inp)
 {
     if (pipe(stdin_pipes) != 0) {
         perror("pipe") ;
@@ -86,9 +86,9 @@ run_process (char * program, char * inp, pr_ret_t * ret)
 }
 
 void
-program_runner_run (char * program, char * inp, pr_ret_t * ret)
+program_runner_run (pr_ret_t * ret, char * program, char * inp)
 {
-    int exit_code = run_process(program, inp, ret) ;
+    int exit_code = run_process(ret, program, inp) ;
 
     if (exit_code == 0) {
         ret->outcome = PR_PASS ;
