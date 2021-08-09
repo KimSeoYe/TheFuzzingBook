@@ -4,7 +4,7 @@
 #include <time.h>
 #include <string.h>
 
-#include "../include/fuzzer.h"
+#include "../include/simplefuzzer.h"
 
 // #define DEBUG
 

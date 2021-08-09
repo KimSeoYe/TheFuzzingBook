@@ -7,7 +7,7 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 
-#include "../include/fuzzer.h"
+#include "../include/simplefuzzer.h"
 #include "../include/fileio.h"
 
 #define DEBUG

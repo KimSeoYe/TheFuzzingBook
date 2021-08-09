@@ -4,7 +4,7 @@
 #include <time.h>
 #include <assert.h>
 
-#include "../include/fuzzer.h"
+#include "../include/simplefuzzer.h"
 #include "../include/heartbeats.h"
 
 // #define DEBUG

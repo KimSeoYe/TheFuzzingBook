@@ -8,7 +8,7 @@
 
 #### src/fileio.c & include/fileio.h
 It has some functions for I/O executions. 
-#### src/fuzzer.c & include/fuzzer.h
+#### src/simplefuzzer.c & include/simplefuzzer.h
 It has a simple fuzzer that generates a random string.<br>
 You need to use `srand()` before using fuzzer.
 
@@ -63,7 +63,7 @@ Thus, it tests `heartbeats()` manually, and also tests randomly with a fuzzer.
 #### src/airport_code.c & include/airport_code.h
 In airport_code.h, a structure `Node` for linked list is declared.<br>
 It also has some functions to maintain and manipulate a linked list.<br>
-Moreover, it has functions for checking its own consistency by testing important conditions.
+Moreover, it has functions for checking its own consistency by checking important conditions.
 
 #### test/5_program_specific_chekers.c
 This is a program for testing if the `airport_code` works well, by executing its built-in functions.

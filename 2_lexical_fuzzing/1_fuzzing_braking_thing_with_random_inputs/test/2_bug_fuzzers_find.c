@@ -5,7 +5,7 @@
 #include <signal.h>
 #include <sys/time.h>
 
-#include "../include/fuzzer.h"
+#include "../include/simplefuzzer.h"
 
 const int trials = 100 ;
 
