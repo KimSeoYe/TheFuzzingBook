@@ -38,8 +38,8 @@ random_fuzzer_run (char * program)
     pr_ret_t ret ;
     program_runner_run(&ret, program, inp) ;
 
-    assert(strcmp(ret.result, inp) == 0) ;
-    assert(ret.outcome == PASS) ;
+    // TODO. to get a stdout and stderr separately?
+    printf("(CompletedProcess(args='%s', returncode=%d, stdout|stderr='%s')\n", program, ret.outcome, ret.result) ;
 
     free(inp) ;
 }
@@ -55,8 +55,7 @@ random_fuzzer_runs (char * program, int trials)
         pr_ret_t ret ;
         program_runner_run(&ret, program, inp) ;
 
-        assert(strcmp(ret.result, inp) == 0) ;
-        assert(ret.outcome == PASS) ;
+        printf("(CompletedProcess(args='%s', returncode=%d, stdout|stderr='%s')\n", program, ret.outcome, ret.result) ;
 
         free(inp) ;
         // random_fuzzer_run(program) ;
