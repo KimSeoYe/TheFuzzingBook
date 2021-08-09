@@ -22,6 +22,13 @@ program_runner_test ()
     printf("result:\n%s", ret.result) ;
     printf("out: %d\n", ret.outcome) ;
     free(ret.result) ;
+
+    printf("-----------------------------\n") ;
+
+    program_runner_run("bc", "2 + 2\n", &ret) ;
+    printf("result:\n%s", ret.result) ;
+    printf("out: %d\n", ret.outcome) ;
+    free(ret.result) ;
 }
 
 
