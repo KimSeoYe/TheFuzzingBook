@@ -49,6 +49,7 @@ parent_proc (pr_ret_t * ret, char * inp)
     }
     
     close(pipes[0]) ;
+    close(stdin_pipes[0]) ;
 }
 
 int
@@ -100,10 +101,4 @@ program_runner_run (char * program, char * inp, pr_ret_t * ret)
     }
 
     return ;
-}
-
-void
-binary_program_runner_run (char * program, char * inp, pr_ret_t * ret)
-{
-    // ?
 }
