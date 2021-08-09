@@ -14,7 +14,7 @@
 
 int stdout_pipes[2] ;
 int stderr_pipes[2] ;
-// int stdin_pipes[2] ;
+int stdin_pipes[2] ;
 
 /*
     http://csit.udc.edu/~byu/COSC4740-01/Lecture6add1.pdf
@@ -36,22 +36,20 @@ int stderr_pipes[2] ;
     현재의 프로세스 이미지를 새로운 프로세스 이미지로 replace한다.
     따라서 이 코드에서 execlp 아래 있는 코드는 실행되지 않는다.
     * Process image : 프로세스를 실행하는 동안 필요한 executable file으로, 프로세스의 실행과 관련된 몇몇 segment들로 구성되어 있다.
-
-    Q. child process 안에서 write pipe를 어떻게 close해주지..?
-    Q. dev_null 대신 다른 파이프(pipes도 stderr_pipes도 아닌 것)를 만들어서 연결해주면?
 */
 
 void
 child_proc (char * program, char * path)
 {
+    dup2(stdin_pipes[0], 0) ;
+    close(stdin_pipes[0]) ;
+    close(stdin_pipes[1]) ;
+
     close(stdout_pipes[0]) ;
     close(stderr_pipes[0]) ;
 
-    int dev_null = open("/dev/null", O_RDONLY) ;    // /dev/null : eof... >> check man4 null
-    dup2(dev_null, 0) ;
-    // close(stdin_pipes[1]) ;
-    // dup2(stdin_pipes[0], 0) ;
-    // close(stdin_pipes[0]) ;
+    // int dev_null = open("/dev/null", O_RDONLY) ;    // /dev/null : eof... >> check man4 null
+    // dup2(dev_null, 0) ;
 
     dup2(stdout_pipes[1], 1) ;
     dup2(stderr_pipes[1], 2) ;
@@ -62,6 +60,7 @@ child_proc (char * program, char * path)
 int
 parent_proc (char * dir_name, int i) 
 {
+    close(stdin_pipes[1]) ;
     close(stdout_pipes[1]) ;
     close(stderr_pipes[1]) ;
 
@@ -102,10 +101,10 @@ parent_proc (char * dir_name, int i)
 int
 my_popen (char * program, char * dir_name, char * in_path, int i)
 {
-    // if (pipe(stdin_pipes) != 0) {
-    //     perror("pipe") ;
-    //     exit(1) ;
-    // }
+    if (pipe(stdin_pipes) != 0) {
+        perror("pipe") ;
+        exit(1) ;
+    }
     if (pipe(stdout_pipes) != 0) {
         perror("pipe") ;
         exit(1) ;
