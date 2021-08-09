@@ -29,7 +29,7 @@ parent_proc (pr_ret_t * ret)
     int len = 0 ;
     int s = 0 ;
 
-    ret->result = (char *) malloc(sizeof(char) * 1) ;
+    ret->result = (char *) malloc(sizeof(char) * 1) ;   // TODO.
     ret->result[0] = 0x0 ;
 
     while ((s = read(pipes[0], buf, 1023)) > 0) {
@@ -45,7 +45,7 @@ parent_proc (pr_ret_t * ret)
     close(pipes[0]) ;
 }
 
-void
+int
 run_process (char * program, char * inp, pr_ret_t * ret)
 {
     if (pipe(pipes) != 0) {
@@ -71,6 +71,14 @@ run_process (char * program, char * inp, pr_ret_t * ret)
     printf("%d terminated w/ exit code %d\n", term_pid, exit_code) ;
 #endif
 
+    return exit_code ;
+}
+
+void
+program_runner_run (char * program, char * inp, pr_ret_t * ret)
+{
+    int exit_code = run_process(program, inp, ret) ;
+
     if (exit_code == 0) {
         ret->outcome = PR_PASS ;
     }
@@ -82,4 +90,12 @@ run_process (char * program, char * inp, pr_ret_t * ret)
     }
 
     return ;
+}
+
+void
+binary_program_runner_run (char * program, int inp, pr_ret_t * ret)
+{
+    char str_inp[16] ;
+    sprintf(str_inp, "%d", inp) ;
+    program_runner_run(program, str_inp, ret) ;
 }

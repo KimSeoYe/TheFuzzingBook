@@ -5,4 +5,6 @@ typedef struct pr_ret_t {
     char * result ;
 } pr_ret_t ;
 
-void run_process (char * program, char * inp, pr_ret_t * ret) ;
+void program_runner_run (char * program, char * inp, pr_ret_t * ret) ;
+
+void binary_program_runner_run (char * program, int inp, pr_ret_t * ret) ;
