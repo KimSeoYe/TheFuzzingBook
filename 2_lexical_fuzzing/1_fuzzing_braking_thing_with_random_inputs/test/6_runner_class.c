@@ -18,7 +18,7 @@ void
 program_runner_test ()
 {
     pr_ret_t ret ;
-    program_runner_run("cat", "hello", &ret) ;
+    program_runner_run("cat", "hello world\n", &ret) ;
     printf("result:\n%s", ret.result) ;
     printf("out: %d\n", ret.outcome) ;
     free(ret.result) ;

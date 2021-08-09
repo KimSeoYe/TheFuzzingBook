@@ -7,23 +7,27 @@
 
 // #define DEBUG
 
+int stdin_pipes[2] ;
 int pipes[2] ;
 
 void
 child_proc (char * program, char * inp) 
 {
-    dup2(pipes[0], 0) ;
-    close(pipes[0]) ;
-    
+    write(stdin_pipes[1], inp, strlen(inp) + 1) ;
+    close(stdin_pipes[1]) ;
+
+    dup2(stdin_pipes[0], 0) ;
+
     dup2(pipes[1], 1) ;
     dup2(pipes[1], 2) ;
 
-    execlp(program, program, inp, 0x0) ;
+    execlp(program, program, 0x0) ;
 }
 
 void
-parent_proc (pr_ret_t * ret)
+parent_proc (pr_ret_t * ret, char * inp)
 {
+    close(stdin_pipes[1]) ;
     close(pipes[1]) ;
 
     char buf[1024] ;
@@ -43,12 +47,17 @@ parent_proc (pr_ret_t * ret)
         printf("%s", buf) ;  // TODO.
     #endif
     }
+    
     close(pipes[0]) ;
 }
 
 int
 run_process (char * program, char * inp, pr_ret_t * ret)
 {
+    if (pipe(stdin_pipes) != 0) {
+        perror("pipe") ;
+        exit(1) ;
+    }
     if (pipe(pipes) != 0) {
         perror("pipe") ;
         exit(1) ;
@@ -59,7 +68,7 @@ run_process (char * program, char * inp, pr_ret_t * ret)
         child_proc(program, inp) ;
     }
     else if (child_pid > 0) {
-        parent_proc(ret) ;
+        parent_proc(ret, inp) ;
     }
     else {
         perror("fork") ;
@@ -91,4 +100,10 @@ program_runner_run (char * program, char * inp, pr_ret_t * ret)
     }
 
     return ;
+}
+
+void
+binary_program_runner_run (char * program, char * inp, pr_ret_t * ret)
+{
+    // ?
 }
