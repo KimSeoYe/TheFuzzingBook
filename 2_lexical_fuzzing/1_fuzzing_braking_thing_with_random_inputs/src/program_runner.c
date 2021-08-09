@@ -13,9 +13,10 @@ void
 child_proc (char * program, char * inp) 
 {
     dup2(pipes[0], 0) ;
+    close(pipes[0]) ;
+    
     dup2(pipes[1], 1) ;
     dup2(pipes[1], 2) ;
-    close(pipes[0]) ;
 
     execlp(program, program, inp, 0x0) ;
 }
