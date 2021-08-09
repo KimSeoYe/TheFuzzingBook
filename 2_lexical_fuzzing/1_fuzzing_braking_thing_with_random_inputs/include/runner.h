@@ -1,4 +1,4 @@
-#define INP_MAX 2048
+#define INP_MAX 128
 
 enum outs { PASS = 0, FAIL, UNRESOLVED } ;
 
