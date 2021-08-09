@@ -6,19 +6,10 @@
 void
 random_fuzzer_init (fuzarg_t * dst, int min_length, int max_length, int char_start, int char_range)
 {
-    // -1 >> default    // Q.
-
-    if (min_length == -1) dst->min_length = MIN_LEN ;
-    else dst->min_length = min_length ;
-
-    if (max_length == -1) dst->max_length = MAX_LEN ;
-    else dst->max_length = max_length ;
-
-    if (char_start == -1) dst->char_start = CHAR_START ;
-    else dst->char_start = char_start ;
-
-    if (char_range == -1) dst->char_range = CHAR_RANGE ;
-    else dst->char_range = char_range ;
+    dst->min_length = min_length ;
+    dst->max_length = max_length ;
+    dst->char_start = char_start ;
+    dst->char_range = char_range ;
 }
 
 char *
