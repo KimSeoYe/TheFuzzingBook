@@ -4,7 +4,7 @@
 
 #include "../include/simulate_troff.h"
 
-#define DEBUG
+// #define DEBUG
 
 int
 no_backslash_d (char * inp)
@@ -13,13 +13,14 @@ no_backslash_d (char * inp)
     char * find = 0x0 ;
     find = strstr(inp, pattern) ;
     
-    if (find == 0x0 || strlen(find) == strlen(pattern)) return 1 ;
+    if (find == 0x0 || strlen(find) == strlen(pattern)) return 1 ;  // TODO. modify (it has a problem w/ \0)
 
-    char * c = find + strlen(pattern) ;
+    char * c = find + strlen(pattern) ; 
 #ifdef DEBUG
     printf("> %d\n", (int) *c) ;
 #endif
-    assert(*c > 31 && *c < 256) ;
+    assert(*c > 31 && *c < 128) ;
 
     return 1 ;
 }
+
