@@ -41,6 +41,7 @@ random_fuzzer_run (char * program)
 
     // TODO. to get a stdout and stderr separately?
     printf("(CompletedProcess(args='%s', returncode=%d, stdout|stderr='%s')\n", program, ret.outcome, ret.result) ;
+    free(ret.result) ;
 }
 
 void 
@@ -56,5 +57,6 @@ random_fuzzer_runs (char * program, int trials)
         free(inp) ;
 
         printf("(CompletedProcess(args='%s', returncode=%d, stdout|stderr='%s')\n", program, ret.outcome, ret.result) ;
+        free(ret.result) ;
     }
 }
