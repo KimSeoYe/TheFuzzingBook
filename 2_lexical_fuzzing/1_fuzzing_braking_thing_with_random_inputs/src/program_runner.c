@@ -13,7 +13,7 @@ int pipes[2] ;
 void
 child_proc (char * program, char * inp) 
 {
-    write(stdin_pipes[1], inp, strlen(inp)) ;
+    write(stdin_pipes[1], inp, strlen(inp)) ;   // TODO.
     close(stdin_pipes[1]) ;
 
     dup2(stdin_pipes[0], 0) ;
