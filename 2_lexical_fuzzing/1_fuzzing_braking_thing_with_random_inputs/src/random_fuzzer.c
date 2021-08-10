@@ -19,7 +19,7 @@ random_fuzzer_fuzz (fuzarg_t args)
 {
     int string_length = rand() % (args.max_length - args.min_length + 1) + args.min_length ;
     
-    char * out = (char *) malloc(sizeof(char) * string_length + 1) ;
+    char * out = (char *) malloc(sizeof(char) * string_length + 1) ;    // as an argument ?
     for (int i = 0; i < string_length; i++) {
         out[i] = rand() % args.char_range + args.char_start ;
     }
@@ -37,11 +37,10 @@ random_fuzzer_run (char * program)
 
     pr_ret_t ret ;
     program_runner_run(&ret, program, inp) ;
+    free(inp) ;
 
     // TODO. to get a stdout and stderr separately?
     printf("(CompletedProcess(args='%s', returncode=%d, stdout|stderr='%s')\n", program, ret.outcome, ret.result) ;
-
-    free(inp) ;
 }
 
 void 
@@ -54,10 +53,8 @@ random_fuzzer_runs (char * program, int trials)
 
         pr_ret_t ret ;
         program_runner_run(&ret, program, inp) ;
+        free(inp) ;
 
         printf("(CompletedProcess(args='%s', returncode=%d, stdout|stderr='%s')\n", program, ret.outcome, ret.result) ;
-
-        free(inp) ;
-        // random_fuzzer_run(program) ;
     }
 }
