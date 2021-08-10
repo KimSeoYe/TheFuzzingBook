@@ -19,7 +19,7 @@ random_fuzzer_fuzz (fuzarg_t args)
 {
     int string_length = rand() % (args.max_length - args.min_length + 1) + args.min_length ;
     
-    char * out = (char *) malloc(sizeof(char) * string_length + 1) ;    // as an argument ?
+    char * out = (char *) malloc(sizeof(char) * (string_length + 1)) ;    // as an argument ?
     for (int i = 0; i < string_length; i++) {
         out[i] = rand() % args.char_range + args.char_start ;
     }
