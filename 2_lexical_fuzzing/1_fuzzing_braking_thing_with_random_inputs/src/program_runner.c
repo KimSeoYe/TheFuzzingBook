@@ -93,7 +93,7 @@ program_runner_run (pr_ret_t * ret, char * program, char * inp)
     if (exit_code == 0) {
         ret->outcome = PR_PASS ;
     }
-    else if (exit_code < 0) {
+    else if (exit_code < 0) {   // TODO.
         ret->outcome = PR_FAIL ;
     }
     else {
