@@ -32,7 +32,7 @@ void
 random_fuzzer_run (char * program)
 {
     fuzarg_t args ;
-    random_fuzzer_init(&args, 20, 20, CHAR_START, CHAR_RANGE) ;
+    random_fuzzer_init(&args, 20, 20, CHAR_START, CHAR_RANGE) ; // TODO. out of this function.
     char * inp = random_fuzzer_fuzz(args) ;
 
     pr_ret_t ret ;
@@ -48,7 +48,7 @@ void
 random_fuzzer_runs (char * program, int trials)
 {
     fuzarg_t args ;
-    random_fuzzer_init(&args, 20, 20, CHAR_START, CHAR_RANGE) ;
+    random_fuzzer_init(&args, 20, 20, CHAR_START, CHAR_RANGE) ; // TODO. out of this function.
     for (int i = 0; i < trials; i++) {
         char * inp = random_fuzzer_fuzz(args) ;
 
