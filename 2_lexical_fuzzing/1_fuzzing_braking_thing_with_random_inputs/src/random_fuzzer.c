@@ -21,7 +21,7 @@ random_fuzzer_fuzz (fuzarg_t args)
     
     char * out = (char *) malloc(sizeof(char) * (string_length + 1)) ;    // as an argument ?
     for (int i = 0; i < string_length; i++) {
-        out[i] = rand() % args.char_range + args.char_start ;
+        out[i] = rand() % (args.char_range + 1) + args.char_start ;
     }
     out[string_length] = 0x0 ;
 
