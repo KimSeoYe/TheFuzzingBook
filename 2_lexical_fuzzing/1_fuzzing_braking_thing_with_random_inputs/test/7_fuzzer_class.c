@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <time.h>
 
 #include "../include/fuzzer.h"
 #include "../include/random_fuzzer.h"
@@ -50,6 +51,7 @@ rand_fuzzer_test_with_prog_runner ()
 int
 main ()
 {
+    srand(time(NULL)) ;
     // fuzzer_test() ;
     // rand_fuzzer_test() ;
     rand_fuzzer_test_with_prog_runner() ;
