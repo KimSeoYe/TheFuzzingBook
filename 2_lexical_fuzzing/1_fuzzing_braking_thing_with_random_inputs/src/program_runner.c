@@ -18,6 +18,9 @@ child_proc (char * program, char * inp)
 
     dup2(stdin_pipes[0], 0) ;
 
+    close(pipes[0]) ;
+    close(stdin_pipes[0]) ;
+
     dup2(pipes[1], 1) ;
     dup2(pipes[1], 2) ;
 
