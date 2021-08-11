@@ -16,6 +16,10 @@
  * ProgramRunnerInit이 Runner 구조체를 initialize하도록 만드는 것은 어떨까?
  * >> risk : Runner 구조체 안에, Runner에서는 사용하지 않는 멤버 변수들이 들어갈 수 있다.
  * 
+ * or, 
+ * RandomFuzzerInit이 Fuzzer 구조체를 사용하도록 하지 말고,
+ * RandomFuzzer 구조체를 따로 만들어서 사용하도록 하는게 나을까?
+ * 
  * runner.h 하나에 Runner, PrintRunner, ProgramRunner를 모두 넣어두는 건 어떨까?
 */
 
