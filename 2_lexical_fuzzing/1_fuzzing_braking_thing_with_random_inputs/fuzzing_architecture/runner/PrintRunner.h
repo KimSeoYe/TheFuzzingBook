@@ -3,6 +3,6 @@
 
 #include "Runner.h"
 
-void PrintRunnerInit (Runner * runner) ;
+void PrintRunnerInit (Runner * self) ;
 
 #endif

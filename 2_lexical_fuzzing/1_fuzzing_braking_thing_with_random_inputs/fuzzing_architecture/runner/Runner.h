@@ -35,8 +35,8 @@ typedef struct Runner {
 
 void run (Runner * self, char * input, int input_size) ;
 
-void free_input (Runner runner) ;
+void free_input (Runner self) ;
 
-void RunnerInit (Runner * runner) ;  // naming..?
+void RunnerInit (Runner * self) ;  // naming..?
 
 #endif
