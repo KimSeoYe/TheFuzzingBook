@@ -19,9 +19,7 @@
  * 
  * or, 
  * RandomFuzzerInit이 Fuzzer 구조체를 사용하도록 하지 말고,
- * RandomFuzzer 구조체를 따로 만들어서 사용하도록 하는게 나을 것 같다.
- * 
- * runner.h 하나에 Runner, PrintRunner, ProgramRunner를 모두 넣어두는 건 어떨까?
+ * RandomFuzzer 구조체를 따로 만들어서 사용하도록 하는게 나을 것 같다. 
 */
 
 typedef struct Runner {
