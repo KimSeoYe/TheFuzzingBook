@@ -11,8 +11,8 @@ typedef struct ProgramRunner {
     char * outcome ;
     int return_code ;
     
-    void (* run_process) (struct ProgramRunner *, char *, char *, int) ;   // self, prog, inp, length of inp
-    void (* run) (struct ProgramRunner *, char *, char *, int) ;
+    void (* run_process) (struct ProgramRunner *, char *, int) ;   // self, inp, length of inp
+    void (* run) (struct ProgramRunner *, char *, int) ;
     void (* free_results) (struct ProgramRunner) ;
 } ProgramRunner ;
 
