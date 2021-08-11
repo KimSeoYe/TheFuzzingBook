@@ -12,7 +12,7 @@ print_runner_run (Runner * self, char * input, int input_size)
 
     for (int i = 0; i < input_size; i++) {
         self->input[i] = input[i] ;
-        putchar(input[i]) ;
+        putc(input[i], stdout) ;
     }
 
     self->outcome = UNRESOLVED ;
