@@ -1,3 +1,6 @@
+#ifndef RUNNER
+#define RUNNER
+
 #define PASS "PASS"
 #define FAIL "FAIL"
 #define UNRESOLVED "UNRESOLVED"
@@ -14,3 +17,5 @@ typedef struct Runner {
 } Runner ;
 
 void RunnerInit (Runner * runner) ;  // naming..?
+
+#endif
