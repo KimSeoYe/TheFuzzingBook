@@ -3,19 +3,17 @@
 
 #include "Runner.h"
 
-typedef struct prog_result {
-    char * sout ;
-    char * serr ;
+typedef struct ProgramRunner {
+    char * program ;
+
+    char * sout ;   // as a file
+    char * serr ;   // as a file
     char * outcome ;
     int return_code ;
-} prog_result_t ;
-
-typedef struct ProgramRunner {
-    prog_result_t result ;
-    char * program ;
     
-    void (* run_process) (prog_result_t *, char *, char *, int) ;   // ret, prog, inp, length of inp
-    void (* run) (result_t *, char *, char *, int) ;
+    void (* run_process) (struct ProgramRunner *, char *, char *, int) ;   // self, prog, inp, length of inp
+    void (* run) (struct ProgramRunner *, char *, char *, int) ;
+    void (* free_results) (struct ProgramRunner) ;
 } ProgramRunner ;
 
 void ProgramRunnerInit (ProgramRunner * runner, char * program) ;
