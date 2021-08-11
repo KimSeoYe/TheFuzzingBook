@@ -6,7 +6,8 @@
 #define UNRESOLVED "UNRESOLVED"
 
 /**
- * prob.
+ * problem.
+ * Fuzzer와 RandomFuzzer는 모두 Fuzzer 구조체를 사용한다. (RandomFuzzer도 Fuzzer 구조체를 사용한다.)
  * Fuzzer와 RandomFuzzer의 run은 각각 Runner.run과 ProgramRunner.run을 사용한다.
  * 현재 Runner와 ProgramRunner의 멤버 변수가 달라서, Runner와 ProgramRunner를 따로 선언해둔 상태이다.
  * >> Fuzzer.run의 function pointer의 타입이 다르므로, RandomFuzzer가 Fuzzer 구조체를 그대로 사용할 수 없다.
@@ -18,7 +19,7 @@
  * 
  * or, 
  * RandomFuzzerInit이 Fuzzer 구조체를 사용하도록 하지 말고,
- * RandomFuzzer 구조체를 따로 만들어서 사용하도록 하는게 나을까?
+ * RandomFuzzer 구조체를 따로 만들어서 사용하도록 하는게 나을 것 같다.
  * 
  * runner.h 하나에 Runner, PrintRunner, ProgramRunner를 모두 넣어두는 건 어떨까?
 */

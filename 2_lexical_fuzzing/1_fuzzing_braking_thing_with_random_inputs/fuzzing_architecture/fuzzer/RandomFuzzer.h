@@ -10,7 +10,13 @@ typedef struct fuzarg {
     int char_range ;
 } fuzarg_t ;
 
+typedef struct RandomFuzzer {
+    char * (* fuzz) (int *) ; // int * length
+    void (* run) (void (* runner) (ProgramRunner *, char *, int)) ; // CHECK
+    void (* runs) (void (* runner) (ProgramRunner *, char *, int), int) ;
+} RandomFuzzer ;
+
 void fuzarg_init (fuzarg_t * fuzargs) ;
-void RandomFuzzerInit (Fuzzer * fuzzer) ;
+void RandomFuzzerInit (RandomFuzzer * fuzzer) ;
 
 #endif
