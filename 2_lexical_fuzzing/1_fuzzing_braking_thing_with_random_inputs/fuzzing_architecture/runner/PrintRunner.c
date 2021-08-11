@@ -6,16 +6,16 @@
 void
 print_runner_run (Runner * self, char * input, int input_size)
 {
-    self->result.input = (char *) malloc(sizeof(char) * input_size) ;
+    self->input = (char *) malloc(sizeof(char) * input_size) ;
     
-    self->result.input_size = input_size ;
+    self->input_size = input_size ;
 
     for (int i = 0; i < input_size; i++) {
-        self->result.input[i] = input[i] ;
+        self->input[i] = input[i] ;
         putchar(input[i]) ;
     }
 
-    self->result.outcome = UNRESOLVED ;
+    self->outcome = UNRESOLVED ;
 
     return ;
 }

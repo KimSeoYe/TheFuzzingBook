@@ -12,9 +12,9 @@ print_runner_test ()
     
     char input[] = "Hello\0 World\n" ;
     print_runner.run(&print_runner, input, sizeof(input)) ;
-    
-    for (int i = 0; i < print_runner.result.input_size; i++) {
-        putc(print_runner.result.input[i], stdout) ;
+
+    for (int i = 0; i < print_runner.input_size; i++) {
+        putc(print_runner.input[i], stdout) ;
     }
 
     print_runner.free_input(print_runner) ;
