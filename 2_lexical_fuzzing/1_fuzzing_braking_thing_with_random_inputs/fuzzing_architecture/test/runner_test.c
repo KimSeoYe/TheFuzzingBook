@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "../runner/Runner.h"
 #include "../runner/PrintRunner.h"
@@ -13,9 +14,7 @@ print_runner_test ()
     char input[] = "Hello\0 World\n" ;
     print_runner.run(&print_runner, input, sizeof(input)) ;
 
-    for (int i = 0; i < print_runner.input_size; i++) {
-        putc(print_runner.input[i], stdout) ;
-    }
+    write(1, print_runner.input, print_runner.input_size) ;
 
     print_runner.free_input(print_runner) ;
 }

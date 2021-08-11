@@ -28,7 +28,7 @@ run (Runner * self, char * input, int input_size)
         self->outcome = UNRESOLVED ;
     }
     else {
-        perror("Negative input size") ;
+        perror("Input size must be non-negative") ;
     }
 
     return ;
