@@ -13,8 +13,13 @@ typedef struct result {
 
 typedef struct Runner {
     result_t result ;
-    void (* run) (result_t *, char *, int) ;
+    void (* run) (struct Runner *, char *, int) ;
+    void (* free_input) (struct Runner) ;
 } Runner ;
+
+void run (Runner * self, char * input, int input_size) ;
+
+void free_input (Runner runner) ;
 
 void RunnerInit (Runner * runner) ;  // naming..?
 

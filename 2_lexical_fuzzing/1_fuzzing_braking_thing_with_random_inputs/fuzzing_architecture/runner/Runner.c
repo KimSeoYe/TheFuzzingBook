@@ -1,29 +1,36 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "Runner.h"
 
 void
-runner_run (result_t * result, char * input, int input_size)
+run (Runner * self, char * input, int input_size)
 {
-    result->input = (char *) malloc(sizeof(char) * input_size) ;
+    self->result.input = (char *) malloc(sizeof(char) * input_size) ;
     
-    result->input_size = input_size ;
+    self->result.input_size = input_size ;
 
     // Q. how to check validity ?
     for (int i = 0; i < input_size; i++) {
-        result->input[i] = input[i] ;
+        self->result.input[i] = input[i] ;
     }
 
-    result->outcome = UNRESOLVED ;
+    self->result.outcome = UNRESOLVED ;
 
+    return ;
+}
+
+void
+free_input (Runner runner) 
+{
+    if (runner.result.input != 0x0) free(runner.result.input) ;
     return ;
 }
 
 void
 RunnerInit (Runner * runner)
 {
-    runner->run = runner_run ;
+    runner->run = run ;
+    runner->free_input = free_input ;
     return ;
 }

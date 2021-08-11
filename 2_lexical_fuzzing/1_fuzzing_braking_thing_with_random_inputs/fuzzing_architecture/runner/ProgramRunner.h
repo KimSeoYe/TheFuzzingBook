@@ -4,8 +4,8 @@
 #include "Runner.h"
 
 typedef struct prog_result {
-    char * stdout ;
-    char * stderr ;
+    char * sout ;
+    char * serr ;
     char * outcome ;
     int return_code ;
 } prog_result_t ;
