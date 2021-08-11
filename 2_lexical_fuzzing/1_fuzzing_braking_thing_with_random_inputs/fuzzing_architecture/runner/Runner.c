@@ -6,6 +6,13 @@
 void
 run (Runner * self, char * input, int input_size)
 {
+    if (input_size == 0) {
+        self->input_size = 0 ;
+        self->input = 0x0 ;
+        self->outcome = UNRESOLVED ;
+        return ;
+    }
+
     self->input = (char *) malloc(sizeof(char) * input_size) ;
     
     self->input_size = input_size ;
