@@ -14,7 +14,9 @@ print_runner_test ()
     char input[] = "Hello\0 World\n" ;
     print_runner.run(&print_runner, input, sizeof(input)) ;
 
-    write(1, print_runner.input, print_runner.input_size) ;
+    for (int i = 0; i < print_runner.input_size; i++) {
+        putchar(print_runner.input[i]) ;
+    }
 
     print_runner.free_input(print_runner) ;
 }
