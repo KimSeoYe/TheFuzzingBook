@@ -17,7 +17,7 @@ typedef struct test_config {
     int f_char_range ;
 
     char binary_path[PATH_MAX] ;    // Q. dinamic ?
-    char cmd_args[PATH_MAX] ;   // Q.
+    char ** cmd_args ;   // Q. argument들을 string 하나로 받아서 parsing VS array of string ..
 
     int trial ; // TODO. default 10 ?
 
@@ -27,6 +27,6 @@ typedef struct test_config {
 
 } test_config_t ;
 
-#define INIT_CONFIG(X) test_config_t X = { .f_min_len = 10, .f_max_len = 100, .f_char_start = 32, .f_char_range = 32, .binary_path = "", .cmd_args = "", .trial = 10, .timeout = 5, .oracle = 0x0 }
+void init_config (test_config_t * config) ;
 
 #endif

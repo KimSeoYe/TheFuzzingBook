@@ -3,6 +3,6 @@
 
 #include "config.h"
 
-void run (test_config_t * config) ;
+void run (test_config_t * config, char * input) ;
 
 #endif

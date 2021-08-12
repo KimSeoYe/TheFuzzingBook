@@ -3,6 +3,6 @@
 
 #include "config.h"
 
-char * input_fuzz (test_config_t * config) ;
+void fuzz_input (test_config_t * config, char * fuzz_string) ;
 
 #endif
