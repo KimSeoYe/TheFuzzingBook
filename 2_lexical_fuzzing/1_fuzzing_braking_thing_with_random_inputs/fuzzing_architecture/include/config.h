@@ -3,28 +3,24 @@
 
 #define PATH_MAX 4096
 
-typedef struct test_config {
-    /*
-        1. fuzzer input config
-        2. binary path
-        3. oracle function
-        4. command line config
-    */
-
+typedef struct fuzarg {
     int f_min_len ;
     int f_max_len ;
     int f_char_start ;
     int f_char_range ;
+} fuzarg_t ;
 
-    char binary_path[PATH_MAX] ;    // Q. dinamic ?
-    char ** cmd_args ;   // Q. argument들을 string 하나로 받아서 parsing VS array of string ..
-
-    int trial ; // TODO. default 10 ?
-
+typedef struct runarg {
+    char binary_path[PATH_MAX] ;
+    char * cmd_args ;
     int timeout ; // TODO. for each loop. default ?
+} runarg_t ;
 
+typedef struct test_config {   
+    int trial ;
+    fuzarg_t fuzargs ;
+    runarg_t runargs ;
     int (* oracle) (char * dir_name) ;
-
 } test_config_t ;
 
 void init_config (test_config_t * config) ;

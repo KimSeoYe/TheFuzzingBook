@@ -1,11 +1,22 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "../include/fuzzer.h"
+
+int 
+oracle (char * dir_name)
+{
+    printf("ORACLE FUNCTION RUN\n") ;
+
+    return 1 ;
+}
 
 void
 set_configs (test_config_t * config)
 {
-    printf("SET CONFIGS\n") ;
+    strcpy(config->runargs.binary_path, "/bin/cat") ;
+
+    config->oracle = oracle ;
 }
 
 int

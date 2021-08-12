@@ -7,6 +7,13 @@
 #include "../include/fuzzer.h"
 #include "../include/fuzz_input.h"
 
+#define DEBUG
+
+static int trial ;
+static fuzarg_t fuzargs ;
+static runarg_t runargs ;
+static int (* oracle) (char * dir_name) ;
+
 void
 create_input_dir (char * dir_name)
 {
@@ -20,17 +27,24 @@ create_input_dir (char * dir_name)
 }
 
 void
+copy_status (test_config_t * config)
+{
+    trial = config->trial ;
+    fuzargs = config->fuzargs ;
+    
+    strcpy(runargs.binary_path, config->runargs.binary_path) ;
+    if (config->runargs.cmd_args != 0x0) strcpy(runargs.cmd_args, config->runargs.cmd_args) ;
+    runargs.timeout = config->runargs.timeout ;
+
+    oracle = config->oracle ; // Q.
+}
+
+void
 fuzzer_init (test_config_t * config, char * dir_name)
 {
-    /*
-        1. check some conditions
-            - default values >> in config.h
-            - binary path validity
-            - check if the oracle function is not empty ?
-        2. make result directory
-    */
+    copy_status(config) ;
 
-    if (access(config->binary_path, X_OK) == -1) {
+    if (access(runargs.binary_path, X_OK) == -1) {
         perror("Cannot access to the binary path") ;
         exit(1) ;
     }
@@ -39,23 +53,25 @@ fuzzer_init (test_config_t * config, char * dir_name)
         Q. command line argument를 어떤 식으로 넘겨줄지 (exec 함수들 중 무엇을 선택할지)    
     */
 
-    if (config->oracle == 0x0) {
-        perror("Cannot access to the oracle tester") ;
+    if (oracle == 0x0) {
+        perror("Cannot access to the oracle tester") ;  // TODO. default oracle
         exit(1) ;
     }
 
     create_input_dir(dir_name) ;
 }
 
+static int stdin_pipes[2] ;
+static int stdout_pipes[2] ;
+static int stderr_pipes[2] ;
 
 void 
-execute_binary(test_config_t * config, char * input, int input_len, int * stdin_pipes, int * stdout_pipes, int * stderr_pipes)
+execute_target(runarg_t * runargs, char * input, int input_len)
 {
     write(stdin_pipes[1], input, input_len) ;
     close(stdin_pipes[1]) ;
 
     dup2(stdin_pipes[0], 0) ;
-
     
     close(stdin_pipes[0]) ;
     close(stdout_pipes[0]) ;
@@ -68,18 +84,14 @@ execute_binary(test_config_t * config, char * input, int input_len, int * stdin_
 }
 
 void
-save_results(test_config_t * config, char * input, int input_len, int * stdin_pipes, int * stdout_pipes, int * stderr_pipes)
+save_results(runarg_t * runargs, char * dir_name, char * input, int input_len)
 {
 
 }
 
 void 
-run (test_config_t * config, char * input, int input_len)
+run (runarg_t * runargs, char * dir_name, char * input, int input_len)
 {
-    int stdin_pipes[2] ;
-    int stdout_pipes[2] ;
-    int stderr_pipes[2] ;
-
     if (pipe(stdin_pipes) != 0) {
         perror("pipe") ;
         exit(1) ;
@@ -95,16 +107,17 @@ run (test_config_t * config, char * input, int input_len)
 
     pid_t child_pid = fork() ;
     if (child_pid == 0) {
-        execute_binary(config, input, input_len, stdin_pipes, stdout_pipes, stderr_pipes) ;
+        execute_target(runargs, input, input_len) ;
     }
     else if (child_pid > 0) {
-        save_results(config, input, input_len, stdin_pipes, stdout_pipes, stderr_pipes) ;
+        save_results(runargs, dir_name, input, input_len) ;
     }
     else {
         perror("fork") ;
         exit(1) ;
     }
 }
+
 
 void
 fuzzer_main (test_config_t * config)
@@ -114,14 +127,18 @@ fuzzer_main (test_config_t * config)
 
     srand(time(NULL)) ;
 
-    for (int i = 0; config->trial; i++) {
-        char * input = (char *) malloc(sizeof(char) * (config->f_max_len + 1)) ; // Q.
-        int input_len = fuzz_input(config, input) ;
+    for (int i = 0; i < trial; i++) {
+        char * input = (char *) malloc(sizeof(char) * (fuzargs.f_max_len + 1)) ;
+        int input_len = fuzz_input(&fuzargs, input) ;
+    #ifdef DEBUG
+        printf("FUZZ INPUT: (%d)%s\n", input_len, input) ;
+    #endif
 
-        run(config, input, input_len) ;
-
-        config->oracle(dir_name) ;
-
+        run(&runargs, dir_name, input, input_len) ;
         free(input) ;
+
+        // oracle check
     }
+
+    // after loop ends, some works ?
 }

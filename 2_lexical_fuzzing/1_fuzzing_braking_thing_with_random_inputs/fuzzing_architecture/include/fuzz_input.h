@@ -1,8 +1,8 @@
-#ifndef INPUT_FUZZ
-#define INPUT_FUZZ
+#ifndef FUZZ_INPUT
+#define FUZZ_INPUT
 
 #include "config.h"
 
-int fuzz_input (test_config_t * config, char * fuzz_string) ;
+int fuzz_input (fuzarg_t * fuzargs, char * fuzz_string) ;
 
 #endif
