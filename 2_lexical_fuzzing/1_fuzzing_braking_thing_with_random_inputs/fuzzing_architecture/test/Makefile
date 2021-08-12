@@ -1,14 +1,13 @@
-TARGETS=runner_test.c 
-EXECS=runner_test
-OBJS=Runner.o PrintRunner.o ProgramRunner.o Fuzzer.o RandomFuzzer.o 
-RUNNERS=../runner/Runner.c ../runner/PrintRunner.c ../runner/ProgramRunner.c
-FUZZERS=../fuzzer/Fuzzer.c ../fuzzer/RandomFuzzer.c 
+TARGETS=cat_testdriver.c 
+EXECS=cat_testdriver
+OBJS=fuzzer.o input_fuzz.o run.o 
+SRCS=../src/fuzzer.c ../src/input_fuzz.c ../src/run.c 
 
-all: $(TARGETS) $(RUNNERS) $(FUZZERS)
-	gcc -o runner_test runner_test.c ../runner/Runner.c ../runner/PrintRunner.c 
+all: $(TARGETS) $(SRCS)
+	gcc -o cat_testdriver cat_testdriver.c ../src/fuzzer.c ../src/input_fuzz.c ../src/run.c 
 
-runner_test: runner_test.c ../runner/Runner.c ../runner/PrintRunner.c 
-	gcc -o runner_test runner_test.c ../runner/Runner.c ../runner/PrintRunner.c 
+cat_testdriver: cat_testdriver.c ../src/fuzzer.c ../src/input_fuzz.c ../src/run.c
+	gcc -o cat_testdriver cat_testdriver.c ../src/fuzzer.c ../src/input_fuzz.c ../src/run.c 
 
-clean: 
+clean:
 	rm -rf $(EXECS) $(OBJS)
