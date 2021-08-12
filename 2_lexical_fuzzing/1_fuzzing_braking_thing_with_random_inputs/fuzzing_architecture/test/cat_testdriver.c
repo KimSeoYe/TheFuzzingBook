@@ -11,7 +11,8 @@ set_configs (test_config_t * config)
 int
 main ()
 {
-    INIT_CONFIG(config) ;
+    test_config_t config ;
+    init_config(&config) ; // TODO. default values... >> 별로인 것 같다 (두번 세팅하니까..)
     set_configs(&config) ;
 
     fuzzer_main(&config) ;
