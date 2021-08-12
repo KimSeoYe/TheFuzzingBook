@@ -54,7 +54,7 @@ random_fuzzer_runs (char * program, int trials)
 
         pr_ret_t ret ;
         program_runner_run(&ret, program, inp) ;
-        free(inp) ;
+        free(inp) ; // 0x0 ?
 
         printf("(CompletedProcess(args='%s', returncode=%d, stdout|stderr='%s')\n", program, ret.outcome, ret.result) ;
         free(ret.result) ;
