@@ -14,7 +14,8 @@ init_config (test_config_t * config)
     config->fuzargs.f_char_range = 32 ;
 
     strcpy(config->runargs.binary_path, "") ;
-    config->runargs.cmd_args = 0x0 ;
+    strcpy(config->runargs.cmd_args, "") ;
+    config->runargs.num_args = 0 ;
     config->runargs.timeout = 5 ;
 
     config->oracle = 0x0 ;

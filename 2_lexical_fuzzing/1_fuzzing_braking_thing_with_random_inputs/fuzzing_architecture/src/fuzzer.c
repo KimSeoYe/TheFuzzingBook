@@ -12,10 +12,11 @@
 static int trial ;
 static fuzarg_t fuzargs ;
 static runarg_t runargs ;
+static char ** parsed_args ;
 static int (* oracle) (char * dir_name) ;
 
 void
-create_input_dir (char * dir_name)
+create_temp_dir (char * dir_name)
 {
     char template[] = "tmp.XXXXXX" ;
     char * temp_dir = mkdtemp(template) ;
@@ -30,13 +31,38 @@ void
 copy_status (test_config_t * config)
 {
     trial = config->trial ;
-    fuzargs = config->fuzargs ;
+    fuzargs = config->fuzargs ; // Q.
     
-    strcpy(runargs.binary_path, config->runargs.binary_path) ;
-    if (config->runargs.cmd_args != 0x0) strcpy(runargs.cmd_args, config->runargs.cmd_args) ;
+    strcpy(runargs.binary_path, config->runargs.binary_path) ;  // Q.
+    strcpy(runargs.cmd_args, config->runargs.cmd_args) ;
+    runargs.num_args = config->runargs.num_args ;
     runargs.timeout = config->runargs.timeout ;
 
     oracle = config->oracle ; // Q.
+}
+
+void
+parse_args ()
+{
+    parsed_args = (char **) malloc(sizeof(char *) * (runargs.num_args + 2)) ; // path + null
+
+    parsed_args[0] = (char *) malloc(sizeof(char) * (strlen(runargs.binary_path) + 1)) ;
+    strcpy(parsed_args[0], runargs.binary_path) ;
+
+    int i ;
+    char * tok_ptr = strtok(runargs.cmd_args, " ") ; 
+    for (i = 1; tok_ptr != NULL; i++) {
+        parsed_args[i] = (char *) malloc(sizeof(char) * (strlen(tok_ptr) + 1)) ;
+        strcpy(parsed_args[i], tok_ptr) ;
+        tok_ptr = strtok(0x0, " ") ;
+    }
+    parsed_args[i] = (char *) malloc(sizeof(char) * 1) ;
+    parsed_args[i] = 0x0 ;
+
+    if (runargs.num_args != i - 1) {
+        perror("Invalid number of argument") ;
+        exit(1) ; // Q.
+    }
 }
 
 void
@@ -44,26 +70,37 @@ fuzzer_init (test_config_t * config, char * dir_name)
 {
     copy_status(config) ;
 
+    if (fuzargs.f_min_len > fuzargs.f_max_len) {
+        perror("Invalid fuzzer arguments:\n\tf_min_len is bigger than f_max_len") ;
+        exit(1) ;
+    }
+
     if (access(runargs.binary_path, X_OK) == -1) {
         perror("Cannot access to the binary path") ;
         exit(1) ;
     }
-    /*
-        Q. exec에 상대 경로를 넣었을 경우 ?
-        Q. command line argument를 어떤 식으로 넘겨줄지 (exec 함수들 중 무엇을 선택할지)    
-    */
+
+    parse_args() ;
+
+#ifdef DEBUG
+    for (int i = 0; i < runargs.num_args + 2; i++) {
+        if (parsed_args[i] != 0x0) printf("parsed_args[%d] %s\n", i, parsed_args[i]) ;
+        else printf("parsed_args[%d] 0x0\n", i) ;
+    }
+#endif
 
     if (oracle == 0x0) {
         perror("Cannot access to the oracle tester") ;  // TODO. default oracle
         exit(1) ;
     }
 
-    create_input_dir(dir_name) ;
+    create_temp_dir(dir_name) ;
 }
 
 static int stdin_pipes[2] ;
 static int stdout_pipes[2] ;
 static int stderr_pipes[2] ;
+
 
 void 
 execute_target(runarg_t * runargs, char * input, int input_len)
@@ -80,7 +117,7 @@ execute_target(runarg_t * runargs, char * input, int input_len)
     dup2(stdout_pipes[1], 1) ;
     dup2(stderr_pipes[1], 2) ;
 
-    // execute
+    execv(runargs->binary_path, parsed_args) ;
 }
 
 void
@@ -92,18 +129,9 @@ save_results(runarg_t * runargs, char * dir_name, char * input, int input_len)
 void 
 run (runarg_t * runargs, char * dir_name, char * input, int input_len)
 {
-    if (pipe(stdin_pipes) != 0) {
-        perror("pipe") ;
-        exit(1) ;
-    }
-    if (pipe(stdout_pipes) != 0) {
-        perror("pipe") ;
-        exit(1) ;
-    }
-    if (pipe(stderr_pipes) != 0) {
-        perror("pipe") ;
-        exit(1) ;
-    }
+    if (pipe(stdin_pipes) != 0) goto pipe_err ;
+    if (pipe(stdout_pipes) != 0) goto pipe_err ;
+    if (pipe(stderr_pipes) != 0) goto pipe_err ;
 
     pid_t child_pid = fork() ;
     if (child_pid == 0) {
@@ -116,8 +144,32 @@ run (runarg_t * runargs, char * dir_name, char * input, int input_len)
         perror("fork") ;
         exit(1) ;
     }
+
+    return ;
+
+pipe_err:
+    perror("pipe") ;
+    exit(1) ;
 }
 
+void
+free_parsed_args ()
+{
+    for (int i = 0; i < runargs.num_args + 2; i++) {
+        free(parsed_args[i]) ;
+    }
+    free(parsed_args) ;
+}
+
+void
+remove_temp_dir (char * dir_name)
+{
+    // TODO. remove files
+    if (rmdir(dir_name) == -1) {
+        perror("rmdir") ;
+        exit(1) ;
+    }
+}
 
 void
 fuzzer_main (test_config_t * config)
@@ -141,4 +193,6 @@ fuzzer_main (test_config_t * config)
     }
 
     // after loop ends, some works ?
+    free_parsed_args() ;
+    remove_temp_dir(dir_name) ;
 }

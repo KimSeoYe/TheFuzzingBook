@@ -2,6 +2,7 @@
 #define CONFIG
 
 #define PATH_MAX 4096
+#define ARG_MAX 1024
 
 typedef struct fuzarg {
     int f_min_len ;
@@ -12,7 +13,8 @@ typedef struct fuzarg {
 
 typedef struct runarg {
     char binary_path[PATH_MAX] ;
-    char * cmd_args ;
+    char cmd_args[ARG_MAX] ;
+    int num_args ;
     int timeout ; // TODO. for each loop. default ?
 } runarg_t ;
 
