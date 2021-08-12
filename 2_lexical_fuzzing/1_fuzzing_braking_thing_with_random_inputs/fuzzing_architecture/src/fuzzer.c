@@ -58,9 +58,9 @@ fuzzer_main (test_config_t * config)
 
     for (int i = 0; config->trial; i++) {
         char * input = (char *) malloc(sizeof(char) * (config->f_max_len + 1)) ; // Q.
-        fuzz_input(config, input) ;
+        int input_len = fuzz_input(config, input) ;
 
-        run(config, input) ;
+        run(config, input, input_len) ;
 
         config->oracle(dir_name) ;
 

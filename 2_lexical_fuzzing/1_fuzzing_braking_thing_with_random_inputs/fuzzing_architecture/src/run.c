@@ -4,19 +4,19 @@
 #include "../include/run.h"
 
 void 
-execute_binary(char * input, int * stdin_pipes, int * stdout_pipes, int * stderr_pipes)
+execute_binary(char * input, int input_len, int * stdin_pipes, int * stdout_pipes, int * stderr_pipes)
 {
-    
+
 }
 
 void
-save_results(char * input, int * stdin_pipes, int * stdout_pipes, int * stderr_pipes)
+save_results(char * input, int input_len, int * stdin_pipes, int * stdout_pipes, int * stderr_pipes)
 {
 
 }
 
 void 
-run (test_config_t * config, char * input)
+run (test_config_t * config, char * input, int input_len)
 {
     int stdin_pipes[2] ;
     int stdout_pipes[2] ;
@@ -37,10 +37,10 @@ run (test_config_t * config, char * input)
 
     pid_t child_pid = fork() ;
     if (child_pid == 0) {
-        execute_binary(input, stdin_pipes, stdout_pipes, stderr_pipes) ;
+        execute_binary(input, input_len, stdin_pipes, stdout_pipes, stderr_pipes) ;
     }
     else if (child_pid > 0) {
-        save_results(input, stdin_pipes, stdout_pipes, stderr_pipes) ;
+        save_results(input, input_len, stdin_pipes, stdout_pipes, stderr_pipes) ;
     }
     else {
         perror("fork") ;

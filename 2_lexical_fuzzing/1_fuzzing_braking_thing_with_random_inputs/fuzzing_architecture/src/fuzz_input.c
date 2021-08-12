@@ -3,7 +3,7 @@
 
 #include "../include/fuzz_input.h"
 
-void
+int
 fuzz_input (test_config_t * config, char * fuzz_string)
 {
     int string_len = rand() % (config->f_max_len - config->f_min_len + 1) + config->f_min_len ;
@@ -13,5 +13,5 @@ fuzz_input (test_config_t * config, char * fuzz_string)
     }
     fuzz_string[string_len] = 0x0 ;
 
-    return ;
+    return string_len ;
 }
