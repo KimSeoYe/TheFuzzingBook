@@ -1,6 +1,8 @@
 #ifndef INPUT_FUZZ
 #define INPUT_FUZZ
 
-char * input_fuzz (int min_len, int max_len, int char_start, int char_range) ;
+#include "config.h"
+
+char * input_fuzz (test_config_t * config) ;
 
 #endif

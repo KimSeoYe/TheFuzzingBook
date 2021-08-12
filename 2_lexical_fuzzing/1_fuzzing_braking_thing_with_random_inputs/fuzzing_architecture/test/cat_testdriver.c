@@ -11,8 +11,8 @@ set_configs (test_config_t * config)
 int
 main ()
 {
-    test_config_t config ;
+    INIT_CONFIG(config) ;
     set_configs(&config) ;
 
-    fuzzer_main(config) ;
+    fuzzer_main(&config) ;
 }

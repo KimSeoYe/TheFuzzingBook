@@ -1,6 +1,8 @@
 #ifndef RUN
 #define RUN
 
-void run (char * dir_name, char * binary_path, char * cmd_args, int timeout) ;
+#include "config.h"
+
+void run (test_config_t * config) ;
 
 #endif
