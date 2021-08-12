@@ -59,9 +59,10 @@ parse_args ()
     parsed_args[i] = (char *) malloc(sizeof(char) * 1) ;
     parsed_args[i] = 0x0 ;
 
+    // if num_args is less than the real number of args..? >> seg fault
     if (runargs.num_args != i - 1) {
         perror("Invalid number of argument") ;
-        exit(1) ; // Q.
+        exit(1) ; 
     }
 }
 
@@ -123,7 +124,20 @@ execute_target(runarg_t * runargs, char * input, int input_len)
 void
 save_results(runarg_t * runargs, char * dir_name, char * input, int input_len)
 {
+    close(stdin_pipes[1]) ;
+    close(stdout_pipes[1]) ;
+    close(stderr_pipes[1]) ;
 
+    // FILE * input_fp = fopen()
+
+    char buf[1024] ;
+    int len = 0 ;
+    int s = 0 ;
+
+    while ((s = read(stdout_pipes[0], buf, 1024)) > 0) {
+        len += s ;
+
+    }
 }
 
 void 
