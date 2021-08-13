@@ -11,6 +11,8 @@
 
 #define DEBUG
 
+///////////////////////////////////// Fuzzer Status /////////////////////////////////////
+
 static int trials ;
 static fuzarg_t fuzargs ;
 static runarg_t runargs ;
@@ -20,6 +22,8 @@ static int (* oracle) (char * dir_name) ;
 static char dir_name[32] ;  
 static char ** parsed_args ;
 static int arg_num = 0 ;
+
+///////////////////////////////////// Fuzzer Init /////////////////////////////////////
 
 void
 create_temp_dir ()
@@ -100,6 +104,8 @@ fuzzer_init (test_config_t * config)
 
     create_temp_dir() ;
 }
+
+///////////////////////////////////// Fuzzer Run /////////////////////////////////////
 
 static int stdin_pipes[2] ;
 static int stdout_pipes[2] ;
@@ -266,6 +272,30 @@ pipe_err:
     exit(1) ;
 }
 
+///////////////////////////////////// Fuzzer Oracle /////////////////////////////////////
+
+result_t
+oracle_run ()
+{
+    result_t result ;
+
+    int ret = oracle(dir_name) ;
+    switch(ret) {
+        case 0:
+            result = PASS ;
+            break ;
+        case -1:
+            result = FAIL ;
+            break ;
+        default:
+            result = UNRESOLVED ;
+    }
+    
+    return result ;
+}
+
+///////////////////////////////////// Fuzzer Completion /////////////////////////////////////
+
 void
 free_parsed_args ()
 {
@@ -292,6 +322,8 @@ remove_temp_dir ()
     }
 }
 
+///////////////////////////////////// Fuzzer Main /////////////////////////////////////
+
 void
 fuzzer_main (test_config_t * config)
 {
@@ -300,6 +332,7 @@ fuzzer_main (test_config_t * config)
     fuzzer_init(config) ;
 
     int * return_codes = (int *) malloc(sizeof(int) * trials) ;
+    result_t results = (result_t *) malloc(sizeof(result_t) * trials) ;
 
     for (int i = 0; i < trials; i++) {
         char * input = (char *) malloc(sizeof(char) * (fuzargs.f_max_len + 1)) ;
@@ -308,7 +341,7 @@ fuzzer_main (test_config_t * config)
         return_codes[i] = run(input, input_len, i) ;
         free(input) ;
 
-        // oracle check
+        oracle_run() ;
     }
 
     // TODO. count & summary
@@ -320,6 +353,7 @@ fuzzer_main (test_config_t * config)
     printf("\n") ;
 #endif
     free(return_codes) ;
+    free(results) ;
     free_parsed_args() ;
     remove_temp_dir() ;
 }
