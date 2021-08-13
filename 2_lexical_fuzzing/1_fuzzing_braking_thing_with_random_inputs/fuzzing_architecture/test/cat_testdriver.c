@@ -16,8 +16,6 @@ set_configs (test_config_t * config)
 {
     strcpy(config->runargs.binary_path, "/bin/cat") ;
     strcpy(config->runargs.cmd_args, "-b -e") ;
-    config->runargs.num_args = 2 ;
-
     config->oracle = oracle ;
 }
 

@@ -14,7 +14,6 @@ typedef struct fuzarg {
 typedef struct runarg {
     char binary_path[PATH_MAX] ;
     char cmd_args[ARG_MAX] ;
-    int num_args ;
     int timeout ; // TODO. for each loop. default ?
 } runarg_t ;
 

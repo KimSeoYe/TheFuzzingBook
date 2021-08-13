@@ -13,6 +13,7 @@ static int trial ;
 static fuzarg_t fuzargs ;
 static runarg_t runargs ;
 static char ** parsed_args ;
+static int arg_num ;
 static int (* oracle) (char * dir_name) ;
 
 void
@@ -35,7 +36,6 @@ copy_status (test_config_t * config)
     
     strcpy(runargs.binary_path, config->runargs.binary_path) ;  // Q.
     strcpy(runargs.cmd_args, config->runargs.cmd_args) ;
-    runargs.num_args = config->runargs.num_args ;
     runargs.timeout = config->runargs.timeout ;
 
     oracle = config->oracle ; // Q.
@@ -44,7 +44,8 @@ copy_status (test_config_t * config)
 void
 parse_args ()
 {
-    parsed_args = (char **) malloc(sizeof(char *) * (runargs.num_args + 2)) ; // path + null
+    arg_num = 0 ;
+    parsed_args = (char **) malloc(sizeof(char *) * 2) ; // path + null
 
     parsed_args[0] = (char *) malloc(sizeof(char) * (strlen(runargs.binary_path) + 1)) ;
     strcpy(parsed_args[0], runargs.binary_path) ;
@@ -52,18 +53,17 @@ parse_args ()
     int i ;
     char * tok_ptr = strtok(runargs.cmd_args, " ") ; 
     for (i = 1; tok_ptr != NULL; i++) {
+        
+        if (arg_num < i) parsed_args = realloc(parsed_args, sizeof(char *) * (++arg_num + 2)) ;
+        
         parsed_args[i] = (char *) malloc(sizeof(char) * (strlen(tok_ptr) + 1)) ;
         strcpy(parsed_args[i], tok_ptr) ;
+
         tok_ptr = strtok(0x0, " ") ;
     }
+    
     parsed_args[i] = (char *) malloc(sizeof(char) * 1) ;
     parsed_args[i] = 0x0 ;
-
-    // if num_args is less than the real number of args..? >> seg fault
-    if (runargs.num_args != i - 1) {
-        perror("Invalid number of argument") ;
-        exit(1) ; 
-    }
 }
 
 void
@@ -84,7 +84,7 @@ fuzzer_init (test_config_t * config, char * dir_name)
     parse_args() ;
 
 #ifdef DEBUG
-    for (int i = 0; i < runargs.num_args + 2; i++) {
+    for (int i = 0; i < arg_num + 2; i++) {
         if (parsed_args[i] != 0x0) printf("parsed_args[%d] %s\n", i, parsed_args[i]) ;
         else printf("parsed_args[%d] 0x0\n", i) ;
     }
@@ -169,7 +169,7 @@ pipe_err:
 void
 free_parsed_args ()
 {
-    for (int i = 0; i < runargs.num_args + 2; i++) {
+    for (int i = 0; i < arg_num + 2; i++) {
         free(parsed_args[i]) ;
     }
     free(parsed_args) ;
@@ -207,6 +207,6 @@ fuzzer_main (test_config_t * config)
     }
 
     // after loop ends, some works ?
-    free_parsed_args() ;
     remove_temp_dir(dir_name) ;
+    free_parsed_args() ;
 }

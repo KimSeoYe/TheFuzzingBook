@@ -15,7 +15,6 @@ init_config (test_config_t * config)
 
     strcpy(config->runargs.binary_path, "") ;
     strcpy(config->runargs.cmd_args, "") ;
-    config->runargs.num_args = 0 ;
     config->runargs.timeout = 5 ;
 
     config->oracle = 0x0 ;
