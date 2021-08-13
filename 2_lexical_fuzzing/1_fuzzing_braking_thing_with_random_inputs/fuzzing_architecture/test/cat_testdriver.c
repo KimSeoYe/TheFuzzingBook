@@ -15,7 +15,7 @@ void
 set_configs (test_config_t * config)
 {
     strcpy(config->runargs.binary_path, "/bin/cat") ;
-    strcpy(config->runargs.cmd_args, "-b -e") ;
+    // strcpy(config->runargs.cmd_args, "-b -e") ;
     config->oracle = oracle ;
 }
 
@@ -23,7 +23,7 @@ int
 main ()
 {
     test_config_t config ;
-    init_config(&config) ; // TODO. default values... >> 별로인 것 같다 (두번 세팅하니까..)
+    init_config(&config) ;
     set_configs(&config) ;
 
     fuzzer_main(&config) ;

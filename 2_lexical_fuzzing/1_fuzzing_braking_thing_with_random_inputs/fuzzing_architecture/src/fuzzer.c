@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <time.h>
+#include <signal.h>
+#include <sys/time.h>
 
 #include "../include/fuzzer.h"
 #include "../include/fuzz_input.h"
@@ -211,14 +213,34 @@ save_results(int trial)
     write_output_files(trial, 2) ;
 }
 
-void 
-run (char * input, int input_len, int trial)
+static pid_t child_pid ;
+
+void
+timeout_handler (int sig)
 {
+    if (sig == SIGALRM) {
+        perror("timeout") ;
+        kill(child_pid, SIGINT) ;
+    }
+}
+
+int
+run (char * input, int input_len, int trial)
+{    
     if (pipe(stdin_pipes) != 0) goto pipe_err ;
     if (pipe(stdout_pipes) != 0) goto pipe_err ;
     if (pipe(stderr_pipes) != 0) goto pipe_err ;
 
-    pid_t child_pid = fork() ;
+    struct itimerval t ;
+    signal(SIGALRM, timeout_handler) ;
+
+    t.it_value.tv_sec = runargs.timeout ;
+    t.it_value.tv_usec = 0 ;
+    t.it_interval = t.it_value ;
+
+    setitimer(ITIMER_REAL, &t, 0x0) ;
+
+    child_pid = fork() ;
     if (child_pid == 0) {
         execute_target(input, input_len, trial) ;
     }
@@ -230,7 +252,14 @@ run (char * input, int input_len, int trial)
         exit(1) ;
     }
 
-    return ;
+    int exit_code ;
+    pid_t term_pid = wait(&exit_code) ;
+    // TODO. process termination check
+#ifdef DEBUG
+    printf("%d terminated w/ exit code %d\n", term_pid, exit_code) ;
+#endif
+
+    return exit_code ;
 
 pipe_err:
     perror("pipe") ;
@@ -266,21 +295,31 @@ remove_temp_dir ()
 void
 fuzzer_main (test_config_t * config)
 {
+    srand(time(NULL)) ;
+    
     fuzzer_init(config) ;
 
-    srand(time(NULL)) ;
+    int * return_codes = (int *) malloc(sizeof(int) * trials) ;
 
     for (int i = 0; i < trials; i++) {
         char * input = (char *) malloc(sizeof(char) * (fuzargs.f_max_len + 1)) ;
         int input_len = fuzz_input(&fuzargs, input) ;
 
-        run(input, input_len, i) ;
+        return_codes[i] = run(input, input_len, i) ;
         free(input) ;
 
         // oracle check
     }
 
-    // after loop ends, some works ?
+    // TODO. count & summary
+#ifdef DEBUG
+    printf("return_codes: ") ;
+    for(int i = 0; i < trials; i++) {
+        printf("%d ", return_codes[i]) ;
+    }
+    printf("\n") ;
+#endif
+    free(return_codes) ;
     free_parsed_args() ;
     remove_temp_dir() ;
 }
