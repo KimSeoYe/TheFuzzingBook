@@ -21,7 +21,7 @@ typedef struct test_config {
     int trials ;
     fuzarg_t fuzargs ;
     runarg_t runargs ;
-    int (* oracle) (char * dir_name, int return_code, int trial) ;
+    int (* oracle) (int return_code, int trial) ;
 } test_config_t ;
 
 void init_config (test_config_t * config) ;

@@ -17,7 +17,7 @@
 static int trials ;
 static fuzarg_t fuzargs ;
 static runarg_t runargs ;
-static int (* oracle) (char * dir_name, int return_code, int trial) ;
+static int (* oracle) (int return_code, int trial) ;
 
 // Q. static global ?
 static char dir_name[RESULT_PATH_MAX] ;  
@@ -80,7 +80,7 @@ parse_args ()
 }
 
 int
-default_oracle (char * dir_name, int return_codes, int trial)
+default_oracle (int return_codes, int trial)
 {
     if (return_codes == 0) return 0 ;
     else return -1 ;
@@ -308,7 +308,7 @@ oracle_run (int return_code, int trial)   // Q. useless..?
 {
     result_t result ;
 
-    int ret = oracle(dir_name, return_code, trial) ;
+    int ret = oracle(return_code, trial) ;
     switch(ret) {
         case 0:
             result = PASS ;

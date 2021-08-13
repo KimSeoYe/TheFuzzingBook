@@ -3,27 +3,27 @@
 
 #include "../include/fuzzer.h"
 
-int 
-cat_oracle (char * dir_name, int return_code, int trial)
+void
+print_stderr (int trial)
 {
-    int result ;
+    char err_path[RESULT_PATH_MAX] ;
+    get_path(err_path, trial, 2) ;
+    FILE * err_fp = fopen(err_path, "rb") ;
 
-    if (return_code != 0) {
-        result = -1 ;   
+    int s ;
+    char err_buf[1024] ;
+    printf("stderr: ") ;
+    while((s = fread(err_buf, 1, 1023, err_fp)) > 0) {
+        err_buf[s] = 0x0 ;
+        printf("%s", err_buf) ;
     }
+    fclose(err_fp) ;
+}
 
-    char in_path[RESULT_PATH_MAX] ;
-    char out_path[RESULT_PATH_MAX] ;
-
-    FILE * in_fp ;
-    FILE * out_fp ;
-
-    
-    get_path(in_path, trial, 0) ;
-    in_fp = fopen(in_path, "rb") ;
-
-    get_path(out_path, trial, 1) ;
-    out_fp = fopen(out_path, "rb") ; 
+int
+compare_in_and_out (FILE * in_fp, FILE * out_fp)
+{
+    int result = 0 ;
 
     int s ;
     char in_buf[1024] ;
@@ -35,13 +35,38 @@ cat_oracle (char * dir_name, int return_code, int trial)
             out_len += fread(out_buf + out_len, 1, 1024, out_fp) ;
         }
 
-        if (memcmp(in_buf, out_buf, s) == 0) result = 0 ;
-        else result = -1 ;
+        if (memcmp(in_buf, out_buf, s) != 0) {
+            result = -1 ;
+            break ;
+        }
     }        
-    
 
+    return result ;
+}
+
+int 
+cat_oracle (int return_code, int trial)
+{
+    int result ;
+
+    if (return_code != 0) {
+        print_stderr(trial) ;
+        result = -1 ;   
+    }
+
+    char in_path[RESULT_PATH_MAX] ;  
+    get_path(in_path, trial, 0) ;
+    FILE * in_fp = fopen(in_path, "rb") ;
+    
+    char out_path[RESULT_PATH_MAX] ;
+    get_path(out_path, trial, 1) ;
+    FILE * out_fp = fopen(out_path, "rb") ; 
+
+    result = compare_in_and_out(in_fp, out_fp) ;
+    
     fclose(in_fp) ;
     fclose(out_fp) ;
+
     return result ;
 }
 
