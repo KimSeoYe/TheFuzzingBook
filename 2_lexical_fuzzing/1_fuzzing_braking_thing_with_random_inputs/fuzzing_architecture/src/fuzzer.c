@@ -78,8 +78,8 @@ parse_args ()
 int
 default_oracle (char * dir_name, int return_codes)
 {
-
-    return 0 ;
+    if (return_codes == 0) return 0 ;
+    else return -1 ;
 }
 
 void
@@ -107,8 +107,7 @@ fuzzer_init (test_config_t * config)
 #endif
 
     if (oracle == 0x0) {
-        perror("Cannot access to the oracle tester") ;  // TODO. default oracle
-        exit(1) ;
+        oracle = default_oracle ;
     }
 
     create_temp_dir() ;
