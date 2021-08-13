@@ -51,7 +51,7 @@ cat_oracle (int return_code, int trial)
 
     if (return_code != 0) {
         print_stderr(trial) ;
-        result = -1 ;   
+        return -1 ;   
     }
 
     char in_path[RESULT_PATH_MAX] ;  
