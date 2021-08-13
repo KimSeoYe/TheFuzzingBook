@@ -17,7 +17,7 @@
 static int trials ;
 static fuzarg_t fuzargs ;
 static runarg_t runargs ;
-static int (* oracle) (char * dir_name) ;
+static int (* oracle) (char * dir_name, int return_codes) ;
 
 // Q. static global ?
 static char dir_name[32] ;  
@@ -73,6 +73,13 @@ parse_args ()
     
     parsed_args[i] = (char *) malloc(sizeof(char) * 1) ;
     parsed_args[i] = 0x0 ;
+}
+
+int
+default_oracle (char * dir_name, int return_codes)
+{
+
+    return 0 ;
 }
 
 void
@@ -279,11 +286,11 @@ pipe_err:
 ///////////////////////////////////// Fuzzer Oracle /////////////////////////////////////
 
 result_t
-oracle_run ()   // Q. useless..?
+oracle_run (int return_code)   // Q. useless..?
 {
     result_t result ;
 
-    int ret = oracle(dir_name) ;
+    int ret = oracle(dir_name, return_code) ;
     switch(ret) {
         case 0:
             result = PASS ;
@@ -305,7 +312,7 @@ fuzzer_summary (int * return_codes, result_t * results)
 {
     for (int i = 0; i < trials; i++) {
         // TODO. stdout, stderr, time
-        printf("(CompletedProcess(args='%s', exec_time='', returncode='%d', stdout='', stderr='', result='%s'))\n", runargs.cmd_args, return_codes[i], result_strings[results[i]]) ;
+        printf("(CompletedProcess(target='%s', args='%s', exec_time='', returncode='%d', stdout='', stderr='', result='%s'))\n", runargs.binary_path, runargs.cmd_args, return_codes[i], result_strings[results[i]]) ;
     }
 }
 
@@ -357,7 +364,7 @@ fuzzer_main (test_config_t * config)
         return_codes[i] = run(input, input_len, i) ;
         free(input) ;
 
-        oracle_run() ;
+        results[i] = oracle_run(return_codes[i]) ;
     }
 
     fuzzer_summary(return_codes, results) ;

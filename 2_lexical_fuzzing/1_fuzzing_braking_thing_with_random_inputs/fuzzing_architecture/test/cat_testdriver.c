@@ -4,7 +4,7 @@
 #include "../include/fuzzer.h"
 
 int 
-oracle (char * dir_name)
+oracle (char * dir_name, int return_codes)
 {
     printf("ORACLE FUNCTION RUN\n") ;
 
