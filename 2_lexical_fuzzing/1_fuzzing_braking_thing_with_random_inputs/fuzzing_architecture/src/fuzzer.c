@@ -249,7 +249,14 @@ free_parsed_args ()
 void
 remove_temp_dir ()
 {
-    // TODO. remove files
+    for (int fd = 0; fd < 3; fd++) {
+        for (int i = 0; i < trials; i++) {
+            char path[32] ;
+            get_path(path, i, fd) ;
+            remove(path) ;
+        }
+    }
+    
     if (rmdir(dir_name) == -1) {
         perror("rmdir") ;
         exit(1) ;
@@ -274,6 +281,6 @@ fuzzer_main (test_config_t * config)
     }
 
     // after loop ends, some works ?
-    // remove_temp_dir() ;
     free_parsed_args() ;
+    remove_temp_dir() ;
 }
