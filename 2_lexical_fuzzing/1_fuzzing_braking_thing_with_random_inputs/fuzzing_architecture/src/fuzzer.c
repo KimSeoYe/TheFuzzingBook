@@ -11,6 +11,7 @@
 
 #define DEBUG
 
+
 ///////////////////////////////////// Fuzzer Status /////////////////////////////////////
 
 static int trials ;
@@ -22,6 +23,7 @@ static int (* oracle) (char * dir_name) ;
 static char dir_name[32] ;  
 static char ** parsed_args ;
 static int arg_num = 0 ;
+
 
 ///////////////////////////////////// Fuzzer Init /////////////////////////////////////
 
@@ -104,6 +106,7 @@ fuzzer_init (test_config_t * config)
 
     create_temp_dir() ;
 }
+
 
 ///////////////////////////////////// Fuzzer Run /////////////////////////////////////
 
@@ -272,10 +275,11 @@ pipe_err:
     exit(1) ;
 }
 
+
 ///////////////////////////////////// Fuzzer Oracle /////////////////////////////////////
 
 result_t
-oracle_run ()
+oracle_run ()   // Q. useless..?
 {
     result_t result ;
 
@@ -290,9 +294,21 @@ oracle_run ()
         default:
             result = UNRESOLVED ;
     }
-    
     return result ;
 }
+
+
+///////////////////////////////////// Fuzzer Summary /////////////////////////////////////
+
+void
+fuzzer_summary (int * return_codes, result_t * results)
+{
+    for (int i = 0; i < trials; i++) {
+        // TODO. stdout, stderr, time
+        printf("(CompletedProcess(args='%s', exec_time='', returncode='%d', stdout='', stderr='', result='%s'))\n", runargs.cmd_args, return_codes[i], result_strings[results[i]]) ;
+    }
+}
+
 
 ///////////////////////////////////// Fuzzer Completion /////////////////////////////////////
 
@@ -332,7 +348,7 @@ fuzzer_main (test_config_t * config)
     fuzzer_init(config) ;
 
     int * return_codes = (int *) malloc(sizeof(int) * trials) ;
-    result_t results = (result_t *) malloc(sizeof(result_t) * trials) ;
+    result_t * results = (result_t *) malloc(sizeof(result_t) * trials) ;
 
     for (int i = 0; i < trials; i++) {
         char * input = (char *) malloc(sizeof(char) * (fuzargs.f_max_len + 1)) ;
@@ -344,14 +360,8 @@ fuzzer_main (test_config_t * config)
         oracle_run() ;
     }
 
-    // TODO. count & summary
-#ifdef DEBUG
-    printf("return_codes: ") ;
-    for(int i = 0; i < trials; i++) {
-        printf("%d ", return_codes[i]) ;
-    }
-    printf("\n") ;
-#endif
+    fuzzer_summary(return_codes, results) ;
+
     free(return_codes) ;
     free(results) ;
     free_parsed_args() ;
