@@ -17,10 +17,10 @@
 static int trials ;
 static fuzarg_t fuzargs ;
 static runarg_t runargs ;
-static int (* oracle) (char * dir_name, int return_codes) ;
+static int (* oracle) (char * dir_name, int return_code, int trial) ;
 
 // Q. static global ?
-static char dir_name[32] ;  
+static char dir_name[RESULT_PATH_MAX] ;  
 static char ** parsed_args ;
 static int arg_num = 0 ;
 
@@ -43,9 +43,13 @@ void
 copy_status (test_config_t * config)
 {
     trials = config->trials ;
-    fuzargs = config->fuzargs ; // Q.
-    
-    strcpy(runargs.binary_path, config->runargs.binary_path) ;  // Q.
+    fuzargs = config->fuzargs ; 
+
+    if (realpath(config->runargs.binary_path, runargs.binary_path) == 0x0) {
+        perror("realpath: copy_status") ;
+        exit(1) ;
+    }
+
     strcpy(runargs.cmd_args, config->runargs.cmd_args) ;
     runargs.timeout = config->runargs.timeout ;
 
@@ -76,7 +80,7 @@ parse_args ()
 }
 
 int
-default_oracle (char * dir_name, int return_codes)
+default_oracle (char * dir_name, int return_codes, int trial)
 {
     if (return_codes == 0) return 0 ;
     else return -1 ;
@@ -88,27 +92,41 @@ fuzzer_init (test_config_t * config)
     copy_status(config) ;
 
     if (fuzargs.f_min_len > fuzargs.f_max_len) {
-        perror("Invalid fuzzer arguments:\n\tf_min_len is bigger than f_max_len") ;
+        perror("fuzzer_init: invalid fuzzer arguments:\n\tf_min_len is bigger than f_max_len") ;
+        exit(1) ;
+    }
+
+    if (fuzargs.f_char_start < 0 || fuzargs.f_char_start > 127) {
+        perror("fuzzer_init: invalid f_char_start value") ;
+        exit(1) ;
+    }
+
+    if (fuzargs.f_char_start + fuzargs.f_char_range > 127) {
+        perror("fuzzer_init: invalid range") ;
         exit(1) ;
     }
 
     if (access(runargs.binary_path, X_OK) == -1) {
-        perror("Cannot access to the binary path") ;
+        perror("fuzzer_init: cannot access to the binary path") ;
         exit(1) ;
     }
 
-    parse_args() ;
+    if (runargs.timeout < 0) {
+        perror("fuzzer_init: invalid value for timeout") ;
+        exit(1) ;
+    }
 
+    if (oracle == 0x0) {
+        oracle = default_oracle ;
+    }
+
+    parse_args() ;
 #ifdef DEBUG
     for (int i = 0; i < arg_num + 2; i++) {
         if (parsed_args[i] != 0x0) printf("parsed_args[%d] %s\n", i, parsed_args[i]) ;
         else printf("parsed_args[%d] 0x0\n", i) ;
     }
 #endif
-
-    if (oracle == 0x0) {
-        oracle = default_oracle ;
-    }
 
     create_temp_dir() ;
 }
@@ -141,7 +159,7 @@ get_path (char * path, int trial, int fd)
 void
 write_input_files (char * input, int input_len, int trial)
 {
-    char in_path[32] ;
+    char in_path[RESULT_PATH_MAX] ;
     get_path(in_path, trial, 0) ;
 
     FILE * in_fp = fopen(in_path, "wb") ;
@@ -176,12 +194,13 @@ execute_target(char * input, int input_len, int trial)
     dup2(stdout_pipes[1], 1) ;
     dup2(stderr_pipes[1], 2) ;
 
+    // TODO. check
     execv(runargs.binary_path, parsed_args) ;
 }
 
 void
 write_output_files (int trial, int fd){
-    char path[32] ;
+    char path[RESULT_PATH_MAX] ;
     get_path(path, trial, fd) ;
 
     FILE * fp = fopen(path, "wb") ;
@@ -285,11 +304,11 @@ pipe_err:
 ///////////////////////////////////// Fuzzer Oracle /////////////////////////////////////
 
 result_t
-oracle_run (int return_code)   // Q. useless..?
+oracle_run (int return_code, int trial)   // Q. useless..?
 {
     result_t result ;
 
-    int ret = oracle(dir_name, return_code) ;
+    int ret = oracle(dir_name, return_code, trial) ;
     switch(ret) {
         case 0:
             result = PASS ;
@@ -332,7 +351,7 @@ remove_temp_dir ()
 {
     for (int fd = 0; fd < 3; fd++) {
         for (int i = 0; i < trials; i++) {
-            char path[32] ;
+            char path[RESULT_PATH_MAX] ;
             get_path(path, i, fd) ;
             remove(path) ;
         }
@@ -356,6 +375,9 @@ fuzzer_main (test_config_t * config)
     int * return_codes = (int *) malloc(sizeof(int) * trials) ;
     result_t * results = (result_t *) malloc(sizeof(result_t) * trials) ;
 
+    char ** stdout_results = (char **) malloc(sizeof(char *) * trials) ;
+    char ** stderr_results = (char **) malloc(sizeof(char *) * trials) ;
+
     for (int i = 0; i < trials; i++) {
         char * input = (char *) malloc(sizeof(char) * (fuzargs.f_max_len + 1)) ;
         int input_len = fuzz_input(&fuzargs, input) ;
@@ -363,7 +385,7 @@ fuzzer_main (test_config_t * config)
         return_codes[i] = run(input, input_len, i) ;
         free(input) ;
 
-        results[i] = oracle_run(return_codes[i]) ;
+        results[i] = oracle_run(return_codes[i], i) ;
     }
 
     fuzzer_summary(return_codes, results) ;
