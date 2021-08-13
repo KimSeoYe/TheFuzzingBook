@@ -6,7 +6,7 @@
 void 
 init_config (test_config_t * config)
 {
-    config->trial = 10 ; 
+    config->trials = 10 ; 
 
     config->fuzargs.f_min_len = 10 ;
     config->fuzargs.f_max_len = 100 ;

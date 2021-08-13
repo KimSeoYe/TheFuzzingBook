@@ -18,7 +18,7 @@ typedef struct runarg {
 } runarg_t ;
 
 typedef struct test_config {   
-    int trial ;
+    int trials ;
     fuzarg_t fuzargs ;
     runarg_t runargs ;
     int (* oracle) (char * dir_name) ;
