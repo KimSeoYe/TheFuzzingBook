@@ -24,9 +24,9 @@ static char dir_name[RESULT_PATH_MAX] ;
 static char ** parsed_args ;
 static int arg_num = 0 ;
 
-static char ** stdout_contents ;
-static char ** stderr_contents ;
-
+// Q. local ? (TODO)
+// static char ** stdout_contents ;
+// static char ** stderr_contents ;
 
 ///////////////////////////////////// Fuzzer Init /////////////////////////////////////
 
@@ -206,7 +206,7 @@ execute_target(char * input, int input_len, int trial)
 }
 
 void
-write_output_files (int trial, int fd){
+write_output_files (char ** stdout_contents, char ** stderr_contents, int trial, int fd){
     char path[RESULT_PATH_MAX] ;
     get_path(path, trial, fd) ;
 
@@ -222,7 +222,7 @@ write_output_files (int trial, int fd){
     if (fd == 1) {
         while ((s = read(stdout_pipes[0], buf, 1024)) > 0) {
             strncpy(stdout_contents[trial], buf, 15) ;
-            stdout_contents[15] = 0x0 ;
+            stdout_contents[trial][15] = 0x0 ;
 
             if (fwrite(buf, 1, s, fp) != s) {
                 perror("fwrite: save_results: stdout") ;
@@ -233,7 +233,7 @@ write_output_files (int trial, int fd){
     else if (fd == 2) {
         while ((s = read(stderr_pipes[0], buf, 1024)) > 0) {
             strncpy(stderr_contents[trial], buf, 15) ;
-            stderr_contents[15] = 0x0 ;
+            stderr_contents[trial][15] = 0x0 ;
 
             if (fwrite(buf, 1, s, fp) != s) {
                 perror("fwrite: save_results: stderr") ;
@@ -250,7 +250,7 @@ write_output_files (int trial, int fd){
 }
 
 void
-save_results(int trial)
+save_results(char ** stdout_contents, char ** stderr_contents, int trial)
 {
     close(stdin_pipes[1]) ;
     close(stdout_pipes[1]) ;
@@ -274,7 +274,7 @@ timeout_handler (int sig)
 }
 
 int
-run (char * input, int input_len, int trial)
+run (char ** stdout_contents, char ** stderr_contents, char * input, int input_len, int trial)
 {    
     if (pipe(stdin_pipes) != 0) goto pipe_err ;
     if (pipe(stdout_pipes) != 0) goto pipe_err ;
@@ -285,7 +285,7 @@ run (char * input, int input_len, int trial)
         execute_target(input, input_len, trial) ;
     }
     else if (child_pid > 0) {
-        save_results(trial) ;
+        save_results(stdout_contents, stderr_contents, trial) ;
     }
     else {
         perror("fork") ;
@@ -332,11 +332,11 @@ oracle_run (int return_code, int trial)   // Q. useless..?
 ///////////////////////////////////// Fuzzer Summary /////////////////////////////////////
 
 void
-fuzzer_summary (int * return_codes, result_t * results)
+fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents, char ** stderr_contents)
 {
     for (int i = 0; i < trials; i++) {
         // TODO. stdout, stderr, time
-        printf("(CompletedProcess(target='%s', args='%s', exec_time='', returncode='%d', stdout='%s', stderr='%s', result='%s'))\n", runargs.binary_path, runargs.cmd_args, return_codes[i], stdout_contents[i], stderr_contents[i], result_strings[results[i]]) ;
+        printf("(CompletedProcess(target='%s', args='%s', returncode='%d', stdout='%s', stderr='%s', result='%s'))\n", runargs.binary_path, runargs.cmd_args, return_codes[i], stdout_contents[i], stderr_contents[i], result_strings[results[i]]) ;
     }
 }
 
@@ -371,20 +371,8 @@ remove_temp_dir ()
 
 ///////////////////////////////////// Fuzzer Main /////////////////////////////////////
 
-void 
-allocate_contents ()
-{
-    stdout_contents = (char **) malloc(sizeof(char *) * trials) ;
-    stderr_contents = (char **) malloc(sizeof(char *) * trials) ;
-
-    for (int i = 0; i < trials; i++) {
-        stdout_contents[i] = (char *) malloc(sizeof(char) * 16) ;
-        stderr_contents[i] = (char *) malloc(sizeof(char) * 16) ;
-    }
-}
-
 void
-free_contents ()
+free_contents (char ** stdout_contents, char ** stderr_contents)
 {
     for (int i = 0; i < trials; i++) {
         free(stdout_contents[i]) ;
@@ -406,23 +394,28 @@ fuzzer_main (test_config_t * config)
     int * return_codes = (int *) malloc(sizeof(int) * trials) ;
     result_t * results = (result_t *) malloc(sizeof(result_t) * trials) ;
 
-    allocate_contents() ;
+    char ** stdout_contents = (char **) malloc(sizeof(char *) * trials) ;
+    char ** stderr_contents = (char **) malloc(sizeof(char *) * trials) ;
+    for (int i = 0; i < trials; i++) {
+        stdout_contents[i] = (char *) malloc(sizeof(char) * 16) ;
+        stderr_contents[i] = (char *) malloc(sizeof(char) * 16) ;
+    }
 
     for (int i = 0; i < trials; i++) {
         char * input = (char *) malloc(sizeof(char) * (fuzargs.f_max_len + 1)) ;
         int input_len = fuzz_input(&fuzargs, input) ;
 
-        return_codes[i] = run(input, input_len, i) ;
+        return_codes[i] = run(stdout_contents, stderr_contents, input, input_len, i) ;
         free(input) ;
 
         results[i] = oracle_run(return_codes[i], i) ;
     }
 
-    fuzzer_summary(return_codes, results) ;
+    fuzzer_summary(return_codes, results, stdout_contents, stderr_contents) ;
 
     free(return_codes) ;
     free(results) ;
     free_parsed_args() ;
-    free_contents() ;
+    free_contents(stdout_contents, stderr_contents) ;
     remove_temp_dir() ;
 }
