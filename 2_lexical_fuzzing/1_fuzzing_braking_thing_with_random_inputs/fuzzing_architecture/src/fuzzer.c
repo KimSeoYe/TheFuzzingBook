@@ -9,7 +9,7 @@
 #include "../include/fuzzer.h"
 #include "../include/fuzz_input.h"
 
-#define DEBUG
+// #define DEBUG
 
 
 ///////////////////////////////////// Fuzzer Status /////////////////////////////////////
@@ -101,7 +101,7 @@ fuzzer_init (test_config_t * config)
         exit(1) ;
     }
 
-    if (fuzargs.f_char_start + fuzargs.f_char_range > 127) {
+    if (fuzargs.f_char_start + fuzargs.f_char_range > 255) {
         perror("fuzzer_init: invalid range") ;
         exit(1) ;
     }
