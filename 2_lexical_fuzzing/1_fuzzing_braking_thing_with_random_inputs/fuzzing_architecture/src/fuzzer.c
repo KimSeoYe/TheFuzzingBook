@@ -331,10 +331,28 @@ oracle_run (int return_code, int trial)   // Q. useless..?
 void
 fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents, char ** stderr_contents)
 {
+    int pass_cnt = 0 ;
+    int fail_cnt = 0 ;
+    int unresolved_cnt = 0 ;
+
     for (int i = 0; i < trials; i++) {
-        // TODO. stdout, stderr, time
         printf("(CompletedProcess(target='%s', args='%s', returncode='%d', stdout='%s', stderr='%s', result='%s'))\n", runargs.binary_path, runargs.cmd_args, return_codes[i], stdout_contents[i], stderr_contents[i], result_strings[results[i]]) ;
+        switch(results[i]) {
+            case PASS:
+                pass_cnt++ ;
+                break ;
+            case FAIL:
+                fail_cnt++ ;
+                break ;
+            default:
+                unresolved_cnt++ ;
+        }
     }
+
+    printf("TOTAL SUMMARY: ") ;
+    printf("PASS=%.1f%%, ", pass_cnt * 100.0 / trials) ;
+    printf("FAIL=%.1f%%, ", fail_cnt * 100.0 / trials) ;
+    printf("UNRESOLVED=%.1f%%\n", unresolved_cnt * 100.0 / trials) ;
 }
 
 

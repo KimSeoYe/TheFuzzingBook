@@ -5,7 +5,7 @@
 #include <string.h>
 #include <assert.h>
 
-#define DEBUG
+// #define DEBUG
 
 int
 main ()
@@ -50,7 +50,7 @@ main ()
     }
 
     // case3
-    for (int i = 0; i < input_len - 1 ; i++) {
+    for (int i = 0; i < input_len ; i++) {
         // assert(strcmp(input + i, ".\n") != 0) ;
         if (strcmp(input + i, ".\n") == 0) {
             perror("single .") ;
