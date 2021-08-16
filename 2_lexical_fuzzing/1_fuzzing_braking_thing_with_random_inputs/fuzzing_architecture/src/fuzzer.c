@@ -9,7 +9,7 @@
 #include "../include/fuzzer.h"
 #include "../include/fuzz_input.h"
 
-#define DEBUG
+// #define DEBUG
 
 
 ///////////////////////////////////// Fuzzer Status /////////////////////////////////////
@@ -132,6 +132,13 @@ fuzzer_init (test_config_t * config)
 #endif
 
     create_temp_dir() ;
+
+    struct itimerval t ;
+    t.it_value.tv_sec = runargs.timeout ;
+    t.it_value.tv_usec = 0 ;
+    t.it_interval = t.it_value ;
+
+    setitimer(ITIMER_REAL, &t, 0x0) ;
 }
 
 
@@ -274,14 +281,7 @@ run (char * input, int input_len, int trial)
     if (pipe(stdout_pipes) != 0) goto pipe_err ;
     if (pipe(stderr_pipes) != 0) goto pipe_err ;
 
-    struct itimerval t ;
     signal(SIGALRM, timeout_handler) ;
-
-    t.it_value.tv_sec = runargs.timeout ;
-    t.it_value.tv_usec = 0 ;
-    t.it_interval = t.it_value ;
-
-    setitimer(ITIMER_REAL, &t, 0x0) ;
 
     child_pid = fork() ;
     if (child_pid == 0) {
