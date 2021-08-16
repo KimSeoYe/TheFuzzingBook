@@ -32,7 +32,7 @@ compare_in_and_out (FILE * in_fp, FILE * out_fp)
         int out_len = 0 ;
         char out_buf[1024] ;
         while(out_len < s || !feof(out_fp)) {
-            out_len += fread(out_buf + out_len, 1, 1024, out_fp) ;
+            out_len += fread(out_buf + out_len, 1, s, out_fp) ;
         }
 
         if (memcmp(in_buf, out_buf, s) != 0) {
