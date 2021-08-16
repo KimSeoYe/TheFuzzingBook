@@ -65,7 +65,7 @@ parse_args ()
     parsed_args = (char **) malloc(sizeof(char *) * 2) ; // path + null
 
     parsed_args[0] = (char *) malloc(sizeof(char) * (strlen(runargs.binary_path) + 1)) ;
-    strcpy(parsed_args[0], runargs.binary_path) ;
+    strcpy(parsed_args[0], runargs.binary_path) ;   // TODO. filename!
 
     int i ;
     char * tok_ptr = strtok(runargs.cmd_args, " ") ; 
@@ -183,7 +183,7 @@ execute_target(char * input, int input_len, int trial)
 {
     write_input_files(input, input_len, trial) ;
 
-    alarm(2) ;
+    alarm(runargs.timeout) ;
 
     if (write(stdin_pipes[1], input, input_len) != input_len) {
         perror("write: execute_target") ;
