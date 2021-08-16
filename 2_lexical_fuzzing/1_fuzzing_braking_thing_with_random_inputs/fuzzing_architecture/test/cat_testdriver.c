@@ -26,11 +26,10 @@ compare_in_and_out (FILE * in_fp, FILE * out_fp)
     int result = 0 ;
 
     int s ;
+    int out_len = 0 ;
     char in_buf[1024] ;
+    char out_buf[1024] ;
     while((s = fread(in_buf, 1, 1024, in_fp)) > 0) {
-        
-        int out_len = 0 ;
-        char out_buf[1024] ;
         while(out_len < s || !feof(out_fp)) {
             out_len += fread(out_buf + out_len, 1, s, out_fp) ;
         }
@@ -39,8 +38,12 @@ compare_in_and_out (FILE * in_fp, FILE * out_fp)
             result = -1 ;
             break ;
         }
-    }        
+    }
 
+    if (fread(out_buf + out_len, 1, 1024, out_fp) > 0) {
+        result = -1 ;
+    }
+    
     return result ;
 }
 
@@ -54,6 +57,8 @@ cat_oracle (int return_code, int trial)
         return -1 ;   
     }
 
+    // case2. >> return code 0 but has error messages
+
     char in_path[RESULT_PATH_MAX] ;  
     get_path(in_path, trial, 0) ;
     FILE * in_fp = fopen(in_path, "rb") ;
@@ -66,8 +71,6 @@ cat_oracle (int return_code, int trial)
     
     fclose(in_fp) ;
     fclose(out_fp) ;
-
-    // case3.
 
     return result ;
 }
