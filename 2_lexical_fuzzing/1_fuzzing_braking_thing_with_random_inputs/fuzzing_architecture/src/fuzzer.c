@@ -24,9 +24,6 @@ static char dir_name[RESULT_PATH_MAX] ;
 static char ** parsed_args ;
 static int arg_num = 0 ;
 
-// Q. local ? (TODO)
-// static char ** stdout_contents ;
-// static char ** stderr_contents ;
 
 ///////////////////////////////////// Fuzzer Init /////////////////////////////////////
 
@@ -65,7 +62,7 @@ parse_args ()
     parsed_args = (char **) malloc(sizeof(char *) * 2) ; // path + null
 
     parsed_args[0] = (char *) malloc(sizeof(char) * (strlen(runargs.binary_path) + 1)) ;
-    strcpy(parsed_args[0], runargs.binary_path) ;   // TODO. filename!
+    strcpy(parsed_args[0], runargs.binary_path) ;   // TODO. filename ?
 
     int i ;
     char * tok_ptr = strtok(runargs.cmd_args, " ") ; 
@@ -83,7 +80,7 @@ parse_args ()
 }
 
 int
-default_oracle (int return_codes, int trial)
+default_oracle (int return_codes, int trial)    // Q.
 {
     if (return_codes == 0) return 0 ;
     else return -1 ;
