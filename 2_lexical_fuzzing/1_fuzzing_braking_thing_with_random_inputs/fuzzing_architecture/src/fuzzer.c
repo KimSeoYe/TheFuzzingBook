@@ -9,7 +9,7 @@
 #include "../include/fuzzer.h"
 #include "../include/fuzz_input.h"
 
-// #define DEBUG
+#define DEBUG
 
 ///////////////////////////////////// Fuzzer Status /////////////////////////////////////
 
@@ -127,13 +127,6 @@ fuzzer_init (test_config_t * config)
 #endif
 
     create_temp_dir() ;
-
-    struct itimerval t ;
-    t.it_value.tv_sec = runargs.timeout ;
-    t.it_value.tv_usec = 0 ;
-    t.it_interval = t.it_value ;
-
-    setitimer(ITIMER_REAL, &t, 0x0) ;
 }
 
 
@@ -185,6 +178,8 @@ execute_target(char * input, int input_len, int trial)
 {
     write_input_files(input, input_len, trial) ;
 
+    alarm(2) ;
+
     if (write(stdin_pipes[1], input, input_len) != input_len) {
         perror("write: execute_target") ;
     }
@@ -199,8 +194,10 @@ execute_target(char * input, int input_len, int trial)
     dup2(stdout_pipes[1], 1) ;
     dup2(stderr_pipes[1], 2) ;
 
-    // TODO. check
-    execv(runargs.binary_path, parsed_args) ;
+    if (execv(runargs.binary_path, parsed_args) == -1) {
+        perror("execv: execute_target") ;
+        exit(1) ;
+    }
 }
 
 void
@@ -253,7 +250,6 @@ save_results(char ** stdout_contents, char ** stderr_contents, int trial)
     close(stdin_pipes[1]) ;
     close(stdout_pipes[1]) ;
     close(stderr_pipes[1]) ;
-
     write_output_files(stdout_contents, stderr_contents, trial, 1) ;
     write_output_files(stdout_contents, stderr_contents, trial, 2) ;
 }
@@ -265,7 +261,10 @@ timeout_handler (int sig)
 {
     if (sig == SIGALRM) {
         perror("timeout") ;
-        kill(child_pid, SIGINT) ;
+        if (kill(child_pid, SIGINT) == -1) {
+            perror("kill: timeout_handler") ;
+            exit(1) ;
+        }
     }
 }
 
@@ -275,8 +274,6 @@ run (char ** stdout_contents, char ** stderr_contents, char * input, int input_l
     if (pipe(stdin_pipes) != 0) goto pipe_err ;
     if (pipe(stdout_pipes) != 0) goto pipe_err ;
     if (pipe(stderr_pipes) != 0) goto pipe_err ;
-
-    signal(SIGALRM, timeout_handler) ;
 
     child_pid = fork() ;
     if (child_pid == 0) {
@@ -397,6 +394,7 @@ void
 fuzzer_main (test_config_t * config)
 {
     srand(time(NULL)) ;
+    signal(SIGALRM, timeout_handler) ;
     
     fuzzer_init(config) ;
 

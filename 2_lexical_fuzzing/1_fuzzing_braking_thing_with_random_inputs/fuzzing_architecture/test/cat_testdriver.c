@@ -67,6 +67,8 @@ cat_oracle (int return_code, int trial)
     fclose(in_fp) ;
     fclose(out_fp) ;
 
+    // case3.
+
     return result ;
 }
 

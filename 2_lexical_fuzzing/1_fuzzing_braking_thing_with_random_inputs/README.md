@@ -71,27 +71,10 @@ This is a program for testing if the `airport_code` works well, by executing its
 
 ## A Fuzzing Architecture
 
-### Runner Classes
+### fuzzing_architecture/
 
-#### src/runner.c & include/runner.h 
-It is a really simplified version of runner.<br>
-It does not even run any programs.
+#### src/fuzzer.c
+It is a generic random fuzzer. It has a main loop which includes input creation part, execution part, and result checking part.
 
-#### src/program_runner.c & include/program_runner.h
-It execute an external program and return the results.<br>
-It passes arguments of the program through standard input.<br>
-(It just shows the structure of a runner.)
-
-#### test/6_runner_class.c
-It just executes the runner programs and checks the results.
-
-### Fuzzer Classes
-
-#### src/fuzzer.c & include/fuzzer.h
-It just shows the structure of a fuzzer class.
-
-#### src/random_fuzzer.c & include/random_fuzzer.h
-It has an implementation of the random fuzzer, initializer for the fuzzer arguments, and a function to run external programs using a random fuzzer.
-
-#### test/7_fuzzer_class.c
-It tests if the functions of fuzzer & random fuzzer works well.
+#### test/cat_testdriver.c
+It is a testdriver for specific program `cat`.
