@@ -28,8 +28,6 @@ troff_oracle (int return_code, int trial)
         return -1 ;   
     }
 
-    // case2. >> return code 0 but has error messages
-
     else return 0 ;
 }
 
