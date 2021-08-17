@@ -350,9 +350,10 @@ fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents,
     }
 
     printf("TOTAL SUMMARY: ") ;
-    printf("PASS=%.1f%%, ", pass_cnt * 100.0 / trials) ;
-    printf("FAIL=%.1f%%, ", fail_cnt * 100.0 / trials) ;
-    printf("UNRESOLVED=%.1f%%\n", unresolved_cnt * 100.0 / trials) ;
+    printf("TRIALS=%d, ", trials) ;
+    printf("PASS=%d, ", pass_cnt) ;
+    printf("FAIL=%d, ", fail_cnt) ;
+    printf("UNRESOLVED=%d\n", unresolved_cnt) ;
 }
 
 
