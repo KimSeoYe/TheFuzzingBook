@@ -43,7 +43,10 @@ main ()
     // case2
     for (int i = 0; i < strlen(input); i++) {
         // assert((unsigned int)input[i] < 128 || input[i + 1] != '\n') ;
-        if ((unsigned int)input[i] >= 128 && input[i + 1] == '\n') {
+        if (((int)input[i] >= 128 || (int)input[i] < 0) && input[i + 1] == '\n') {
+        #ifdef DEBUG
+            printf("%u\n", input[i]) ;
+        #endif
             perror("8bit") ;
             exit(1) ;
         }
