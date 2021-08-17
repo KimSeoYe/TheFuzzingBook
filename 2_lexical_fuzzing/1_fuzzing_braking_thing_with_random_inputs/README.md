@@ -83,7 +83,7 @@ It is a generic random fuzzer. It has a main loop which includes input creation 
 #### test/cat_testdriver.c
 It is a simple testdriver for specific program `cat`.
 
-#### program/troff_bug_simulate.c test/troff_test_driver.c
+#### program/troff_bug_simulate.c & test/troff_test_driver.c
 `troff_bug_simulate` is a simple program to simulate the bug scenario of early `troff`.<br>
 `troff_test_driver.c` is a simplest test driver to test the `troff_bug_simulate`.
 
