@@ -5,6 +5,8 @@
 #include "../include/cgi_decode.h"
 
 /**
+ * Black-Box Testing to find errors in the specified behavior.
+ * 
  * Specifications
  * 1. replacement of '+'
  * 2. replacement of "%xx"
@@ -16,7 +18,7 @@ int
 main ()
 {
     char dst[32] ;
-    
+
     cgi_decode(dst, "+") ;
     assert(strcmp(dst, " ") == 0) ;
 
