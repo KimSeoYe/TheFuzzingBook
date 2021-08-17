@@ -35,6 +35,9 @@ void
 set_configs (test_config_t * config)
 {
     strcpy(config->runargs.binary_path, "/usr/local/bin/hunspell") ;
+    config->fuzargs.f_char_start = 32 ;
+    config->fuzargs.f_char_range = 95 ;
+    config->trials = 100 ;
     config->oracle = hunspell_oracle ;
 }
 
