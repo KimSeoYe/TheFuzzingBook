@@ -73,8 +73,19 @@ This is a program for testing if the `airport_code` works well, by executing its
 
 ### fuzzing_architecture/
 
+#### include/config.h & src/config.c
+It has a structure `test_config` which has some information for running a fuzzer.<br>
+Also, there is a function `init_config()` for test driver to set default values of `test_config`.
+
 #### src/fuzzer.c
 It is a generic random fuzzer. It has a main loop which includes input creation part, execution part, and result checking part.
 
 #### test/cat_testdriver.c
-It is a testdriver for specific program `cat`.
+It is a simple testdriver for specific program `cat`.
+
+#### program/troff_bug_simulate.c test/troff_test_driver.c
+`troff_bug_simulate` is a simple program to simulate the bug scenario of early `troff`.<br>
+`troff_test_driver.c` is a simplest test driver to test the `troff_bug_simulate`.
+
+#### test/hunspell_test_driver.c
+It is a simple test driver for [hunspell](https://github.com/hunspell/hunspell).
