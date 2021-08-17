@@ -5,7 +5,29 @@
 #include <string.h>
 #include <assert.h>
 
-// #define DEBUG
+#define DEBUG
+
+char *
+find_pattern(char * input, int input_len, char * pattern)
+{
+    char * find = 0x0 ;
+    int flag = 0 ;
+
+    for (int i = 0; i < input_len; i++) {
+        if (input[i] == pattern[0]) {
+            for (int j = 1; j < strlen(pattern); j++) {
+                if(input[i+j] == pattern[j]) flag = 1 ;
+                else {
+                    flag = 0 ;
+                    break ;
+                }
+            }
+            if (flag) find = input + i ;
+        }
+    }
+
+    return find ;
+}
 
 int
 main ()
@@ -25,15 +47,14 @@ main ()
     // case1
     char pattern[] = "\\D" ;
     char * find = 0x0 ;
-    find = strstr(input, pattern) ; // ...
+    find = find_pattern(input, input_len, pattern) ;
     
-    if (find != 0x0 && strlen(find) != strlen(pattern)) {   // strstr...
+    if (find != 0x0) {
         char * following = find + strlen(pattern) ; 
     #ifdef DEBUG
         printf("> %d\n", (int) *following) ;
     #endif
 
-        // assert(*following > 31 && *following < 128) ;
         if (*following < 32 || *following > 127) {
             perror("\\D") ;
             exit(1) ;
@@ -41,8 +62,7 @@ main ()
     }
 
     // case2
-    for (int i = 0; i < strlen(input); i++) {
-        // assert((unsigned int)input[i] < 128 || input[i + 1] != '\n') ;
+    for (int i = 0; i < input_len; i++) {
         if (((int)input[i] >= 128 || (int)input[i] < 0) && input[i + 1] == '\n') {
         #ifdef DEBUG
             printf("%u\n", input[i]) ;
@@ -54,8 +74,7 @@ main ()
 
     // case3
     for (int i = 0; i < input_len ; i++) {
-        // assert(strcmp(input + i, ".\n") != 0) ;
-        if (strcmp(input + i, ".\n") == 0) {
+        if (memcmp(input + i, ".\n", 2) == 0) {
             perror("single .") ;
             exit(1) ;
         }
