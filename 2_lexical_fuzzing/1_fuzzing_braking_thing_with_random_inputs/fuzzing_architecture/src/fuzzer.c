@@ -349,11 +349,14 @@ fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents,
         }
     }
 
-    printf("TOTAL SUMMARY: ") ;
-    printf("TRIALS=%d, ", trials) ;
-    printf("PASS=%d, ", pass_cnt) ;
-    printf("FAIL=%d, ", fail_cnt) ;
-    printf("UNRESOLVED=%d\n", unresolved_cnt) ;
+    printf("=======================================================\n") ;
+    printf("TOTAL SUMMARY\n") ;
+    printf("=======================================================\n") ;
+    printf("# TRIALS : %d\n", trials) ;
+    printf("# PASS : %d\n", pass_cnt) ;
+    printf("# FAIL : %d\n", fail_cnt) ;
+    printf("# UNRESOLVED : %d\n", unresolved_cnt) ;
+    printf("=======================================================\n") ;
 }
 
 
