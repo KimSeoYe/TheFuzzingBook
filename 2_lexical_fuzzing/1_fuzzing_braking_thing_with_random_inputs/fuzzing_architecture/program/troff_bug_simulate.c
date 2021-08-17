@@ -22,7 +22,10 @@ find_pattern(char * input, int input_len, char * pattern)
                     break ;
                 }
             }
-            if (flag) find = input + i ;
+            if (flag) {
+                find = input + i ;
+                break ;
+            }
         }
     }
 
