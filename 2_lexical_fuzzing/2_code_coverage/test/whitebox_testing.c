@@ -34,61 +34,33 @@ execute_program (char * program, char ** arguments)
 void
 compile_with_gcc (char * target_path, char * target_path_c)
 {
-    char ** compile_args = (char **) malloc(sizeof(char *) * 6) ;
-    for (int i = 0; i < 6; i++) compile_args[i] = (char *) malloc(sizeof(char) * PATH_MAX) ;
-    
-    strcpy(compile_args[0], "gcc") ;
-    strcpy(compile_args[1], "--coverage") ;
-    strcpy(compile_args[2], "-o") ;
-    strcpy(compile_args[3], target_path) ;
-    strcpy(compile_args[4], target_path_c) ;
-    compile_args[5] = 0x0 ;
+    char * compile_args[] = { "gcc", "--coverage", "-o", target_path, target_path_c, 0x0 } ;
 
     if (execute_program("/usr/bin/gcc", compile_args) != 0) {
         perror("compile_with_gcc: execute_program") ;
         exit(1) ;
     }
-
-    for (int i = 0; i < 6; i++) free(compile_args[i]) ;
-    free(compile_args) ;
 }
 
 void
 run_target(char * target_path, char * input)
 {
-    char ** args = (char **) malloc(sizeof(char *) * 3) ;
-    for (int i = 0; i < 3; i++) args[i] = (char *) malloc(sizeof(char) * PATH_MAX) ;
-
-    strcpy(args[0], target_path) ;
-    strcpy(args[1], input) ;
-    args[2] = 0x0 ;
-
+    char * args[] = { target_path, input, 0x0 } ;
     if (execute_program(target_path, args) != 0) {
         perror("run_target: execute_program") ;
         exit(1) ;
     }
-
-    for (int i = 0; i < 3; i++) free(args[i]) ;
-    free(args) ;
 }
 
 void
 run_gcov (char * c_file_name)
 {
-    char ** gcov_args = (char **) malloc(sizeof(char *) * 3) ;
-    for(int i = 0; i < 3; i++) gcov_args[i] = (char *) malloc(sizeof(char) * PATH_MAX) ;
-
-    strcpy(gcov_args[0], "gcov") ;
-    strcpy(gcov_args[1], c_file_name) ;
-    gcov_args[2] = 0x0 ;
+    char * gcov_args[] = { "gcov", c_file_name, 0x0 } ;
 
     if (execute_program("/usr/bin/gcov", gcov_args) != 0) {
         perror("run_gcov: execute_program") ;
         exit(1) ;
     }
-
-    for(int i = 0; i < 3; i++) free(gcov_args[i]) ;
-    free(gcov_args) ;
 }
 
 void
@@ -121,6 +93,7 @@ read_gcov_file (char * c_file_name)
         }
     }
 
+    free(buf) ;
     free(coverage) ;
     fclose(fp) ;
 }
