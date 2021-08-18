@@ -32,7 +32,7 @@ execute_program (char * program, char ** arguments)
 }
 
 void
-compile_with_gcc (char * target, char * target_c)
+compile_with_gcc (char * target_path, char * target_path_c)
 {
     char ** compile_args = (char **) malloc(sizeof(char *) * 6) ;
     for (int i = 0; i < 6; i++) compile_args[i] = (char *) malloc(sizeof(char) * PATH_MAX) ;
@@ -40,8 +40,8 @@ compile_with_gcc (char * target, char * target_c)
     strcpy(compile_args[0], "gcc") ;
     strcpy(compile_args[1], "--coverage") ;
     strcpy(compile_args[2], "-o") ;
-    strcpy(compile_args[3], target) ;
-    strcpy(compile_args[4], target_c) ;
+    strcpy(compile_args[3], target_path) ;
+    strcpy(compile_args[4], target_path_c) ;
     compile_args[5] = 0x0 ;
 
     if (execute_program("/usr/bin/gcc", compile_args) != 0) {
@@ -54,16 +54,16 @@ compile_with_gcc (char * target, char * target_c)
 }
 
 void
-run_target(char * target, char * input)
+run_target(char * target_path, char * input)
 {
     char ** args = (char **) malloc(sizeof(char *) * 3) ;
     for (int i = 0; i < 3; i++) args[i] = (char *) malloc(sizeof(char) * PATH_MAX) ;
 
-    strcpy(args[0], target) ;
+    strcpy(args[0], target_path) ;
     strcpy(args[1], input) ;
     args[2] = 0x0 ;
 
-    if (execute_program(target, args) != 0) {
+    if (execute_program(target_path, args) != 0) {
         perror("run_target: execute_program") ;
         exit(1) ;
     }
@@ -116,7 +116,6 @@ read_gcov_file (char * c_file_name)
             if (cov_idx != 0 && cov_idx % cov_max == 0) {
                 coverage = realloc(coverage, cov_idx + cov_max) ;
             }
-
             coverage[cov_idx++] = atoi(line_number) ;
             printf("('%s', %d)\n", c_file_name, coverage[cov_idx - 1]) ;
         }
@@ -126,9 +125,25 @@ read_gcov_file (char * c_file_name)
     fclose(fp) ;
 }
 
+void
+get_c_file_name (char * dst, char * src)
+{
+    char cpied_src[1024] ;
+    strcpy(cpied_src, src) ;
+
+    char * tmp_ptr = src ;
+    for (char * ptr = strtok(cpied_src, "/"); ptr != 0x0; ptr = strtok(0x0, "/")) {
+        tmp_ptr = ptr ;
+    }
+    strcpy(dst, tmp_ptr) ;
+}
+
 void 
-remove_files (char * c_file_name) {
-    
+remove_files (char * executable, char * c_file_name) {  
+    if (remove(executable) == -1) {
+        perror("remove_files: remove: executable") ;
+    }
+
     char gcov_file[PATH_MAX] ;
     sprintf(gcov_file, "%s.gcov", c_file_name) ;
     if (remove(gcov_file) == -1) {
@@ -149,44 +164,31 @@ remove_files (char * c_file_name) {
     }
 }
 
-void
-get_c_file_name (char * dst, char * src)
-{
-    char cpied_src[1024] ;
-    strcpy(cpied_src, src) ;
-
-    char * tmp_ptr = src ;
-    for (char * ptr = strtok(cpied_src, "/"); ptr != 0x0; ptr = strtok(0x0, "/")) {
-        tmp_ptr = ptr ;
-    }
-    strcpy(dst, tmp_ptr) ;
-}
-
 int
 main (int argc, char * argv[])
 {
-    if (argc != 4) {
+    if (argc < 4) {
         perror("whitebox_testing: usage: ./whitebox_testing EXECUATBLE_PATH FILE_PATH INPUT") ;
         return 1 ;
     }
 
-    char * target = argv[1] ;
+    char * executable_path = argv[1] ;
     char * target_c = argv[2] ;
     if (access(target_c, R_OK) == -1) {
         perror("access: readable file does not exist") ;
         return 1 ;
     }
-    char * input = argv[3] ;
+    char * input = argv[3] ; // TODO. >> cgi_decode specific
 
     char c_file_name[PATH_MAX] ;
     get_c_file_name(c_file_name, target_c) ;
 
-    compile_with_gcc(target, target_c) ;
-    run_target(target, input) ;
+    compile_with_gcc(executable_path, target_c) ;
+    run_target(executable_path, input) ;
     run_gcov(c_file_name) ;
 
     read_gcov_file(c_file_name) ;
 
-    remove_files(c_file_name) ;
+    remove_files(executable_path, c_file_name) ;
     return 0 ;
 }
