@@ -5,6 +5,7 @@
 
 #define PATH_MAX 2048
 #define LINE_MAX 256 // Q.
+#define COV_MAX 1024
 
 /**
  * White-Box Testing : derive tests from the implementation.
@@ -89,17 +90,15 @@ run_gcov (char * c_file_name)
     }
 }
 
-void
-read_gcov_file (char * c_file_name) 
+int
+read_gcov_file (int * coverage, char * c_file_name) 
 {
     char gcov_file[PATH_MAX] ;
     sprintf(gcov_file, "%s.gcov", c_file_name) ;
 
-    int cov_max = 1024 ;
     int cov_idx = 0 ;
-    int * coverage = (int *) malloc(sizeof(int) * cov_max) ; // TODO.
-
-    FILE * fp = fopen(gcov_file, "rb") ;
+    
+    FILE * fp = fopen(gcov_file, "r") ;
     if (fp == 0x0) {
         perror("read_gcov_file: fopen") ;
         exit(1) ;
@@ -112,17 +111,20 @@ read_gcov_file (char * c_file_name)
         if (atoi(covered) > 0) { 
             char * line_number = strtok(0x0, ":") ;
 
-            if (cov_idx != 0 && cov_idx % cov_max == 0) {
-                coverage = realloc(coverage, cov_idx + cov_max) ;
+            if (cov_idx != 0 && cov_idx % COV_MAX == 0) {
+                coverage = realloc(coverage, cov_idx + COV_MAX) ;
             }
             coverage[cov_idx++] = atoi(line_number) ;
+        #ifdef DEBUG
             printf("('%s', %d)\n", c_file_name, coverage[cov_idx - 1]) ;
+        #endif
         }
     }
 
     free(buf) ;
-    free(coverage) ;
     fclose(fp) ;
+
+    return cov_idx ;
 }
 
 
@@ -156,28 +158,31 @@ int
 main (int argc, char * argv[])
 {
     if (argc < 4) {
-        perror("whitebox_testing: usage: ./whitebox_testing EXECUATBLE_PATH FILE_PATH INPUT") ;
+        perror("whitebox_testing: usage: ./whitebox_testing EXECUATBLE_PATH C_FILE_PATH INPUT") ;
         return 1 ;
     }
 
     char * executable_path = argv[1] ;
-    char * target_c = argv[2] ;
-    if (access(target_c, R_OK) == -1) {
+    // TODO. check if the path is valid
+    char * c_file_path = argv[2] ;
+    if (access(c_file_path, R_OK) == -1) {
         perror("access: readable file does not exist") ;
         return 1 ;
     }
-    char * input = argv[3] ;
+    char * input = argv[3] ; // TODO. if the target program gets more than one arguments
 
     char c_file_name[PATH_MAX] ;
-    get_c_file_name(c_file_name, target_c) ;
+    get_c_file_name(c_file_name, c_file_path) ;
 
-    compile_with_gcc(executable_path, target_c) ;
+    compile_with_gcc(executable_path, c_file_path) ;
     run_target(executable_path, input) ;
     run_gcov(c_file_name) ;
 
-    read_gcov_file(c_file_name) ;
-    // TODO.
+    int * coverage = (int *) malloc(sizeof(int) * COV_MAX) ;
+    read_gcov_file(coverage, c_file_name) ;
+    // TODO. w/ coverage ?
 
     remove_files(executable_path, c_file_name) ;
+    free(coverage) ;
     return 0 ;
 }
