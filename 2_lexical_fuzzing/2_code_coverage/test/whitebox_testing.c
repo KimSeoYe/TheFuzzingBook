@@ -14,18 +14,26 @@
  * 2. Branch coverage
 */
 
-// TODO. read backword instead of strtok
 void
 get_c_file_name (char * dst, char * src)
 {
     char copied_src[1024] ;
     strcpy(copied_src, src) ;
 
-    char * tmp_ptr = copied_src ;
-    for (char * ptr = strtok(copied_src, "/"); ptr != 0x0; ptr = strtok(0x0, "/")) {
-        tmp_ptr = ptr ;
+    int src_len = strlen(src) ;
+    int idx = 0 ;
+    char reversed[1024] ;
+    for (int i = src_len - 1; i >= 0; i--) {
+        if (src[i] == '/') break ;
+        reversed[idx++] = src[i] ;
     }
-    strcpy(dst, tmp_ptr) ;
+    reversed[idx] = 0x0 ;
+
+    int i ;
+    for (i = 0; i < src_len; i++) {
+        dst[i] = reversed[idx - i - 1] ;
+    }
+    dst[i] = 0x0 ;
 }
 
 int
