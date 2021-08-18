@@ -14,6 +14,20 @@
  * 2. Branch coverage
 */
 
+// TODO. read backword instead of strtok
+void
+get_c_file_name (char * dst, char * src)
+{
+    char copied_src[1024] ;
+    strcpy(copied_src, src) ;
+
+    char * tmp_ptr = copied_src ;
+    for (char * ptr = strtok(copied_src, "/"); ptr != 0x0; ptr = strtok(0x0, "/")) {
+        tmp_ptr = ptr ;
+    }
+    strcpy(dst, tmp_ptr) ;
+}
+
 int
 execute_program (char * program, char ** arguments)
 {
@@ -23,6 +37,10 @@ execute_program (char * program, char ** arguments)
             perror("execute_program: execv") ;
             exit(1) ;
         }
+    }
+    else if (child_pid == 0x0) {
+        perror("execute_program: fork") ;
+        exit(1) ;
     }
 
     int exit_code ;
@@ -76,10 +94,11 @@ read_gcov_file (char * c_file_name)
     FILE * fp = fopen(gcov_file, "rb") ;
     if (fp == 0x0) {
         perror("read_gcov_file: fopen") ;
+        exit(1) ;
     }
 
     char * buf = (char *) malloc(sizeof(char) * LINE_MAX) ;
-    size_t line_max = 0 ;
+    size_t line_max = LINE_MAX ;
     while(getline(&buf, &line_max, fp) > 0) {
         char * covered = strtok(buf, ":") ; 
         if (atoi(covered) > 0) { 
@@ -98,18 +117,6 @@ read_gcov_file (char * c_file_name)
     fclose(fp) ;
 }
 
-void
-get_c_file_name (char * dst, char * src)
-{
-    char cpied_src[1024] ;
-    strcpy(cpied_src, src) ;
-
-    char * tmp_ptr = src ;
-    for (char * ptr = strtok(cpied_src, "/"); ptr != 0x0; ptr = strtok(0x0, "/")) {
-        tmp_ptr = ptr ;
-    }
-    strcpy(dst, tmp_ptr) ;
-}
 
 void 
 remove_files (char * executable, char * c_file_name) {  
