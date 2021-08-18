@@ -178,7 +178,7 @@ main (int argc, char * argv[])
         perror("access: readable file does not exist") ;
         return 1 ;
     }
-    char * input = argv[3] ; // TODO. >> cgi_decode specific
+    char * input = argv[3] ;
 
     char c_file_name[PATH_MAX] ;
     get_c_file_name(c_file_name, target_c) ;
@@ -188,6 +188,7 @@ main (int argc, char * argv[])
     run_gcov(c_file_name) ;
 
     read_gcov_file(c_file_name) ;
+    // TODO.
 
     remove_files(executable_path, c_file_name) ;
     return 0 ;
