@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../include/cgi_decode.h"
-
 #define DEBUG
 
 int 
