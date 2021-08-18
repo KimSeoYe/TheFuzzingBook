@@ -99,7 +99,7 @@ read_gcov_file (char * c_file_name)
 
     int cov_max = 1024 ;
     int cov_idx = 0 ;
-    int * coverage = (int *) malloc(sizeof(int) * cov_max) ;
+    int * coverage = (int *) malloc(sizeof(int) * cov_max) ; // TODO.
 
     FILE * fp = fopen(gcov_file, "rb") ;
     if (fp == 0x0) {
