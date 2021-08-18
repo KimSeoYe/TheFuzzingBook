@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "../include/cgi_decode.h"
@@ -59,6 +60,10 @@ cgi_decode (char * decoded, char * input)
                 perror("cgi_decode: Invalid encoding") ;
                 return -1 ;
             }
+        }
+        else if (input[i] == ' ') {
+            perror("cgi_decode: Invalid encoding: No whitespace is allowed") ;
+            return -1 ;
         }
         else {
             decoded[idx++] = input[i] ;
