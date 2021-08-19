@@ -24,7 +24,7 @@ int
 troff_oracle (int return_code, int trial)
 {
     if (return_code != 0) {
-        print_stderr(trial) ;
+        // print_stderr(trial) ;
         return -1 ;   
     }
 

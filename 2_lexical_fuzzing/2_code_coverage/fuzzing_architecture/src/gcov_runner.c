@@ -7,7 +7,7 @@
 #include "../include/gcov_runner.h"
 
 void
-get_c_file_name (char * dst, char * src)
+get_source_filename (char * dst, char * src)
 {
     char copied_src[1024] ;
     strcpy(copied_src, src) ;
@@ -22,7 +22,7 @@ get_c_file_name (char * dst, char * src)
     reversed[idx] = 0x0 ;
 
     if (reversed[0] != 'c' || reversed[1] != '.') {
-        perror("get_c_file_name: not a c source file") ;
+        perror("get_source_filename: not a c source file") ;
         exit(1) ;
     }
 
@@ -47,7 +47,6 @@ get_executable_real_path (char * executable_path, char * source_path)
 
     char * tok_ptr = strtok(copied_src, ".") ;
     strcpy(executable_path, tok_ptr) ;
-    printf("executable: %s\n", executable_path) ;
 }
 
 int
@@ -83,9 +82,9 @@ compile_with_coverage (char * target_path, char * target_path_c)
 }
 
 void
-run_gcov (char * c_file_name)
+run_gcov (char * source_filename)
 {
-    char * gcov_args[] = { "gcov", c_file_name, 0x0 } ;
+    char * gcov_args[] = { "gcov", source_filename, 0x0 } ;
 
     if (exec_program("/usr/bin/gcov", gcov_args) != 0) {
         perror("run_gcov: exec_program") ;
@@ -93,26 +92,86 @@ run_gcov (char * c_file_name)
     }
 }
 
+void
+read_gcov_file (coverset_t * coverage, char * source_filename) 
+{
+    char gcov_file[PATH_MAX] ;
+    sprintf(gcov_file, "%s.gcov", source_filename) ;
+
+    int cov_idx = 0 ;
+    
+    FILE * fp = fopen(gcov_file, "r") ;
+    if (fp == 0x0) {
+        perror("read_gcov_file: fopen") ;
+        exit(1) ;
+    }
+
+    coverage->line_nums = (int *) malloc(sizeof(int) * COV_MAX) ;
+
+    char * buf = (char *) malloc(sizeof(char) * LINE_MAX) ;
+    size_t line_max = LINE_MAX ;
+    while(getline(&buf, &line_max, fp) > 0) {
+        char * covered = strtok(buf, ":") ; 
+        if (atoi(covered) > 0) { 
+            char * line_number = strtok(0x0, ":") ;
+
+            if (cov_idx != 0 && cov_idx % COV_MAX == 0) {
+                coverage->line_nums = realloc(coverage, cov_idx + COV_MAX) ;
+            }
+            coverage->line_nums[cov_idx++] = atoi(line_number) ;
+        #ifdef DEBUG
+            printf("('%s', %d)\n", source_filename, coverage->line_nums[cov_idx - 1]) ;
+        #endif
+        }
+    }
+
+    free(buf) ;
+    fclose(fp) ;
+
+    coverage->line_cnt = cov_idx ;
+}
+
 void 
-remove_files (char * executable, char * c_file_name) {  
+remove_gcda (char * source_filename)
+{
+    char copied_filename[PATH_MAX] ;
+    strcpy(copied_filename, source_filename) ;
+
+    char gcda_file[PATH_MAX] ;
+    char * ptr = strtok(copied_filename, ".") ;
+    sprintf(gcda_file, "%s.gcda", ptr) ;
+    if (remove(gcda_file) == -1) {
+        perror("get_coverage: remove: gcda") ;
+    }
+}
+
+void
+get_coverage (coverset_t * coverage, char * source_filename)
+{
+    run_gcov(source_filename) ;
+    // read gcov & save result
+    read_gcov_file(coverage, source_filename) ;
+
+    remove_gcda(source_filename) ;
+}
+
+void 
+remove_files (char * executable, char * source_filename) {  
     if (remove(executable) == -1) {
         perror("remove_files: remove: executable") ;
     }
 
     char gcov_file[PATH_MAX] ;
-    sprintf(gcov_file, "%s.gcov", c_file_name) ;
+    sprintf(gcov_file, "%s.gcov", source_filename) ;
     if (remove(gcov_file) == -1) {
         perror("remove_files: remove: gcov") ;
     }
-
-    char gcda_file[PATH_MAX] ;
-    char * ptr = strtok(c_file_name, ".") ;
-    sprintf(gcda_file, "%s.gcda", ptr) ;
-    if (remove(gcda_file) == -1) {
-        perror("remove_files: remove: gcda") ;
-    }
     
+    char copied_filename[PATH_MAX] ;
+    strcpy(copied_filename, source_filename) ;
+
     char gcno_file[PATH_MAX] ;
+    char * ptr = strtok(copied_filename, ".") ;
     sprintf(gcno_file, "%s.gcno", ptr) ;
     if (remove(gcno_file) == -1) {
         perror("remove_files: remove: gcno") ;
