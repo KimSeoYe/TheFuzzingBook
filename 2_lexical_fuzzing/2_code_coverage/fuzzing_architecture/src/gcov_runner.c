@@ -1,6 +1,10 @@
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include <unistd.h>
+
 #include "../include/config.h"
+#include "../include/gcov_runner.h"
 
 void
 get_c_file_name (char * dst, char * src)
@@ -17,6 +21,11 @@ get_c_file_name (char * dst, char * src)
     }
     reversed[idx] = 0x0 ;
 
+    if (reversed[0] != 'c' || reversed[1] != '.') {
+        perror("get_c_file_name: not a c source file") ;
+        exit(1) ;
+    }
+
     int i ;
     for (i = 0; i < src_len; i++) {
         dst[i] = reversed[idx - i - 1] ;
@@ -30,6 +39,11 @@ get_executable_real_path (char * executable_path, char * source_path)
 {
     char copied_src[PATH_MAX] ;
     strcpy(copied_src, source_path) ;
+
+    if (copied_src[0] == '.') {
+        perror("get_executable_real_path: Source is not a absolute path") ;
+        exit(1) ;
+    }
 
     char * tok_ptr = strtok(copied_src, ".") ;
     strcpy(executable_path, tok_ptr) ;
@@ -68,6 +82,16 @@ compile_with_coverage (char * target_path, char * target_path_c)
     }
 }
 
+void
+run_gcov (char * c_file_name)
+{
+    char * gcov_args[] = { "gcov", c_file_name, 0x0 } ;
+
+    if (exec_program("/usr/bin/gcov", gcov_args) != 0) {
+        perror("run_gcov: exec_program") ;
+        exit(1) ;
+    }
+}
 
 void 
 remove_files (char * executable, char * c_file_name) {  

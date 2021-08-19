@@ -20,13 +20,14 @@
 static int trials ;
 static int is_source ;
 static char source_path[PATH_MAX] ;
+static char source_filename[PATH_MAX] ;
 static fuzarg_t fuzargs ;
 static runarg_t runargs ;
 static int (* oracle) (int return_code, int trial) ;
 
 // Q. static global ?
 static char dir_name[RESULT_PATH_MAX] ;  
-static char ** parsed_args ;
+static char ** parsed_args ; // TODO. as a local var.
 static int arg_num = 0 ;
 
 
@@ -44,13 +45,14 @@ copy_status (test_config_t * config)
             perror("copy_status: realpath: source_path") ;
             exit(1) ;
         }
+        
     }  
     else {
         if (realpath(config->runargs.binary_path, runargs.binary_path) == 0x0) {
             perror("copy_status: realpath: runargs.binary_path") ;
             exit(1) ;
         }  
-    }
+    }   
 
     strcpy(runargs.cmd_args, config->runargs.cmd_args) ;
     runargs.timeout = config->runargs.timeout ;
@@ -122,14 +124,15 @@ fuzzer_init (test_config_t * config)
 
     if (is_source) {
         if (access(source_path, R_OK) == -1) {
-            perror("fuzzer_init: access: cannot access to the source path") ;
+            perror("copy_status: access: cannot access to the source path") ;
             exit(1) ;
         }
 
+        get_c_file_name(source_filename, source_path) ;
         get_executable_real_path(runargs.binary_path, source_path) ;
         compile_with_coverage(runargs.binary_path, source_path) ;
     }
-    
+
     if (access(runargs.binary_path, X_OK) == -1) {
         perror("fuzzer_init: access: cannot access to the binary path") ;
         exit(1) ;
@@ -373,7 +376,7 @@ fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents,
         }
     }
 
-    printf("=======================================================\n") ;
+    printf("\n=======================================================\n") ;
     printf("TOTAL SUMMARY\n") ;
     printf("=======================================================\n") ;
     printf("# TRIALS : %d\n", trials) ;
@@ -454,6 +457,8 @@ fuzzer_main (test_config_t * config)
         return_codes[i] = run(stdout_contents, stderr_contents, input, input_len, i) ;
         free(input) ;
 
+        run_gcov(source_filename) ;
+
         results[i] = oracle_run(return_codes[i], i) ;
     }
 
@@ -465,6 +470,6 @@ fuzzer_main (test_config_t * config)
     free_contents(stdout_contents, stderr_contents) ;
     remove_temp_dir() ;
     if (is_source) {
-        remove_files() ;
+        remove_files(runargs.binary_path, source_filename) ;
     }
 }
