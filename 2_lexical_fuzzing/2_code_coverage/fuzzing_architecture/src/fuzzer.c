@@ -351,7 +351,7 @@ oracle_run (int return_code, int trial)   // Q. useless..?
 ///////////////////////////////////// Fuzzer Summary /////////////////////////////////////
 
 void
-fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents, char ** stderr_contents, coverset_t * coverages)
+fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents, char ** stderr_contents, int * coverages)
 {
     int pass_cnt = 0 ;
     int fail_cnt = 0 ;
@@ -359,7 +359,7 @@ fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents,
 
     for (int i = 0; i < trials; i++) {
         // TODO. exec_time
-        printf("(CompletedProcess(target='%s', args='%s', returncode='%d', stdout='%s', stderr='%s', result='%s'))\n", runargs.binary_path, runargs.cmd_args, return_codes[i], stdout_contents[i], stderr_contents[i], result_strings[results[i]]) ;
+        printf("(CompletedProcess(target='%s', args='%s', returncode='%d', stdout='%s', stderr='%s', coverage='%d', result='%s'))\n", runargs.binary_path, runargs.cmd_args, return_codes[i], stdout_contents[i], stderr_contents[i], coverages[i], result_strings[results[i]]) ;
         switch(results[i]) {
             case PASS:
                 pass_cnt++ ;
@@ -372,18 +372,12 @@ fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents,
         }
     }
 
-    // TODO. coverage
-    printf("\nCOVERAGES\n") ;
-    for (int i = 0; i < trials; i++) {
-        printf("%d ", coverages[i].line_cnt) ;
-    }
-    printf("\n") ;
-
     printf("\n=======================================================\n") ;
     printf("TOTAL SUMMARY\n") ;
     printf("=======================================================\n") ;
     printf("# TRIALS : %d\n", trials) ;
     // TODO. execution time
+    // printf("# Line COVERED : %d\n", coverage_set.cnt) ;
     printf("# PASS : %d\n", pass_cnt) ;
     printf("# FAIL : %d\n", fail_cnt) ;
     printf("# UNRESOLVED : %d\n", unresolved_cnt) ;
@@ -454,7 +448,10 @@ fuzzer_main (test_config_t * config)
         stderr_contents[i] = (char *) malloc(sizeof(char) * 16) ;
     }
 
-    coverset_t * coverages = (coverset_t *) malloc(sizeof(coverset_t) * trials) ;
+    int * coverages = (int *) malloc(sizeof(int) * trials) ;
+    list_t cov_set ;
+    cov_set.list = (int *) malloc(sizeof(int) * COV_MAX) ;
+    cov_set.size = 0 ;
 
     for (int i = 0; i < trials; i++) {
         char * input = (char *) malloc(sizeof(char) * (fuzargs.f_max_len + 1)) ;
@@ -463,7 +460,7 @@ fuzzer_main (test_config_t * config)
         return_codes[i] = run(stdout_contents, stderr_contents, input, input_len, i) ;
         free(input) ;
 
-        get_coverage(coverages + i, source_filename) ;
+        coverages[i] = get_coverage(&cov_set, source_filename) ;
 
         results[i] = oracle_run(return_codes[i], i) ;
     }
@@ -472,6 +469,8 @@ fuzzer_main (test_config_t * config)
 
     free(return_codes) ;
     free(results) ;
+    free(coverages) ;
+    free(cov_set.list) ;
     free_parsed_args() ;
     free_contents(stdout_contents, stderr_contents) ;
     remove_temp_dir() ;

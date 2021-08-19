@@ -6,6 +6,8 @@
 #include "../include/config.h"
 #include "../include/gcov_runner.h"
 
+// #define DEBUG
+
 void
 get_source_filename (char * dst, char * src)
 {
@@ -92,8 +94,73 @@ run_gcov (char * source_filename)
     }
 }
 
-void
-read_gcov_file (coverset_t * coverage, char * source_filename) 
+// void
+// make_new_union (int * new_union, int * set_a, int * set_b)
+// {
+//     int * longer ;
+//     int * shorter ;
+//     if (set_a->cnt > set_b->cnt) {
+//         longer = set_a ;
+//         shorter = set_b ;
+//     }
+//     else {
+//         longer = set_b ;
+//         shorter = set_a ;
+//     }
+
+//     // TODO. realloc
+//     int i ;
+//     for (i = 0; i < shorter->cnt; i++) {
+//         if (longer->line_nums[i] == shorter->line_nums[i]) {
+//             new_union->line_nums[new_union->cnt] = longer->line_nums[i] ;
+//             new_union->cnt += 1 ;
+//         }
+//         else {
+//             if (longer->line_nums[i] > shorter->line_nums[i]) {
+//                 new_union->line_nums[new_union->cnt] = shorter->line_nums[i] ;
+//                 new_union->line_nums[new_union->cnt + 1] = longer->line_nums[i] ;
+//             }
+//             else {
+//                 new_union->line_nums[new_union->cnt] = longer->line_nums[i] ;
+//                 new_union->line_nums[new_union->cnt + 1] = shorter->line_nums[i] ;
+//             }
+//             new_union->cnt += 2 ;
+//         }
+//     }
+//     for (; i < longer->cnt; i++) {
+//         new_union->line_nums[new_union->cnt] = longer->line_nums[i] ;
+//         new_union->cnt += 1 ;
+//     }
+// }
+
+// void 
+// union_coverages (int * cov_set, int * coverages, int coverages_size)
+// {
+//     if (coverages[0].cnt > COV_MAX) {
+//         cov_set->line_nums = realloc(cov_set->line_nums, COV_MAX * (coverages[0].cnt/COV_MAX + 1)) ;
+//         if (cov_set->line_nums == 0x0) {
+//             perror("union_coverage: realloc") ;
+//             exit(1) ; 
+//         }
+//     }
+//     memcpy(cov_set->line_nums, coverages[0].line_nums, coverages[0].cnt) ;
+//     cov_set->cnt = coverages[0].cnt ;
+
+//     for (int i = 1; i < coverages_size; i++) {
+//         int new_union ;
+//         new_union.line_nums = (int *) malloc(sizeof(int) * (cov_set->cnt + coverages[i].cnt)) ;
+//         make_new_union (&new_union, cov_set, &coverages[i]) ;
+
+//         memcpy(cov_set->line_nums, new_union.line_nums, new_union.cnt) ;
+//         cov_set->cnt = new_union.cnt ;
+
+//         free(new_union.line_nums) ;
+//     }
+// }
+
+
+int
+read_gcov_file (list_t * cov_set, char * source_filename) 
 {
     char gcov_file[PATH_MAX] ;
     sprintf(gcov_file, "%s.gcov", source_filename) ;
@@ -106,7 +173,10 @@ read_gcov_file (coverset_t * coverage, char * source_filename)
         exit(1) ;
     }
 
-    coverage->line_nums = (int *) malloc(sizeof(int) * COV_MAX) ;
+    list_t gcov_result ;
+    gcov_result.list = (int *) malloc(sizeof(int) * COV_MAX) ;
+
+    int idx = 0 ;
 
     char * buf = (char *) malloc(sizeof(char) * LINE_MAX) ;
     size_t line_max = LINE_MAX ;
@@ -115,20 +185,24 @@ read_gcov_file (coverset_t * coverage, char * source_filename)
         if (atoi(covered) > 0) { 
             char * line_number = strtok(0x0, ":") ;
 
-            if (cov_idx != 0 && cov_idx % COV_MAX == 0) {
-                coverage->line_nums = realloc(coverage, cov_idx + COV_MAX) ;
+            if (idx != 0 && idx % COV_MAX == 0) {
+                gcov_result.list = realloc(gcov_result.list, idx + COV_MAX) ;
             }
-            coverage->line_nums[cov_idx++] = atoi(line_number) ;
+            gcov_result.list[idx++] = atoi(line_number) ;
         #ifdef DEBUG
-            printf("('%s', %d)\n", source_filename, coverage->line_nums[cov_idx - 1]) ;
+            printf("('%s', %d)\n", source_filename, line_nums[idx - 1]) ;
         #endif
         }
     }
 
+    gcov_result.size = idx ;
+    // union_coverage(cov_set, gcov_result) ;
+
     free(buf) ;
     fclose(fp) ;
+    free(gcov_result.list) ;
 
-    coverage->line_cnt = cov_idx ;
+    return idx ;
 }
 
 void 
@@ -145,18 +219,19 @@ remove_gcda (char * source_filename)
     }
 }
 
-void
-get_coverage (coverset_t * coverage, char * source_filename)
+int
+get_coverage (list_t * cov_set, char * source_filename)
 {
     run_gcov(source_filename) ;
-    // read gcov & save result
-    read_gcov_file(coverage, source_filename) ;
-
+    int coverage = read_gcov_file(cov_set, source_filename) ;
     remove_gcda(source_filename) ;
+    
+    return coverage ;
 }
 
 void 
-remove_files (char * executable, char * source_filename) {  
+remove_files (char * executable, char * source_filename) 
+{  
     if (remove(executable) == -1) {
         perror("remove_files: remove: executable") ;
     }
