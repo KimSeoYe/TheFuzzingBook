@@ -41,7 +41,7 @@ set_configs (test_config_t * config)
 }
 
 int
-main ()
+main (int argc, char * argv[])
 {
     test_config_t config ;
     init_config(&config) ;
