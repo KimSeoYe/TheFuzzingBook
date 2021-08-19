@@ -95,28 +95,9 @@ run_gcov (char * source_filename)
 }
 
 void
-make_new_union (list_t * new_union, list_t * set_a, list_t * set_b)
-{
-    
-}
-
-void
 union_coverage (list_t * cov_set, list_t * target) 
 {
-    list_t new_union ;
-    new_union.list = (int *) malloc(sizeof(int) * (cov_set->cnt + target->cnt)) ;
-    new_union.cnt = 0 ;
-
-    make_new_union(&new_union, cov_set, target) ;
-    for (int i = 0; i < new_union.cnt; i++) {
-        printf("%d ", new_union.list[i]) ;
-    }
-    printf("\n") ;
-
-    memcpy(cov_set->list, new_union.list, new_union.cnt * sizeof(int)) ;
-    cov_set->cnt = new_union.cnt ;
-
-    free(new_union.list) ;
+    
 }
 
 int
