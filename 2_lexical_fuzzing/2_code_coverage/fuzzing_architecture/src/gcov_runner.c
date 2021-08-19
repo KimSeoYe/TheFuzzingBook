@@ -8,6 +8,22 @@
 
 // #define DEBUG
 
+int
+get_total_line_cnt (char * source_path)
+{
+    int cnt = 0 ;
+
+    FILE * fp = fopen(source_path, "rb") ;
+    char * buf = 0x0 ;
+    size_t line_max = 0 ;
+    while(getline(&buf, &line_max, fp) > 0) {   // Q.
+        cnt++ ;
+    }
+    fclose(fp) ;
+
+    return cnt ;
+}
+
 void
 get_source_filename (char * dst, char * src)
 {

@@ -155,25 +155,6 @@ fuzzer_init (test_config_t * config)
 }
 
 
-///////////////////////////////////// GET TOTAL LINE /////////////////////////////////////
-
-int
-get_total_line_cnt ()
-{
-    int cnt = 0 ;
-
-    FILE * fp = fopen(source_path, "rb") ;
-    char * buf = 0x0 ;
-    size_t line_max = 0 ;
-    while(getline(&buf, &line_max, fp) > 0) {   // Q.
-        cnt++ ;
-    }
-    fclose(fp) ;
-
-    return cnt ;
-}
-
-
 ///////////////////////////////////// Fuzzer Run /////////////////////////////////////
 
 static int stdin_pipes[2] ;
@@ -486,7 +467,7 @@ fuzzer_main (test_config_t * config)
     if (is_source) {
         coverages = (int *) malloc(sizeof(int) * trials) ;
 
-        total_line_cnt = get_total_line_cnt() ;
+        total_line_cnt = get_total_line_cnt(source_path) ;
         cov_set.list = (int *) malloc(sizeof(int) * total_line_cnt) ; 
         cov_set.cnt = 0 ;
     }

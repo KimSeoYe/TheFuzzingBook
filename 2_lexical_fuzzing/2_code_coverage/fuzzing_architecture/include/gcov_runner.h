@@ -9,6 +9,8 @@ typedef struct list {
     int cnt ;
 } list_t ;
 
+int get_total_line_cnt (char * source_path) ;
+
 void get_source_filename (char * dst, char * src) ;
 
 void get_executable_real_path (char * executable_path, char * source_path) ;
