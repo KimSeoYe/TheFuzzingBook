@@ -110,14 +110,8 @@ run_gcov (char * source_filename)
     }
 }
 
-void
-union_coverage (list_t * cov_set, list_t * target) 
-{
-    
-}
-
 int
-read_gcov_file (list_t * cov_set, char * source_filename) 
+read_gcov_file (char * cov_set, int total_line_cnt, char * source_filename) 
 {
     char gcov_file[PATH_MAX] ;
     sprintf(gcov_file, "%s.gcov", source_filename) ;
@@ -130,11 +124,9 @@ read_gcov_file (list_t * cov_set, char * source_filename)
         exit(1) ;
     }
 
-    list_t gcov_result ;
-    gcov_result.list = (int *) malloc(sizeof(int) * COV_MAX) ;
+    int * gcov_result = (int *) malloc(sizeof(int) * total_line_cnt) ;
 
     int idx = 0 ;
-
     char * buf = (char *) malloc(sizeof(char) * LINE_MAX) ;
     size_t line_max = LINE_MAX ;
     while(getline(&buf, &line_max, fp) > 0) {
@@ -142,22 +134,20 @@ read_gcov_file (list_t * cov_set, char * source_filename)
         if (atoi(covered) > 0) { 
             char * line_number = strtok(0x0, ":") ;
 
-            if (idx != 0 && idx % COV_MAX == 0) {
-                gcov_result.list = realloc(gcov_result.list, idx + COV_MAX) ;
-            }
-            gcov_result.list[idx++] = atoi(line_number) ;
+            gcov_result[idx++] = atoi(line_number) ;
         #ifdef DEBUG
             printf("('%s', %d)\n", source_filename, line_nums[idx - 1]) ;
         #endif
         }
     }
 
-    gcov_result.cnt = idx ;
-    union_coverage(cov_set, &gcov_result) ;
+    for (int i = 0; i < idx; i++) {
+        cov_set[gcov_result[i]] = '1' ;
+    }
 
     free(buf) ;
     fclose(fp) ;
-    free(gcov_result.list) ;
+    free(gcov_result) ;
 
     return idx ;
 }
@@ -177,10 +167,10 @@ remove_gcda (char * source_filename)
 }
 
 int
-get_coverage (list_t * cov_set, char * source_filename)
+get_coverage (char * cov_set, int total_line_cnt, char * source_filename)
 {
     run_gcov(source_filename) ;
-    int coverage = read_gcov_file(cov_set, source_filename) ;
+    int coverage = read_gcov_file(cov_set, total_line_cnt, source_filename) ;
     remove_gcda(source_filename) ;
     
     return coverage ;
