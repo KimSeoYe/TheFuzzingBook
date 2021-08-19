@@ -38,17 +38,17 @@ get_c_file_name (char * dst, char * src)
 }
 
 int
-execute_program (char * program, char ** arguments)
+exec_program (char * program, char ** arguments)
 {
     pid_t child_pid = fork() ;
     if (child_pid == 0) {
         if (execv(program, arguments) == -1) {
-            perror("execute_program: execv") ;
+            perror("exec_program: execv") ;
             exit(1) ;
         }
     }
     else if (child_pid == 0x0) {
-        perror("execute_program: fork") ;
+        perror("exec_program: fork") ;
         exit(1) ;
     }
 
@@ -63,8 +63,8 @@ compile_with_gcc (char * target_path, char * target_path_c)
 {
     char * compile_args[] = { "gcc", "--coverage", "-o", target_path, target_path_c, 0x0 } ;
 
-    if (execute_program("/usr/bin/gcc", compile_args) != 0) {
-        perror("compile_with_gcc: execute_program") ;
+    if (exec_program("/usr/bin/gcc", compile_args) != 0) {
+        perror("compile_with_gcc: exec_program") ;
         exit(1) ;
     }
 }
@@ -73,8 +73,8 @@ void
 run_target(char * target_path, char * input)
 {
     char * args[] = { target_path, input, 0x0 } ;
-    if (execute_program(target_path, args) != 0) {
-        perror("run_target: execute_program") ;
+    if (exec_program(target_path, args) != 0) {
+        perror("run_target: exec_program") ;
         exit(1) ;
     }
 }
@@ -84,8 +84,8 @@ run_gcov (char * c_file_name)
 {
     char * gcov_args[] = { "gcov", c_file_name, 0x0 } ;
 
-    if (execute_program("/usr/bin/gcov", gcov_args) != 0) {
-        perror("run_gcov: execute_program") ;
+    if (exec_program("/usr/bin/gcov", gcov_args) != 0) {
+        perror("run_gcov: exec_program") ;
         exit(1) ;
     }
 }
