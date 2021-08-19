@@ -6,7 +6,7 @@
 
 typedef struct list {
     int * list ;
-    int size ;
+    int cnt ;
 } list_t ;
 
 void get_source_filename (char * dst, char * src) ;

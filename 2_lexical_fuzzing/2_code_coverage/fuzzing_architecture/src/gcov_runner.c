@@ -94,70 +94,30 @@ run_gcov (char * source_filename)
     }
 }
 
-// void
-// make_new_union (int * new_union, int * set_a, int * set_b)
-// {
-//     int * longer ;
-//     int * shorter ;
-//     if (set_a->cnt > set_b->cnt) {
-//         longer = set_a ;
-//         shorter = set_b ;
-//     }
-//     else {
-//         longer = set_b ;
-//         shorter = set_a ;
-//     }
+void
+make_new_union (list_t * new_union, list_t * set_a, list_t * set_b)
+{
+    
+}
 
-//     // TODO. realloc
-//     int i ;
-//     for (i = 0; i < shorter->cnt; i++) {
-//         if (longer->line_nums[i] == shorter->line_nums[i]) {
-//             new_union->line_nums[new_union->cnt] = longer->line_nums[i] ;
-//             new_union->cnt += 1 ;
-//         }
-//         else {
-//             if (longer->line_nums[i] > shorter->line_nums[i]) {
-//                 new_union->line_nums[new_union->cnt] = shorter->line_nums[i] ;
-//                 new_union->line_nums[new_union->cnt + 1] = longer->line_nums[i] ;
-//             }
-//             else {
-//                 new_union->line_nums[new_union->cnt] = longer->line_nums[i] ;
-//                 new_union->line_nums[new_union->cnt + 1] = shorter->line_nums[i] ;
-//             }
-//             new_union->cnt += 2 ;
-//         }
-//     }
-//     for (; i < longer->cnt; i++) {
-//         new_union->line_nums[new_union->cnt] = longer->line_nums[i] ;
-//         new_union->cnt += 1 ;
-//     }
-// }
+void
+union_coverage (list_t * cov_set, list_t * target) 
+{
+    list_t new_union ;
+    new_union.list = (int *) malloc(sizeof(int) * (cov_set->cnt + target->cnt)) ;
+    new_union.cnt = 0 ;
 
-// void 
-// union_coverages (int * cov_set, int * coverages, int coverages_size)
-// {
-//     if (coverages[0].cnt > COV_MAX) {
-//         cov_set->line_nums = realloc(cov_set->line_nums, COV_MAX * (coverages[0].cnt/COV_MAX + 1)) ;
-//         if (cov_set->line_nums == 0x0) {
-//             perror("union_coverage: realloc") ;
-//             exit(1) ; 
-//         }
-//     }
-//     memcpy(cov_set->line_nums, coverages[0].line_nums, coverages[0].cnt) ;
-//     cov_set->cnt = coverages[0].cnt ;
+    make_new_union(&new_union, cov_set, target) ;
+    for (int i = 0; i < new_union.cnt; i++) {
+        printf("%d ", new_union.list[i]) ;
+    }
+    printf("\n") ;
 
-//     for (int i = 1; i < coverages_size; i++) {
-//         int new_union ;
-//         new_union.line_nums = (int *) malloc(sizeof(int) * (cov_set->cnt + coverages[i].cnt)) ;
-//         make_new_union (&new_union, cov_set, &coverages[i]) ;
+    memcpy(cov_set->list, new_union.list, new_union.cnt * sizeof(int)) ;
+    cov_set->cnt = new_union.cnt ;
 
-//         memcpy(cov_set->line_nums, new_union.line_nums, new_union.cnt) ;
-//         cov_set->cnt = new_union.cnt ;
-
-//         free(new_union.line_nums) ;
-//     }
-// }
-
+    free(new_union.list) ;
+}
 
 int
 read_gcov_file (list_t * cov_set, char * source_filename) 
@@ -195,8 +155,8 @@ read_gcov_file (list_t * cov_set, char * source_filename)
         }
     }
 
-    gcov_result.size = idx ;
-    // union_coverage(cov_set, gcov_result) ;
+    gcov_result.cnt = idx ;
+    union_coverage(cov_set, &gcov_result) ;
 
     free(buf) ;
     fclose(fp) ;

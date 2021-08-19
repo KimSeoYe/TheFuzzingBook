@@ -351,7 +351,7 @@ oracle_run (int return_code, int trial)   // Q. useless..?
 ///////////////////////////////////// Fuzzer Summary /////////////////////////////////////
 
 void
-fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents, char ** stderr_contents, int * coverages)
+fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents, char ** stderr_contents, int * coverages, list_t cov_set)
 {
     int pass_cnt = 0 ;
     int fail_cnt = 0 ;
@@ -377,7 +377,7 @@ fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents,
     printf("=======================================================\n") ;
     printf("# TRIALS : %d\n", trials) ;
     // TODO. execution time
-    // printf("# Line COVERED : %d\n", coverage_set.cnt) ;
+    printf("# LINE COVERED : %d\n", cov_set.cnt) ;
     printf("# PASS : %d\n", pass_cnt) ;
     printf("# FAIL : %d\n", fail_cnt) ;
     printf("# UNRESOLVED : %d\n", unresolved_cnt) ;
@@ -451,7 +451,7 @@ fuzzer_main (test_config_t * config)
     int * coverages = (int *) malloc(sizeof(int) * trials) ;
     list_t cov_set ;
     cov_set.list = (int *) malloc(sizeof(int) * COV_MAX) ;
-    cov_set.size = 0 ;
+    cov_set.cnt = 0 ;
 
     for (int i = 0; i < trials; i++) {
         char * input = (char *) malloc(sizeof(char) * (fuzargs.f_max_len + 1)) ;
@@ -465,7 +465,7 @@ fuzzer_main (test_config_t * config)
         results[i] = oracle_run(return_codes[i], i) ;
     }
 
-    fuzzer_summary(return_codes, results, stdout_contents, stderr_contents, coverages) ;
+    fuzzer_summary(return_codes, results, stdout_contents, stderr_contents, coverages, cov_set) ;
 
     free(return_codes) ;
     free(results) ;
