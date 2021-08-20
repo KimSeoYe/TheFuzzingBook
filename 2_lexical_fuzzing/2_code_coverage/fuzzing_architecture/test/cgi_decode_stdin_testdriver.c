@@ -34,14 +34,13 @@ oracle (int return_code, int trial)
 void
 set_configs (test_config_t * config)
 {
-    // strcpy(config->runargs.binary_path, "../lib/troff_bug_simulate") ;
     config->is_source = 1 ;
     strcpy(config->source_path, "../lib/cgi_decode_stdin.c") ;
 
-    config->trials = 100 ;
-    
     config->fuzargs.f_char_start = 0 ;
     config->fuzargs.f_char_range = 255 ;
+
+    config->trials = 100 ;
     config->oracle = oracle ;
 }
 

@@ -15,6 +15,7 @@
 ///////////////////////////////////// Fuzzer Status /////////////////////////////////////
 
 static int trials ;
+fuzopt_t option ;
 static int is_source ;
 static char source_path[PATH_MAX] ;
 static char source_filename[PATH_MAX] ;
@@ -35,6 +36,8 @@ copy_status (test_config_t * config)
 {
     trials = config->trials ;
     fuzargs = config->fuzargs ; 
+
+    option = config->option ;
 
     is_source = config->is_source ;
     if (is_source) {
@@ -358,6 +361,10 @@ fuzzer_loop (int * return_codes, result_t * results, char ** stdout_contents, ch
     for (int i = 0; i < trials; i++) {
         char * input = (char *) malloc(sizeof(char) * (fuzargs.f_max_len + 1)) ;
         int input_len = fuzz_input(&fuzargs, input) ;
+
+    #ifdef DEBUG
+        printf("FUZZER INPUT : %s\n", input) ;
+    #endif
 
         return_codes[i] = run(stdout_contents, stderr_contents, input, input_len, i) ;
         free(input) ;
