@@ -41,6 +41,7 @@ copy_status (test_config_t * config)
     option = config->option ;
     if (option == ARGUMENT) {
         fuzzed_args_num = config->fuzzed_args_num ;
+        // TODO. if fuzzed_args_num == 0 : error
     }
 
     is_source = config->is_source ;
