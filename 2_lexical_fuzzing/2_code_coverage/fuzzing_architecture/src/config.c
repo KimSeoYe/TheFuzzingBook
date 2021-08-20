@@ -13,6 +13,8 @@ init_config (test_config_t * config)
     config->fuzargs.f_char_start = 32 ;
     config->fuzargs.f_char_range = 32 ;
 
+    config->option = STD_IN ;
+
     config->is_source = 0 ;
     strcpy(config->source_path, "") ;
     strcpy(config->runargs.binary_path, "") ;

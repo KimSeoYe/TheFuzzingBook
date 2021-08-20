@@ -4,6 +4,8 @@
 #define PATH_MAX 4096
 #define ARG_MAX 1024
 
+typedef enum fuzopt { STD_IN = 0, ARGUMENT, FILE_CONTENTS } fuzopt_t ;
+
 typedef struct fuzarg {
     int f_min_len ;
     int f_max_len ;
@@ -19,6 +21,7 @@ typedef struct runarg {
 
 typedef struct test_config {   
     int trials ;
+    fuzopt_t option ;
     int is_source ;
     char source_path[PATH_MAX] ; // NEW
     fuzarg_t fuzargs ;
