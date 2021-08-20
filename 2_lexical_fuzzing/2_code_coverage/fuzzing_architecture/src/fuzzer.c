@@ -508,6 +508,17 @@ free_contents (content_t contents)
 ///////////////////////////////////// Fuzzer Main /////////////////////////////////////
 
 void
+allocate_contents (content_t * contents)
+{
+    contents->stdout_contents = (char **) malloc(sizeof(char *) * trials) ;
+    contents->stderr_contents = (char **) malloc(sizeof(char *) * trials) ;
+    for (int i = 0; i < trials; i++) {
+        contents->stdout_contents[i] = (char *) malloc(sizeof(char) * CONTENTS_MAX) ;
+        contents->stderr_contents[i] = (char *) malloc(sizeof(char) * CONTENTS_MAX) ;
+    }
+}
+
+void
 fuzzer_main (test_config_t * config)
 {
     srand(time(NULL)) ;
@@ -517,15 +528,9 @@ fuzzer_main (test_config_t * config)
 
     int * return_codes = (int *) malloc(sizeof(int) * trials) ;
     result_t * results = (result_t *) malloc(sizeof(result_t) * trials) ;
-
     
     content_t contents ;
-    contents.stdout_contents = (char **) malloc(sizeof(char *) * trials) ;
-    contents.stderr_contents = (char **) malloc(sizeof(char *) * trials) ;
-    for (int i = 0; i < trials; i++) {
-        contents.stdout_contents[i] = (char *) malloc(sizeof(char) * CONTENTS_MAX) ;
-        contents.stderr_contents[i] = (char *) malloc(sizeof(char) * CONTENTS_MAX) ;
-    }
+    allocate_contents(&contents) ;
 
     int src_total_line_cnt = 0 ;
     int * coverages = 0x0 ;
@@ -542,15 +547,16 @@ fuzzer_main (test_config_t * config)
 
     fuzzer_summary(return_codes, results, contents, coverages, cov_set, src_total_line_cnt, exec_time_ms) ;
 
-    free(return_codes) ;
-    free(results) ;
-    free_parsed_args() ;
-    free_contents(contents) ;
-    remove_temp_dir() ;
 
     if (is_source) {
         remove_files(runargs.binary_path, source_filename) ;
         free(coverages) ;
         free(cov_set) ;
     }
+
+    free(return_codes) ;
+    free(results) ;
+    free_parsed_args() ;
+    free_contents(contents) ;
+    remove_temp_dir() ;  
 }
