@@ -4,6 +4,7 @@
 #include "config.h"
 
 #define RESULT_PATH_MAX 32
+#define CONTENTS_MAX 64
 #define ARG_N_MAX 64
 
 typedef enum result { PASS = 0, FAIL, UNRESOLVED } result_t ;

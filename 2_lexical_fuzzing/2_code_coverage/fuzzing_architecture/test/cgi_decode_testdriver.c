@@ -45,7 +45,7 @@ set_configs (test_config_t * config)
     config->option = ARGUMENT ;
     config->fuzzed_args_num = 1 ;
 
-    config->trials = 10 ;
+    config->trials = 50 ;
     config->oracle = oracle ;
 }
 

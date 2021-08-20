@@ -29,6 +29,8 @@ static char dir_name[RESULT_PATH_MAX] ;
 static char ** parsed_args ; // TODO. as a local var.
 static int arg_num = 2 ;
 
+// TODO. contents : add input contents & make a structure
+
 
 ///////////////////////////////////// Fuzzer Init /////////////////////////////////////
 
@@ -250,8 +252,8 @@ write_output_files (char ** stdout_contents, char ** stderr_contents, int trial,
     
     if (fd == 1) {
         while ((s = read(stdout_pipes[0], buf, 1024)) > 0) {
-            strncpy(stdout_contents[trial], buf, 15) ;
-            stdout_contents[trial][15] = 0x0 ;
+            strncpy(stdout_contents[trial], buf, CONTENTS_MAX - 1) ;
+            stdout_contents[trial][CONTENTS_MAX - 1] = 0x0 ;
 
             if (fwrite(buf, 1, s, fp) != s) {
                 perror("fwrite: save_results: stdout") ;
@@ -261,8 +263,8 @@ write_output_files (char ** stdout_contents, char ** stderr_contents, int trial,
     }
     else if (fd == 2) {
         while ((s = read(stderr_pipes[0], buf, 1024)) > 0) {
-            strncpy(stderr_contents[trial], buf, 15) ;
-            stderr_contents[trial][15] = 0x0 ;
+            strncpy(stderr_contents[trial], buf, CONTENTS_MAX - 1) ;
+            stderr_contents[trial][CONTENTS_MAX - 1] = 0x0 ;
 
             if (fwrite(buf, 1, s, fp) != s) {
                 perror("fwrite: save_results: stderr") ;
@@ -517,8 +519,8 @@ fuzzer_main (test_config_t * config)
     char ** stdout_contents = (char **) malloc(sizeof(char *) * trials) ;
     char ** stderr_contents = (char **) malloc(sizeof(char *) * trials) ;
     for (int i = 0; i < trials; i++) {
-        stdout_contents[i] = (char *) malloc(sizeof(char) * 16) ;
-        stderr_contents[i] = (char *) malloc(sizeof(char) * 16) ;
+        stdout_contents[i] = (char *) malloc(sizeof(char) * CONTENTS_MAX) ;
+        stderr_contents[i] = (char *) malloc(sizeof(char) * CONTENTS_MAX) ;
     }
 
     int total_line_cnt = 0 ;
