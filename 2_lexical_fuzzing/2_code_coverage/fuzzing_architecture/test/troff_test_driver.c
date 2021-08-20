@@ -37,6 +37,8 @@ set_configs (test_config_t * config)
     // strcpy(config->runargs.binary_path, "../lib/troff_bug_simulate") ;
     config->is_source = 1 ;
     strcpy(config->source_path, "../lib/troff_bug_simulate.c") ;
+
+    config->trials = 100 ;
     
     config->fuzargs.f_char_start = 0 ;
     config->fuzargs.f_char_range = 255 ;

@@ -348,10 +348,37 @@ oracle_run (int return_code, int trial)   // Q. useless..?
 }
 
 
+///////////////////////////////////// Fuzzer Loop /////////////////////////////////////
+
+double
+fuzzer_loop (int * return_codes, result_t * results, char ** stdout_contents, char ** stderr_contents, int * coverages, char * cov_set, int total_line_cnt) 
+{
+    clock_t start = clock() ;
+
+    for (int i = 0; i < trials; i++) {
+        char * input = (char *) malloc(sizeof(char) * (fuzargs.f_max_len + 1)) ;
+        int input_len = fuzz_input(&fuzargs, input) ;
+
+        return_codes[i] = run(stdout_contents, stderr_contents, input, input_len, i) ;
+        free(input) ;
+
+        if (is_source) {
+            coverages[i] = get_coverage(cov_set, total_line_cnt, source_filename) ;
+        }
+
+        results[i] = oracle_run(return_codes[i], i) ;
+    }
+
+    clock_t end = clock() ;
+    double exec_time_ms = (double) end - start ;
+
+    return exec_time_ms ;
+}
+
 ///////////////////////////////////// Fuzzer Summary /////////////////////////////////////
 
 void
-fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents, char ** stderr_contents, int * coverages, char * cov_set, int cov_set_len)
+fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents, char ** stderr_contents, int * coverages, char * cov_set, int cov_set_len, double exec_time_ms)
 {
     int pass_cnt = 0 ;
     int fail_cnt = 0 ;
@@ -359,7 +386,7 @@ fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents,
 
     for (int i = 0; i < trials; i++) {
         // TODO. exec_time
-        printf("(CompletedProcess(target='%s', args='%s', returncode='%d', stdout='%s', stderr='%s', result='%s'))\n", runargs.binary_path, runargs.cmd_args, return_codes[i], stdout_contents[i], stderr_contents[i], result_strings[results[i]]) ;
+        printf("(CompletedProcess(target='%s', args='%s', coverage='%d', returncode='%d', stdout='%s', stderr='%s', result='%s'))\n", runargs.binary_path, runargs.cmd_args, coverages[i], return_codes[i], stdout_contents[i], stderr_contents[i], result_strings[results[i]]) ;
         switch(results[i]) {
             case PASS:
                 pass_cnt++ ;
@@ -375,7 +402,7 @@ fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents,
     int total_coverage = 0 ;
     if (is_source) {
         printf("\n=======================================================\n") ;
-        printf("COVERAGES\n") ;
+        printf("LINE COVERAGES\n") ;
         printf("=======================================================\n") ;
         for (int i = 0; i < trials; i++) {
             printf("%d | ", coverages[i]) ;
@@ -393,7 +420,7 @@ fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents,
     printf("TOTAL SUMMARY\n") ;
     printf("=======================================================\n") ;
     printf("# TRIALS : %d\n", trials) ;
-    // TODO. execution time
+    printf("# EXEC TIME : %.f ms\n", exec_time_ms) ;
     printf("# LINE COVERED : %d\n", total_coverage) ;
     printf("# PASS : %d\n", pass_cnt) ;
     printf("# FAIL : %d\n", fail_cnt) ;
@@ -433,8 +460,6 @@ remove_temp_dir ()
     }
 }
 
-///////////////////////////////////// Fuzzer Main /////////////////////////////////////
-
 void
 free_contents (char ** stdout_contents, char ** stderr_contents)
 {
@@ -446,6 +471,9 @@ free_contents (char ** stdout_contents, char ** stderr_contents)
     free(stdout_contents) ;
     free(stderr_contents) ;
 }
+
+
+///////////////////////////////////// Fuzzer Main /////////////////////////////////////
 
 void
 fuzzer_main (test_config_t * config)
@@ -476,25 +504,12 @@ fuzzer_main (test_config_t * config)
         memset(cov_set, '0', total_line_cnt) ;
     }
 
-    for (int i = 0; i < trials; i++) {
-        char * input = (char *) malloc(sizeof(char) * (fuzargs.f_max_len + 1)) ;
-        int input_len = fuzz_input(&fuzargs, input) ;
+    double exec_time_ms = fuzzer_loop (return_codes, results, stdout_contents, stderr_contents, coverages, cov_set, total_line_cnt) ;
 
-        return_codes[i] = run(stdout_contents, stderr_contents, input, input_len, i) ;
-        free(input) ;
-
-        if (is_source) {
-            coverages[i] = get_coverage(cov_set, total_line_cnt, source_filename) ;
-        }
-
-        results[i] = oracle_run(return_codes[i], i) ;
-    }
-
-    fuzzer_summary(return_codes, results, stdout_contents, stderr_contents, coverages, cov_set, total_line_cnt) ;
+    fuzzer_summary(return_codes, results, stdout_contents, stderr_contents, coverages, cov_set, total_line_cnt, exec_time_ms) ;
 
     free(return_codes) ;
     free(results) ;
-    
     free_parsed_args() ;
     free_contents(stdout_contents, stderr_contents) ;
     remove_temp_dir() ;
