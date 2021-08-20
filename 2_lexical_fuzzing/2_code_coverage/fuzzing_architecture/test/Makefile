@@ -25,9 +25,6 @@ hunspell_testdriver: hunspell_testdriver.c ../src/config.c ../src/fuzzer.c ../sr
 	wget -O en_US.dic https://cgit.freedesktop.org/libreoffice/dictionaries/plain/en/en_US.dic?id=a4473e06b56bfe35187e302754f6baaa8d75e54f
 	gcc -o hunspell_testdriver hunspell_testdriver.c ../src/config.c ../src/fuzzer.c ../src/fuzz_input.c ../src/gcov_runner.c
 
-cgi_decode_stdin_testdriver: cgi_decode_stdin_testdriver.c ../src/config.c ../src/fuzzer.c ../src/fuzz_input.c ../src/gcov_runner.c
-	gcc -o cgi_decode_stdin_testdriver cgi_decode_stdin_testdriver.c ../src/config.c ../src/fuzzer.c ../src/fuzz_input.c ../src/gcov_runner.c
-
 cgi_decode_testdriver: cgi_decode_testdriver.c ../src/config.c ../src/fuzzer.c ../src/fuzz_input.c ../src/gcov_runner.c
 	gcc -o cgi_decode_testdriver cgi_decode_testdriver.c ../src/config.c ../src/fuzzer.c ../src/fuzz_input.c ../src/gcov_runner.c
 
