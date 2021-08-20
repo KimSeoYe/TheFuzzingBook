@@ -29,9 +29,6 @@ static char dir_name[RESULT_PATH_MAX] ;
 static char ** parsed_args ; // TODO. as a local var.
 static int cmd_args_num = 2 ;
 
-// TODO. contents : add input contents & make a structure
-
-
 ///////////////////////////////////// Fuzzer Init /////////////////////////////////////
 
 void
@@ -237,7 +234,7 @@ execute_target(char * input, int input_len, int trial)
 }
 
 void
-write_output_files (char ** stdout_contents, char ** stderr_contents, int trial, int fd){
+write_output_files (content_t contents, int trial, int fd){
     char path[RESULT_PATH_MAX] ;
     get_path(path, trial, fd) ;
 
@@ -252,8 +249,8 @@ write_output_files (char ** stdout_contents, char ** stderr_contents, int trial,
     
     if (fd == 1) {
         while ((s = read(stdout_pipes[0], buf, 1024)) > 0) {
-            strncpy(stdout_contents[trial], buf, CONTENTS_MAX - 1) ;
-            stdout_contents[trial][CONTENTS_MAX - 1] = 0x0 ;
+            strncpy(contents.stdout_contents[trial], buf, CONTENTS_MAX - 1) ;
+            contents.stdout_contents[trial][CONTENTS_MAX - 1] = 0x0 ;
 
             if (fwrite(buf, 1, s, fp) != s) {
                 perror("fwrite: save_results: stdout") ;
@@ -263,8 +260,8 @@ write_output_files (char ** stdout_contents, char ** stderr_contents, int trial,
     }
     else if (fd == 2) {
         while ((s = read(stderr_pipes[0], buf, 1024)) > 0) {
-            strncpy(stderr_contents[trial], buf, CONTENTS_MAX - 1) ;
-            stderr_contents[trial][CONTENTS_MAX - 1] = 0x0 ;
+            strncpy(contents.stderr_contents[trial], buf, CONTENTS_MAX - 1) ;
+            contents.stderr_contents[trial][CONTENTS_MAX - 1] = 0x0 ;
 
             if (fwrite(buf, 1, s, fp) != s) {
                 perror("fwrite: save_results: stderr") ;
@@ -281,13 +278,13 @@ write_output_files (char ** stdout_contents, char ** stderr_contents, int trial,
 }
 
 void
-save_results(char ** stdout_contents, char ** stderr_contents, int trial)
+save_results(content_t contents, int trial)
 {
     close(stdin_pipes[1]) ;
     close(stdout_pipes[1]) ;
     close(stderr_pipes[1]) ;
-    write_output_files(stdout_contents, stderr_contents, trial, 1) ;
-    write_output_files(stdout_contents, stderr_contents, trial, 2) ;
+    write_output_files(contents, trial, 1) ;
+    write_output_files(contents, trial, 2) ;
 }
 
 static pid_t child_pid ;
@@ -305,7 +302,7 @@ timeout_handler (int sig)
 }
 
 int
-run (char ** stdout_contents, char ** stderr_contents, char * input, int input_len, int trial)
+run (content_t contents, char * input, int input_len, int trial)
 {    
     if (pipe(stdin_pipes) != 0) goto pipe_err ;
     if (pipe(stdout_pipes) != 0) goto pipe_err ;
@@ -316,7 +313,7 @@ run (char ** stdout_contents, char ** stderr_contents, char * input, int input_l
         execute_target(input, input_len, trial) ;
     }
     else if (child_pid > 0) {
-        save_results(stdout_contents, stderr_contents, trial) ;
+        save_results(contents, trial) ;
     }
     else {
         perror("fork") ;
@@ -382,7 +379,7 @@ fuzz_argument (fuzarg_t * fuzargs)
 }
 
 double
-fuzzer_loop (int * return_codes, result_t * results, char ** stdout_contents, char ** stderr_contents, int * coverages, char * cov_set, int src_total_line_cnt) 
+fuzzer_loop (int * return_codes, result_t * results, content_t contents, int * coverages, char * cov_set, int src_total_line_cnt) 
 {
     clock_t start = clock() ;
 
@@ -393,7 +390,7 @@ fuzzer_loop (int * return_codes, result_t * results, char ** stdout_contents, ch
         if (option == STD_IN) input_len = fuzz_input(&fuzargs, input) ;
         else if (option == ARGUMENT) fuzz_argument(&fuzargs) ;
 
-        return_codes[i] = run(stdout_contents, stderr_contents, input, input_len, i) ;
+        return_codes[i] = run(contents, input, input_len, i) ;
         free(input) ;
 
         if (is_source) {
@@ -412,7 +409,7 @@ fuzzer_loop (int * return_codes, result_t * results, char ** stdout_contents, ch
 ///////////////////////////////////// Fuzzer Summary /////////////////////////////////////
 
 void
-fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents, char ** stderr_contents, int * coverages, char * cov_set, int cov_set_len, double exec_time_ms)
+fuzzer_summary (int * return_codes, result_t * results, content_t contents, int * coverages, char * cov_set, int cov_set_len, double exec_time_ms)
 {
     int pass_cnt = 0 ;
     int fail_cnt = 0 ;
@@ -420,7 +417,7 @@ fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents,
 
     for (int i = 0; i < trials; i++) {
         // TODO. exec_time
-        printf("(CompletedProcess(target='%s', args='%s', coverage='%d', returncode='%d', stdout='%s', stderr='%s', result='%s'))\n", runargs.binary_path, runargs.cmd_args, coverages[i], return_codes[i], stdout_contents[i], stderr_contents[i], result_strings[results[i]]) ;
+        printf("(CompletedProcess(target='%s', args='%s', coverage='%d', returncode='%d', stdout='%s', stderr='%s', result='%s'))\n", runargs.binary_path, runargs.cmd_args, coverages[i], return_codes[i], contents.stdout_contents[i], contents.stderr_contents[i], result_strings[results[i]]) ;
         switch(results[i]) {
             case PASS:
                 pass_cnt++ ;
@@ -496,15 +493,15 @@ remove_temp_dir ()
 }
 
 void
-free_contents (char ** stdout_contents, char ** stderr_contents)
+free_contents (content_t contents)
 {
     for (int i = 0; i < trials; i++) {
-        free(stdout_contents[i]) ;
-        free(stderr_contents[i]) ;
+        free(contents.stdout_contents[i]) ;
+        free(contents.stderr_contents[i]) ;
     }
 
-    free(stdout_contents) ;
-    free(stderr_contents) ;
+    free(contents.stdout_contents) ;
+    free(contents.stderr_contents) ;
 }
 
 
@@ -521,11 +518,13 @@ fuzzer_main (test_config_t * config)
     int * return_codes = (int *) malloc(sizeof(int) * trials) ;
     result_t * results = (result_t *) malloc(sizeof(result_t) * trials) ;
 
-    char ** stdout_contents = (char **) malloc(sizeof(char *) * trials) ;
-    char ** stderr_contents = (char **) malloc(sizeof(char *) * trials) ;
+    
+    content_t contents ;
+    contents.stdout_contents = (char **) malloc(sizeof(char *) * trials) ;
+    contents.stderr_contents = (char **) malloc(sizeof(char *) * trials) ;
     for (int i = 0; i < trials; i++) {
-        stdout_contents[i] = (char *) malloc(sizeof(char) * CONTENTS_MAX) ;
-        stderr_contents[i] = (char *) malloc(sizeof(char) * CONTENTS_MAX) ;
+        contents.stdout_contents[i] = (char *) malloc(sizeof(char) * CONTENTS_MAX) ;
+        contents.stderr_contents[i] = (char *) malloc(sizeof(char) * CONTENTS_MAX) ;
     }
 
     int src_total_line_cnt = 0 ;
@@ -539,14 +538,14 @@ fuzzer_main (test_config_t * config)
         memset(cov_set, '0', src_total_line_cnt) ;
     }
 
-    double exec_time_ms = fuzzer_loop (return_codes, results, stdout_contents, stderr_contents, coverages, cov_set, src_total_line_cnt) ;
+    double exec_time_ms = fuzzer_loop (return_codes, results, contents, coverages, cov_set, src_total_line_cnt) ;
 
-    fuzzer_summary(return_codes, results, stdout_contents, stderr_contents, coverages, cov_set, src_total_line_cnt, exec_time_ms) ;
+    fuzzer_summary(return_codes, results, contents, coverages, cov_set, src_total_line_cnt, exec_time_ms) ;
 
     free(return_codes) ;
     free(results) ;
     free_parsed_args() ;
-    free_contents(stdout_contents, stderr_contents) ;
+    free_contents(contents) ;
     remove_temp_dir() ;
 
     if (is_source) {
