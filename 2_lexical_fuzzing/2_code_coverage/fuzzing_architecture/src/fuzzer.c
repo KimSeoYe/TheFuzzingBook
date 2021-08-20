@@ -382,7 +382,7 @@ fuzz_argument (fuzarg_t * fuzargs)
 }
 
 double
-fuzzer_loop (int * return_codes, result_t * results, char ** stdout_contents, char ** stderr_contents, int * coverages, char * cov_set, int total_line_cnt) 
+fuzzer_loop (int * return_codes, result_t * results, char ** stdout_contents, char ** stderr_contents, int * coverages, char * cov_set, int src_total_line_cnt) 
 {
     clock_t start = clock() ;
 
@@ -397,7 +397,7 @@ fuzzer_loop (int * return_codes, result_t * results, char ** stdout_contents, ch
         free(input) ;
 
         if (is_source) {
-            coverages[i] = get_coverage(cov_set, total_line_cnt, source_filename) ;
+            coverages[i] = get_coverage(cov_set, src_total_line_cnt, source_filename) ;
         }
 
         results[i] = oracle_run(return_codes[i], i) ;
@@ -528,20 +528,20 @@ fuzzer_main (test_config_t * config)
         stderr_contents[i] = (char *) malloc(sizeof(char) * CONTENTS_MAX) ;
     }
 
-    int total_line_cnt = 0 ;
+    int src_total_line_cnt = 0 ;
     int * coverages = 0x0 ;
     char * cov_set ;
 
     if (is_source) {
         coverages = (int *) malloc(sizeof(int) * trials) ;
-        total_line_cnt = get_total_line_cnt(source_path) ;
-        cov_set = (char *) malloc(sizeof(char) * total_line_cnt) ; 
-        memset(cov_set, '0', total_line_cnt) ;
+        src_total_line_cnt = get_total_line_cnt(source_path) ;
+        cov_set = (char *) malloc(sizeof(char) * src_total_line_cnt) ; 
+        memset(cov_set, '0', src_total_line_cnt) ;
     }
 
-    double exec_time_ms = fuzzer_loop (return_codes, results, stdout_contents, stderr_contents, coverages, cov_set, total_line_cnt) ;
+    double exec_time_ms = fuzzer_loop (return_codes, results, stdout_contents, stderr_contents, coverages, cov_set, src_total_line_cnt) ;
 
-    fuzzer_summary(return_codes, results, stdout_contents, stderr_contents, coverages, cov_set, total_line_cnt, exec_time_ms) ;
+    fuzzer_summary(return_codes, results, stdout_contents, stderr_contents, coverages, cov_set, src_total_line_cnt, exec_time_ms) ;
 
     free(return_codes) ;
     free(results) ;
