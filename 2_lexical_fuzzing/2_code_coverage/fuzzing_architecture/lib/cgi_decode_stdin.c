@@ -79,9 +79,9 @@ main (int argc, char * argv[])
 {
     char * input = (char *) malloc(sizeof(char) * (BUFMAX + 1)) ;
     char c ;
-    int input_len ;
-    for (input_len = 0; (c = getchar()) != EOF && c != '\n'; input_len++) {
-        if (input_len % BUFMAX == 0) {
+    int input_len = 0 ;
+    for (input_len = 0; (c = getchar()) != EOF ; input_len++) {
+        if (input_len != 0 && input_len % BUFMAX == 0) {
             input = realloc(input, sizeof(char) * (input_len / BUFMAX + 1)) ;
             if (input == 0x0) {
                 perror("realloc") ;

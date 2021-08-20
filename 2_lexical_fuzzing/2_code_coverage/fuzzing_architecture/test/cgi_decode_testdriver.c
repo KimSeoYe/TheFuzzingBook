@@ -35,14 +35,17 @@ void
 set_configs (test_config_t * config)
 {
     config->is_source = 1 ;
-    strcpy(config->source_path, "../lib/cgi_decode_stdin.c") ;
+    strcpy(config->source_path, "../lib/cgi_decode.c") ;
 
     config->runargs.timeout = 2 ;
 
     config->fuzargs.f_char_start = 0 ;
     config->fuzargs.f_char_range = 255 ;
 
-    config->trials = 100 ;
+    config->option = ARGUMENT ;
+    config->fuzzed_args_num = 1 ;
+
+    config->trials = 10 ;
     config->oracle = oracle ;
 }
 

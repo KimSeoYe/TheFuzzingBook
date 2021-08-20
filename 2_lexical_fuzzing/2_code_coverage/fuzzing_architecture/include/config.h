@@ -22,6 +22,7 @@ typedef struct runarg {
 typedef struct test_config {   
     int trials ;                    // total trials
     fuzopt_t option ;               // fuzzing option : fuzz stdin | argument | file contents
+    int fuzzed_args_num ;                  // target program's argument # (default 0)
     int is_source ;                 // is the target c source file ? (1: true, 0: false)
     char source_path[PATH_MAX] ;    // path of c source file (if is_source is true)
     fuzarg_t fuzargs ;              

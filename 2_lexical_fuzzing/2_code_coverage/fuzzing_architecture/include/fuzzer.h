@@ -4,6 +4,7 @@
 #include "config.h"
 
 #define RESULT_PATH_MAX 32
+#define ARG_N_MAX 64
 
 typedef enum result { PASS = 0, FAIL, UNRESOLVED } result_t ;
 static char result_strings[3][16] = { "PASS", "FAIL", "UNRESOLVED" } ;

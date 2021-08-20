@@ -136,7 +136,7 @@ read_gcov_file (char * cov_set, int total_line_cnt, char * source_filename)
 
             gcov_result[idx++] = atoi(line_number) ;
         #ifdef DEBUG
-            printf("('%s', %d)\n", source_filename, line_nums[idx - 1]) ;
+            printf("('%s', %d)\n", source_filename, gcov_result[idx - 1]) ;
         #endif
         }
     }
@@ -161,8 +161,14 @@ remove_gcda (char * source_filename)
     char gcda_file[PATH_MAX] ;
     char * ptr = strtok(copied_filename, ".") ;
     sprintf(gcda_file, "%s.gcda", ptr) ;
-    if (remove(gcda_file) == -1) {
-        perror("get_coverage: remove: gcda") ;
+
+    if (access(gcda_file, F_OK) == 0) {
+        if (remove(gcda_file) == -1) {
+            perror("remove_gcda: remove") ;
+        }
+    }
+    else {
+        perror("remove_gcda: access: gcda file not exist") ;
     }
 }
 

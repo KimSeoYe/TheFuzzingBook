@@ -44,7 +44,7 @@ main ()
     input[input_len] = 0x0 ;
     
 #ifdef DEBUG
-    printf("Input: %s", input) ;
+    printf("%s", input) ;
 #endif
 
     // case1

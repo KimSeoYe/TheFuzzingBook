@@ -16,6 +16,7 @@
 
 static int trials ;
 fuzopt_t option ;
+static int fuzzed_args_num = 0 ;
 static int is_source ;
 static char source_path[PATH_MAX] ;
 static char source_filename[PATH_MAX] ;
@@ -26,7 +27,7 @@ static int (* oracle) (int return_code, int trial) ;
 // Q. static global ?
 static char dir_name[RESULT_PATH_MAX] ;  
 static char ** parsed_args ; // TODO. as a local var.
-static int arg_num = 0 ;
+static int arg_num = 2 ;
 
 
 ///////////////////////////////////// Fuzzer Init /////////////////////////////////////
@@ -38,6 +39,9 @@ copy_status (test_config_t * config)
     fuzargs = config->fuzargs ; 
 
     option = config->option ;
+    if (option == ARGUMENT) {
+        fuzzed_args_num = config->fuzzed_args_num ;
+    }
 
     is_source = config->is_source ;
     if (is_source) {
@@ -62,7 +66,7 @@ copy_status (test_config_t * config)
 void
 parse_args ()
 {   
-    parsed_args = (char **) malloc(sizeof(char *) * 2) ; // path + null
+    parsed_args = (char **) malloc(sizeof(char *) * ARG_N_MAX) ;
 
     parsed_args[0] = (char *) malloc(sizeof(char) * (strlen(runargs.binary_path) + 1)) ;
     strcpy(parsed_args[0], runargs.binary_path) ;   // TODO. filename ?
@@ -70,8 +74,7 @@ parse_args ()
     int i ;
     char * tok_ptr = strtok(runargs.cmd_args, " ") ; 
     for (i = 1; tok_ptr != NULL; i++) { 
-        if (arg_num < i) parsed_args = realloc(parsed_args, sizeof(char *) * (++arg_num + 2)) ;
-        
+        arg_num++ ;
         parsed_args[i] = (char *) malloc(sizeof(char) * (strlen(tok_ptr) + 1)) ;
         strcpy(parsed_args[i], tok_ptr) ;
 
@@ -148,7 +151,7 @@ fuzzer_init (test_config_t * config)
 
     parse_args() ;
 #ifdef DEBUG
-    for (int i = 0; i < arg_num + 2; i++) {
+    for (int i = 0; i < arg_num; i++) {
         if (parsed_args[i] != 0x0) printf("parsed_args[%d] %s\n", i, parsed_args[i]) ;
         else printf("parsed_args[%d] 0x0\n", i) ;
     }
@@ -208,8 +211,10 @@ execute_target(char * input, int input_len, int trial)
 
     alarm(runargs.timeout) ;
 
-    if (write(stdin_pipes[1], input, input_len) != input_len) {
-        perror("write: execute_target") ;
+    if (option == STD_IN) {
+        if (write(stdin_pipes[1], input, input_len) != input_len) {
+            perror("execute_target: write") ;
+        }
     }
     close(stdin_pipes[1]) ;
 
@@ -353,6 +358,18 @@ oracle_run (int return_code, int trial)   // Q. useless..?
 
 ///////////////////////////////////// Fuzzer Loop /////////////////////////////////////
 
+void
+fuzz_argument (fuzarg_t * fuzargs)
+{
+    int i ;
+    for (i = arg_num - 1; i < arg_num + fuzzed_args_num - 1; i++) {
+        parsed_args[i] = (char *) malloc(sizeof(char) * (fuzargs->f_max_len + 1)) ;
+        fuzz_input(fuzargs, parsed_args[i]) ;
+    }
+    parsed_args[i] = 0x0 ;
+    arg_num += fuzzed_args_num ;
+}
+
 double
 fuzzer_loop (int * return_codes, result_t * results, char ** stdout_contents, char ** stderr_contents, int * coverages, char * cov_set, int total_line_cnt) 
 {
@@ -360,7 +377,10 @@ fuzzer_loop (int * return_codes, result_t * results, char ** stdout_contents, ch
 
     for (int i = 0; i < trials; i++) {
         char * input = (char *) malloc(sizeof(char) * (fuzargs.f_max_len + 1)) ;
-        int input_len = fuzz_input(&fuzargs, input) ;
+        
+        int input_len = 0 ;
+        if (option == STD_IN) input_len = fuzz_input(&fuzargs, input) ;
+        else if (option == ARGUMENT) fuzz_argument(&fuzargs) ;
 
     #ifdef DEBUG
         printf("FUZZER INPUT : %s\n", input) ;
@@ -412,7 +432,7 @@ fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents,
         printf("LINE COVERAGES\n") ;
         printf("=======================================================\n") ;
         for (int i = 0; i < trials; i++) {
-            printf("%d | ", coverages[i]) ;
+            printf("%d : ", coverages[i]) ;
             for (int j = 0; j < coverages[i]; j++) printf("#") ;
             printf("\n") ;
         }
@@ -428,7 +448,7 @@ fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents,
     printf("=======================================================\n") ;
     printf("# TRIALS : %d\n", trials) ;
     printf("# EXEC TIME : %.f ms\n", exec_time_ms) ;
-    printf("# LINE COVERED : %d\n", total_coverage) ;
+    printf("# LINE COVERED : %d / %d\n", total_coverage, cov_set_len) ;
     printf("# PASS : %d\n", pass_cnt) ;
     printf("# FAIL : %d\n", fail_cnt) ;
     printf("# UNRESOLVED : %d\n", unresolved_cnt) ;
@@ -441,7 +461,7 @@ fuzzer_summary (int * return_codes, result_t * results, char ** stdout_contents,
 void
 free_parsed_args ()
 {
-    for (int i = 0; i < arg_num + 2; i++) {
+    for (int i = 0; i < arg_num; i++) {
         free(parsed_args[i]) ;
     }
     free(parsed_args) ;
