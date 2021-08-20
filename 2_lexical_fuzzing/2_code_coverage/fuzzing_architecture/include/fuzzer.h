@@ -11,7 +11,7 @@ typedef enum result { PASS = 0, FAIL, UNRESOLVED } result_t ;
 static char result_strings[3][16] = { "PASS", "FAIL", "UNRESOLVED" } ;
 
 typedef struct content {
-    char ** stdin_contents ;
+    char ** input_contents ;
     char ** stdout_contents ;
     char ** stderr_contents ;
 } content_t ;
