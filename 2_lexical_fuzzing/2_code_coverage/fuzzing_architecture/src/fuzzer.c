@@ -585,7 +585,6 @@ fuzzer_main (test_config_t * config)
         coverages = (coverage_t *) malloc(sizeof(coverage_t) * trials) ;
 
         src_cnts = get_src_cnts(source_filename) ;
-        printf("DEBUG: LINE: %d\nBRANCH: %d\n", src_cnts.line, src_cnts.branch) ;
 
         if (src_cnts.line >= src_cnts.branch) cov_set_len = src_cnts.line ;
         else cov_set_len = src_cnts.branch ;
