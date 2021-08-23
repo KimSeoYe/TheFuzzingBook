@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "ios": "c",
+        "cgi_decode.h": "c",
+        "__functional_03": "c",
+        "functional": "c"
+    }
+}
