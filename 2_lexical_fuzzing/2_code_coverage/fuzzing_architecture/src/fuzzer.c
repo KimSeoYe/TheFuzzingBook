@@ -41,7 +41,10 @@ copy_status (test_config_t * config)
     option = config->option ;
     if (option == ARGUMENT) {
         fuzzed_args_num = config->fuzzed_args_num ;
-        // TODO. if fuzzed_args_num == 0 : error
+        if (fuzzed_args_num == 0) {
+            perror("copy_status: Invalid fuzzed_args_num for option ARGUMENT") ;
+            exit(1) ;
+        }
     }
 
     is_source = config->is_source ;
@@ -70,7 +73,7 @@ parse_args ()
     parsed_args = (char **) malloc(sizeof(char *) * ARG_N_MAX) ;
 
     parsed_args[0] = (char *) malloc(sizeof(char) * (strlen(runargs.binary_path) + 1)) ;
-    strcpy(parsed_args[0], runargs.binary_path) ;   // TODO. filename ?
+    strcpy(parsed_args[0], runargs.binary_path) ;
 
     int i ;
     char * tok_ptr = strtok(runargs.cmd_args, " ") ; 
@@ -378,7 +381,7 @@ write_input_args_file (content_t contents, int first_input_len, int trial)
     }
 
     if (fwrite(parsed_args[cmd_args_num - 1], 1, first_input_len, in_fp) != first_input_len) {  
-        perror("write_input_ars_file: fwrite") ; // TODO
+        perror("write_input_ars_file: fwrite") ;
     }
 
     fclose(in_fp) ;
@@ -447,7 +450,6 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
     int unresolved_cnt = 0 ;
 
     for (int i = 0; i < trials; i++) {
-        // TODO. exec_time
         printf("(CompletedProcess(target='%s', args='%s', line_coverage='%d', branch_coverage='%d', returncode='%d', input = '%s', stdout='%s', stderr='%s', result='%s'))\n", runargs.binary_path, runargs.cmd_args, coverages[i].line, coverages[i].branch, return_codes[i], contents.input_contents[i], contents.stdout_contents[i], contents.stderr_contents[i], result_strings[results[i]]) ;
         switch(results[i]) {
             case PASS:
@@ -487,8 +489,8 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
     printf("=======================================================\n") ;
     printf("# TRIALS : %d\n", trials) ;
     printf("# EXEC TIME : %.f ms\n", exec_time_ms) ;
-    printf("# LINE COVERED : %d / %d\n", total_line_coverage, src_cnts.line) ;
-    printf("# BRANCH COVERED : %d / %d\n", total_branch_coverage, src_cnts.branch) ;  // TODO
+    printf("# LINE COVERED : %d / %d = %.f%%\n", total_line_coverage, src_cnts.line, (double)total_line_coverage * 100.0 / src_cnts.line) ;
+    printf("# BRANCH COVERED : %d / %d = %.f%%\n", total_branch_coverage, src_cnts.branch, (double)total_branch_coverage * 100.0 / src_cnts.branch) ;
     printf("# PASS : %d\n", pass_cnt) ;
     printf("# FAIL : %d\n", fail_cnt) ;
     printf("# UNRESOLVED : %d\n", unresolved_cnt) ;
@@ -579,7 +581,7 @@ fuzzer_main (test_config_t * config)
 
         src_cnts.line = get_total_line_cnt(source_path) ;
         src_cnts.branch = get_total_branch_cnt(source_filename) ;
-        
+
         if (src_cnts.line >= src_cnts.branch) cov_set_len = src_cnts.line ;
         else cov_set_len = src_cnts.branch ;
 
