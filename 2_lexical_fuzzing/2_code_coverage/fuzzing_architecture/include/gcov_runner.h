@@ -28,6 +28,8 @@ void run_gcov (char * source_filename) ;
 
 int get_total_branch_cnt (char * source_filename) ;
 
+coverage_t get_src_cnts (char * source_filename) ;
+
 coverage_t get_coverage (coverage_t * cov_set, coverage_t src_cnts, char * source_filename) ;
 
 void remove_files (char * executable, char * source_filename) ;

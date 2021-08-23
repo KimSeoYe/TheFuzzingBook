@@ -154,6 +154,32 @@ get_total_branch_cnt (char * source_filename)
 }
 
 coverage_t
+get_src_cnts (char * source_filename)
+{
+    run_gcov(source_filename) ;
+    
+    char gcov_file[PATH_MAX] ;
+    sprintf(gcov_file, "%s.gcov", source_filename) ;
+
+    coverage_t cnt ;
+    cnt.line = 0 ;
+    cnt.branch = 0 ;
+
+    FILE * fp = fopen(gcov_file, "rb") ;
+    char * buf = 0x0 ;
+    size_t line_max = 0 ;
+    while(getline(&buf, &line_max, fp) > 0) {   // Q.
+        if (strncmp(buf, "branch", 6) == 0) cnt.branch++ ;
+        // TODO.
+    }
+    fclose(fp) ;
+
+    remove_gcda(source_filename) ;
+
+    return cnt ;
+}
+
+coverage_t
 read_gcov_file (coverage_t * cov_set, coverage_t src_cnts, char * source_filename) 
 {
     char gcov_file[PATH_MAX] ;
