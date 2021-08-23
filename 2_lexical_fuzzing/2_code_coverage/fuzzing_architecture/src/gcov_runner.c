@@ -75,7 +75,7 @@ exec_program (char * program, char ** arguments)
 void
 compile_with_coverage (char * target_path, char * target_path_c)
 {
-    char * compile_args[] = { "gcc", "--coverage", "-o", target_path, target_path_c, 0x0 } ;
+    char * compile_args[] = { "/usr/bin/gcc", "--coverage", "-o", target_path, target_path_c, 0x0 } ;
 
     if (exec_program("/usr/bin/gcc", compile_args) != 0) {
         perror("compile_with_coverage: exec_program") ;
@@ -86,7 +86,7 @@ compile_with_coverage (char * target_path, char * target_path_c)
 void
 run_gcov (char * source_filename)
 {
-    char * gcov_args[] = { "gcov", "-b", source_filename, 0x0 } ;
+    char * gcov_args[] = { "/usr/bin/gcov", "-b", source_filename, 0x0 } ;
 
     if (exec_program("/usr/bin/gcov", gcov_args) != 0) {
         perror("run_gcov: exec_program") ;
