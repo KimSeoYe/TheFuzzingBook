@@ -415,15 +415,13 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
 {
     clock_t start = clock() ;
 
+    char * input = (char *) malloc(sizeof(char) * (fuzargs.f_max_len + 1)) ;
     for (int i = 0; i < trials; i++) {
-        char * input = (char *) malloc(sizeof(char) * (fuzargs.f_max_len + 1)) ;
-        
         int input_len = 0 ;
         if (option == STD_IN) input_len = fuzz_input(&fuzargs, input) ;
         else if (option == ARGUMENT) fuzz_argument(contents, &fuzargs, i) ;
 
         return_codes[i] = run(contents, input, input_len, i) ;
-        free(input) ;
 
         if (is_source) {
             coverage_t cov = get_coverage(cov_set, src_cnts, source_filename) ;
@@ -436,6 +434,8 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
 
     clock_t end = clock() ;
     double exec_time_ms = (double) end - start ;
+    
+    free(input) ;
 
     return exec_time_ms ;
 }
@@ -493,8 +493,8 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
     printf("# TRIALS : %d\n", trials) ;
     printf("# EXEC TIME : %.f ms\n", exec_time_ms) ;
     if (is_source) {
-        printf("# LINE COVERED : %d / %d = %.f%%\n", total_line_coverage, src_cnts.line, (double)total_line_coverage * 100.0 / src_cnts.line) ;
-        printf("# BRANCH COVERED : %d / %d = %.f%%\n", total_branch_coverage, src_cnts.branch, (double)total_branch_coverage * 100.0 / src_cnts.branch) ;
+        printf("# LINE COVERED : %d / %d = %.1f%%\n", total_line_coverage, src_cnts.line, (double)total_line_coverage * 100.0 / src_cnts.line) ;
+        printf("# BRANCH COVERED : %d / %d = %.1f%%\n", total_branch_coverage, src_cnts.branch, (double)total_branch_coverage * 100.0 / src_cnts.branch) ;
     }
     printf("# PASS : %d\n", pass_cnt) ;
     printf("# FAIL : %d\n", fail_cnt) ;
@@ -585,7 +585,6 @@ fuzzer_main (test_config_t * config)
         coverages = (coverage_t *) malloc(sizeof(coverage_t) * trials) ;
 
         src_cnts = get_src_cnts(source_filename) ;
-
         if (src_cnts.line >= src_cnts.branch) cov_set_len = src_cnts.line ;
         else cov_set_len = src_cnts.branch ;
 

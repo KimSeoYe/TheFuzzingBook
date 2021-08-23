@@ -61,7 +61,7 @@ exec_program (char * program, char ** arguments)
             exit(1) ;
         }
     }
-    else if (child_pid == 0x0) {
+    else if (child_pid < 0) {
         perror("exec_program: fork") ;
         exit(1) ;
     }
@@ -86,7 +86,7 @@ compile_with_coverage (char * target_path, char * target_path_c)
 void
 run_gcov (char * source_filename)
 {
-    char * gcov_args[] = { "gcov", "-b", "-c", source_filename, 0x0 } ;
+    char * gcov_args[] = { "gcov", "-b", source_filename, 0x0 } ;
 
     if (exec_program("/usr/bin/gcov", gcov_args) != 0) {
         perror("run_gcov: exec_program") ;
