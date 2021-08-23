@@ -170,7 +170,7 @@ get_src_cnts (char * source_filename)
     size_t line_max = 0 ;
     while(getline(&buf, &line_max, fp) > 0) {   // Q.
         if (strncmp(buf, "branch", 6) == 0) cnt.branch++ ;
-        else if (strstr(buf, "-:") == 0x0) cnt.line++ ;
+        else if (strstr(buf, "#####") != 0x0 || atoi(buf) > 0) cnt.line++ ;
     }
     fclose(fp) ;
 
