@@ -102,7 +102,7 @@ compile_with_coverage (char * target_path, char * target_path_c)
 void
 run_gcov (char * source_filename)
 {
-    char * gcov_args[] = { "gcov", source_filename, 0x0 } ;
+    char * gcov_args[] = { "gcov", "-b", "-c", source_filename, 0x0 } ;
 
     if (exec_program("/usr/bin/gcov", gcov_args) != 0) {
         perror("run_gcov: exec_program") ;
@@ -110,13 +110,11 @@ run_gcov (char * source_filename)
     }
 }
 
-int
+coverage_t
 read_gcov_file (char * cov_set, int total_line_cnt, char * source_filename) 
 {
     char gcov_file[PATH_MAX] ;
     sprintf(gcov_file, "%s.gcov", source_filename) ;
-
-    int cov_idx = 0 ;
     
     FILE * fp = fopen(gcov_file, "r") ;
     if (fp == 0x0) {
@@ -124,32 +122,40 @@ read_gcov_file (char * cov_set, int total_line_cnt, char * source_filename)
         exit(1) ;
     }
 
-    int * gcov_result = (int *) malloc(sizeof(int) * total_line_cnt) ;
+    coverage_t cov ;
+    cov.line = 0 ;
+    cov.branch = 0 ;
 
-    int idx = 0 ;
+    int * line_result = (int *) malloc(sizeof(int) * total_line_cnt) ;
+    // int * branch_result = (int *) malloc(sizeof(int) * total_line_cnt) ;
+    
     char * buf = (char *) malloc(sizeof(char) * LINE_MAX) ;
     size_t line_max = LINE_MAX ;
     while(getline(&buf, &line_max, fp) > 0) {
+        // branch coverage
+        if (strncmp(buf, "branch", 6) == 0) {
+            if (strstr(buf, "taken") != 0x0) {
+                cov.branch++ ;
+            }
+        }
+
         char * covered = strtok(buf, ":") ; 
         if (atoi(covered) > 0) { 
             char * line_number = strtok(0x0, ":") ;
-
-            gcov_result[idx++] = atoi(line_number) ;
-        #ifdef DEBUG
-            printf("('%s', %d)\n", source_filename, gcov_result[idx - 1]) ;
-        #endif
+            line_result[cov.line++] = atoi(line_number) ;
         }
     }
 
-    for (int i = 0; i < idx; i++) {
-        cov_set[gcov_result[i]] = '1' ;
+    for (int i = 0; i < cov.line; i++) {
+        cov_set[line_result[i]] = '1' ;
     }
 
     free(buf) ;
     fclose(fp) ;
-    free(gcov_result) ;
+    free(line_result) ;
+    // free(branch_result) ;
 
-    return idx ;
+    return cov ;
 }
 
 void 
@@ -172,11 +178,11 @@ remove_gcda (char * source_filename)
     }
 }
 
-int
+coverage_t
 get_coverage (char * cov_set, int total_line_cnt, char * source_filename)
 {
     run_gcov(source_filename) ;
-    int coverage = read_gcov_file(cov_set, total_line_cnt, source_filename) ;
+    coverage_t coverage = read_gcov_file(cov_set, total_line_cnt, source_filename) ;
     remove_gcda(source_filename) ;
     
     return coverage ;
