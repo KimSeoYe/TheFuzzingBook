@@ -14,13 +14,14 @@ init_config (test_config_t * config)
     config->fuzargs.f_char_range = 32 ;
 
     config->option = STD_IN ;
+    config->fuzzed_args_num = 0 ;
 
     config->is_source = 0 ;
     strcpy(config->source_path, "") ;
+
     strcpy(config->runargs.binary_path, "") ;
     strcpy(config->runargs.cmd_args, "") ;
     config->runargs.timeout = 5 ;
-    config->fuzzed_args_num = 0 ;
-
+    
     config->oracle = 0x0 ;
 }

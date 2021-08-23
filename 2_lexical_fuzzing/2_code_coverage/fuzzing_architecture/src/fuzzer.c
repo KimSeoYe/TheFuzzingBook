@@ -450,7 +450,10 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
     int unresolved_cnt = 0 ;
 
     for (int i = 0; i < trials; i++) {
-        printf("(CompletedProcess(target='%s', args='%s', line_coverage='%d', branch_coverage='%d', returncode='%d', input = '%s', stdout='%s', stderr='%s', result='%s'))\n", runargs.binary_path, runargs.cmd_args, coverages[i].line, coverages[i].branch, return_codes[i], contents.input_contents[i], contents.stdout_contents[i], contents.stderr_contents[i], result_strings[results[i]]) ;
+        printf("(CompletedProcess(target='%s', args='%s', ", runargs.binary_path, runargs.cmd_args) ;
+        if (is_source) printf("line_coverage='%d', branch_coverage='%d', ", coverages[i].line, coverages[i].branch) ;
+        printf("returncode='%d', input = '%s', stdout='%s', stderr='%s', result='%s'))\n", return_codes[i], contents.input_contents[i], contents.stdout_contents[i], contents.stderr_contents[i], result_strings[results[i]]) ;
+        
         switch(results[i]) {
             case PASS:
                 pass_cnt++ ;
@@ -489,8 +492,10 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
     printf("=======================================================\n") ;
     printf("# TRIALS : %d\n", trials) ;
     printf("# EXEC TIME : %.f ms\n", exec_time_ms) ;
-    printf("# LINE COVERED : %d / %d = %.f%%\n", total_line_coverage, src_cnts.line, (double)total_line_coverage * 100.0 / src_cnts.line) ;
-    printf("# BRANCH COVERED : %d / %d = %.f%%\n", total_branch_coverage, src_cnts.branch, (double)total_branch_coverage * 100.0 / src_cnts.branch) ;
+    if (is_source) {
+        printf("# LINE COVERED : %d / %d = %.f%%\n", total_line_coverage, src_cnts.line, (double)total_line_coverage * 100.0 / src_cnts.line) ;
+        printf("# BRANCH COVERED : %d / %d = %.f%%\n", total_branch_coverage, src_cnts.branch, (double)total_branch_coverage * 100.0 / src_cnts.branch) ;
+    }
     printf("# PASS : %d\n", pass_cnt) ;
     printf("# FAIL : %d\n", fail_cnt) ;
     printf("# UNRESOLVED : %d\n", unresolved_cnt) ;
@@ -590,7 +595,6 @@ fuzzer_main (test_config_t * config)
     }
 
     double exec_time_ms = fuzzer_loop (return_codes, results, contents, coverages, cov_set, src_cnts) ;
-
     fuzzer_summary(return_codes, results, contents, coverages, cov_set, cov_set_len, src_cnts, exec_time_ms) ;
 
 
@@ -603,6 +607,5 @@ fuzzer_main (test_config_t * config)
     free(return_codes) ;
     free(results) ;
     free_parsed_args() ;
-    free_contents(contents) ;
     remove_temp_dir() ;  
 }
