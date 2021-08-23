@@ -8,22 +8,6 @@
 
 // #define DEBUG
 
-int
-get_total_line_cnt (char * source_path)
-{
-    int cnt = 0 ;
-
-    FILE * fp = fopen(source_path, "rb") ;
-    char * buf = 0x0 ;
-    size_t line_max = 0 ;
-    while(getline(&buf, &line_max, fp) > 0) {   // Q.
-        cnt++ ;
-    }
-    fclose(fp) ;
-
-    return cnt ;
-}
-
 void
 get_source_filename (char * dst, char * src)
 {
@@ -128,29 +112,6 @@ remove_gcda (char * source_filename)
     else {
         perror("remove_gcda: access: gcda file not exist") ;
     }
-}
-
-int
-get_total_branch_cnt (char * source_filename)
-{ 
-    run_gcov(source_filename) ;
-    
-    char gcov_file[PATH_MAX] ;
-    sprintf(gcov_file, "%s.gcov", source_filename) ;
-
-    int cnt = 0 ;
-
-    FILE * fp = fopen(gcov_file, "rb") ;
-    char * buf = 0x0 ;
-    size_t line_max = 0 ;
-    while(getline(&buf, &line_max, fp) > 0) {   // Q.
-        if (strncmp(buf, "branch", 6) == 0) cnt++ ;
-    }
-    fclose(fp) ;
-
-    remove_gcda(source_filename) ;
-
-    return cnt ;
 }
 
 coverage_t
