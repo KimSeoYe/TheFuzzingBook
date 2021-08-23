@@ -110,54 +110,6 @@ run_gcov (char * source_filename)
     }
 }
 
-coverage_t
-read_gcov_file (coverage_t * cov_set, int total_line_cnt, char * source_filename) 
-{
-    char gcov_file[PATH_MAX] ;
-    sprintf(gcov_file, "%s.gcov", source_filename) ;
-    
-    FILE * fp = fopen(gcov_file, "r") ;
-    if (fp == 0x0) {
-        perror("read_gcov_file: fopen") ;
-        exit(1) ;
-    }
-
-    coverage_t cov ;
-    cov.line = 0 ;
-    cov.branch = 0 ;
-
-    int * line_result = (int *) malloc(sizeof(int) * total_line_cnt) ;
-    // int * branch_result = (int *) malloc(sizeof(int) * total_line_cnt) ;
-    
-    char * buf = (char *) malloc(sizeof(char) * LINE_MAX) ;
-    size_t line_max = LINE_MAX ;
-    while(getline(&buf, &line_max, fp) > 0) {
-        // branch coverage
-        if (strncmp(buf, "branch", 6) == 0) {
-            if (strstr(buf, "taken") != 0x0) {
-                cov.branch++ ;
-            }
-        }
-
-        char * covered = strtok(buf, ":") ; 
-        if (atoi(covered) > 0) { 
-            char * line_number = strtok(0x0, ":") ;
-            line_result[cov.line++] = atoi(line_number) ;
-        }
-    }
-
-    for (int i = 0; i < cov.line; i++) {
-        cov_set[line_result[i]].line = 1 ;
-    }
-
-    free(buf) ;
-    fclose(fp) ;
-    free(line_result) ;
-    // free(branch_result) ;
-
-    return cov ;
-}
-
 void 
 remove_gcda (char * source_filename)
 {
@@ -178,11 +130,86 @@ remove_gcda (char * source_filename)
     }
 }
 
+int
+get_total_branch_cnt (char * source_filename)
+{ 
+    run_gcov(source_filename) ;
+    
+    char gcov_file[PATH_MAX] ;
+    sprintf(gcov_file, "%s.gcov", source_filename) ;
+
+    int cnt = 0 ;
+
+    FILE * fp = fopen(gcov_file, "rb") ;
+    char * buf = 0x0 ;
+    size_t line_max = 0 ;
+    while(getline(&buf, &line_max, fp) > 0) {   // Q.
+        if (strncmp(buf, "branch", 6) == 0) cnt++ ;
+    }
+    fclose(fp) ;
+
+    remove_gcda(source_filename) ;
+
+    return cnt ;
+}
+
 coverage_t
-get_coverage (coverage_t * cov_set, int total_line_cnt, char * source_filename)
+read_gcov_file (coverage_t * cov_set, coverage_t src_cnts, char * source_filename) 
+{
+    char gcov_file[PATH_MAX] ;
+    sprintf(gcov_file, "%s.gcov", source_filename) ;
+    
+    FILE * fp = fopen(gcov_file, "r") ;
+    if (fp == 0x0) {
+        perror("read_gcov_file: fopen") ;
+        exit(1) ;
+    }
+
+    coverage_t cov ;
+    cov.line = 0 ;
+    cov.branch = 0 ;
+
+    int * line_result = (int *) malloc(sizeof(int) * src_cnts.line) ;
+    int * branch_result = (int *) malloc(sizeof(int) * src_cnts.branch) ;
+    
+    char * buf = (char *) malloc(sizeof(char) * LINE_MAX) ;
+    size_t line_max = LINE_MAX ;
+
+    for (int branch_num = 0 ; getline(&buf, &line_max, fp) > 0; ) {
+        if (strncmp(buf, "branch", 6) == 0) {
+            if (strstr(buf, "taken") != 0x0) {
+                branch_result[cov.branch++] = branch_num ;
+            }
+            branch_num++ ;
+        }
+
+        char * covered = strtok(buf, ":") ; 
+        if (atoi(covered) > 0) { 
+            char * line_number = strtok(0x0, ":") ;
+            line_result[cov.line++] = atoi(line_number) ;
+        }
+    }
+
+    for (int i = 0; i < cov.line; i++) {
+        cov_set[line_result[i]].line = 1 ;
+    }
+    for (int i = 0; i < cov.branch; i++) {
+        cov_set[branch_result[i]].branch = 1 ;
+    }
+
+    free(buf) ;
+    fclose(fp) ;
+    free(line_result) ;
+    free(branch_result) ;
+
+    return cov ;
+}
+
+coverage_t
+get_coverage (coverage_t * cov_set, coverage_t src_cnts, char * source_filename)
 {
     run_gcov(source_filename) ;
-    coverage_t coverage = read_gcov_file(cov_set, total_line_cnt, source_filename) ;
+    coverage_t coverage = read_gcov_file(cov_set, src_cnts, source_filename) ;
     remove_gcda(source_filename) ;
     
     return coverage ;
