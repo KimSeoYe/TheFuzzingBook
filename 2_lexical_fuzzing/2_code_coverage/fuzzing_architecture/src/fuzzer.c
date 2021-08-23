@@ -408,7 +408,7 @@ fuzz_argument (content_t contents, fuzarg_t * fuzargs, int trial)
 }
 
 double
-fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverage_t * coverages, char * cov_set, int src_total_line_cnt) 
+fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverage_t * coverages, coverage_t * cov_set, int src_total_line_cnt) 
 {
     clock_t start = clock() ;
 
@@ -440,7 +440,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
 ///////////////////////////////////// Fuzzer Summary /////////////////////////////////////
 
 void
-fuzzer_summary (int * return_codes, result_t * results, content_t contents, coverage_t * coverages, char * cov_set, int cov_set_len, double exec_time_ms)
+fuzzer_summary (int * return_codes, result_t * results, content_t contents, coverage_t * coverages, coverage_t * cov_set, int src_total_line, double exec_time_ms)
 {
     int pass_cnt = 0 ;
     int fail_cnt = 0 ;
@@ -474,8 +474,8 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
         }
         printf("=======================================================\n") ;
     #endif
-        for (int i = 0; i < cov_set_len; i++) {
-            total_coverage += cov_set[i] - '0' ;
+        for (int i = 0; i < src_total_line; i++) {
+            total_coverage += cov_set[i].line ;
         }
     }
 
@@ -484,7 +484,7 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
     printf("=======================================================\n") ;
     printf("# TRIALS : %d\n", trials) ;
     printf("# EXEC TIME : %.f ms\n", exec_time_ms) ;
-    printf("# LINE COVERED : %d / %d\n", total_coverage, cov_set_len) ;
+    printf("# LINE COVERED : %d / %d\n", total_coverage, src_total_line) ;
     printf("# PASS : %d\n", pass_cnt) ;
     printf("# FAIL : %d\n", fail_cnt) ;
     printf("# UNRESOLVED : %d\n", unresolved_cnt) ;
@@ -567,15 +567,14 @@ fuzzer_main (test_config_t * config)
     allocate_contents(&contents) ;
 
     int src_total_line_cnt = 0 ;
-    // int * coverages = 0x0 ;
     coverage_t * coverages ;
-    char * cov_set ;
+    coverage_t * cov_set ;
 
     if (is_source) {
         coverages = (coverage_t *) malloc(sizeof(coverage_t) * trials) ;
         src_total_line_cnt = get_total_line_cnt(source_path) ;
-        cov_set = (char *) malloc(sizeof(char) * src_total_line_cnt) ; 
-        memset(cov_set, '0', src_total_line_cnt) ;
+        cov_set = (coverage_t *) malloc(sizeof(coverage_t) * src_total_line_cnt) ;
+        memset(cov_set, 0, sizeof(coverage_t) * src_total_line_cnt) ;
     }
 
     double exec_time_ms = fuzzer_loop (return_codes, results, contents, coverages, cov_set, src_total_line_cnt) ;

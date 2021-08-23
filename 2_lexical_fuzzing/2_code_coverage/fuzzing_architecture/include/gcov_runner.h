@@ -26,7 +26,7 @@ void compile_with_coverage (char * target_path, char * target_path_c) ;
 
 void run_gcov (char * source_filename) ;
 
-coverage_t get_coverage (char * cov_set, int total_line_cnt, char * source_filename) ;
+coverage_t get_coverage (coverage_t * cov_set, int total_line_cnt, char * source_filename) ;
 
 void remove_files (char * executable, char * source_filename) ;
 

@@ -111,7 +111,7 @@ run_gcov (char * source_filename)
 }
 
 coverage_t
-read_gcov_file (char * cov_set, int total_line_cnt, char * source_filename) 
+read_gcov_file (coverage_t * cov_set, int total_line_cnt, char * source_filename) 
 {
     char gcov_file[PATH_MAX] ;
     sprintf(gcov_file, "%s.gcov", source_filename) ;
@@ -147,7 +147,7 @@ read_gcov_file (char * cov_set, int total_line_cnt, char * source_filename)
     }
 
     for (int i = 0; i < cov.line; i++) {
-        cov_set[line_result[i]] = '1' ;
+        cov_set[line_result[i]].line = 1 ;
     }
 
     free(buf) ;
@@ -179,7 +179,7 @@ remove_gcda (char * source_filename)
 }
 
 coverage_t
-get_coverage (char * cov_set, int total_line_cnt, char * source_filename)
+get_coverage (coverage_t * cov_set, int total_line_cnt, char * source_filename)
 {
     run_gcov(source_filename) ;
     coverage_t coverage = read_gcov_file(cov_set, total_line_cnt, source_filename) ;
