@@ -2,21 +2,21 @@
 
 ## Fuzzing Architecture w/ Code Coverage
 
-### config.h & config.c
+### include/config.h & src/config.c
 
 - test_config.option : Fuzzing option : fuzz stdin | argument | file contents
 - test_config.fuzzed_args_num : The number of arguments you want to fuzz
 - test_config.is_source : It indicates if the target is c source file (0 or 1)
 - test_config.source_path : If is_source is true, you need to pass the source path here
 
-### fuzzer.h
+### src/fuzzer.h
 
 - content_t : Now the fuzzer save input/output contents by CONTENTS_MAX bytes
 
-### fuzzer.c & gcov_runner.c & gcov_runner.h
+### src/fuzzer.c & src/gcov_runner.c & include/gcov_runner.h
 
 If you choose a c source file as a target, the fuzzer compiles it with `--coverage` and gets coverage summary (both line and branch).<br>
-Below is an example of execution results.
+Below is an example of execution results for target `lib/cgi_decode.c`.
 
 ```
 ...
