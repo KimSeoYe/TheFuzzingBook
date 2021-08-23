@@ -584,10 +584,10 @@ fuzzer_main (test_config_t * config)
     if (is_source) {
         coverages = (coverage_t *) malloc(sizeof(coverage_t) * trials) ;
 
-        src_cnts.line = get_total_line_cnt(source_path) ;   // TODO. modify to count #####...
-        src_cnts.branch = get_total_branch_cnt(source_filename) ;
-        // src_cnts = get_src_cnts(source_filename) ;
-        // printf("DEBUG: LINE: %d\nBRANCH: %d\n", src_cnts.line, src_cnts.branch) ;
+        // src_cnts.line = get_total_line_cnt(source_path) ;   // TODO. modify to count #####...
+        // src_cnts.branch = get_total_branch_cnt(source_filename) ;
+        src_cnts = get_src_cnts(source_filename) ;
+        printf("DEBUG: LINE: %d\nBRANCH: %d\n", src_cnts.line, src_cnts.branch) ;
 
         if (src_cnts.line >= src_cnts.branch) cov_set_len = src_cnts.line ;
         else cov_set_len = src_cnts.branch ;
