@@ -105,7 +105,7 @@ mutate (char * dst, char * seed, int seed_len)
 void
 multiple_mutate (char * seed, int seed_len, int trials) 
 {
-    char dst[2048] ;
+    char * dst = (char *) malloc(sizeof(char) * (seed_len * 2)) ;
     memcpy(dst, seed, seed_len) ;
     int new_len = seed_len ;
 
@@ -115,4 +115,5 @@ multiple_mutate (char * seed, int seed_len, int trials)
         }
         new_len = mutate(dst, dst, new_len) ;
     }
+    free(dst) ;
 }
