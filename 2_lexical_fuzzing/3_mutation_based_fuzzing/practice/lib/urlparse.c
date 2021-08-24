@@ -20,7 +20,7 @@ int
 urlparse (url_t * result, char * url)
 {
     regex_t preg ;
-    char * pattern = "^([a-z]+)://([a-z0-9.]+)/?([a-z0-9./]*)\\?\?([a-z0-9=]*)#?([a-z]*)" ;
+    char * pattern = "^([a-z]+)://([a-z0-9.]+)/?([a-zA-Z0-9./]*)\\?\?([a-zA-Z0-9=]*)#?([a-zA-Z0-9]*)" ;
     size_t nmatch = 6 ;
     regmatch_t pmatch[6] ;
 
