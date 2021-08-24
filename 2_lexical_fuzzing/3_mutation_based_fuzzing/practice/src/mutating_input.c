@@ -5,7 +5,7 @@
 
 #include "../include/mutating_input.h"
 
-#define DEBUG
+// #define DEBUG
 
 typedef enum mutator { DELETE = 0, INSERT, FLIP } mutator_t ;
 
@@ -40,7 +40,7 @@ insert_random_character (char * dst, char * seed, int seed_len)
     } 
 
     int position = rand() % seed_len ;
-    char rand_char = (char) (rand() % 96 + 32) ; 
+    char rand_char = (char) (rand() % 96 + 32) ; // TODO. range
 
 #ifdef DEBUG
     printf("Inserting %c at %d\n", rand_char, position) ;
@@ -100,4 +100,19 @@ mutate (char * dst, char * seed, int seed_len)
     }
 
     return new_len ;
+}
+
+void
+multiple_mutate (char * seed, int seed_len, int trials) 
+{
+    char dst[2048] ;
+    memcpy(dst, seed, seed_len) ;
+    int new_len = seed_len ;
+
+    for (int i = 0; i < trials; i++) {
+        if (i % 5 == 0) {
+            printf("%d mutations: %s\n", i, dst) ;
+        }
+        new_len = mutate(dst, dst, new_len) ;
+    }
 }

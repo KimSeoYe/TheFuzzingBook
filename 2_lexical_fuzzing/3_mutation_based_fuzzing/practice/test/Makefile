@@ -7,5 +7,8 @@ LIBS=../lib/urlparse.c
 all: $(TARGET) $(SRCS) $(LIBS)
 	gcc -o url_test url_test.c ../src/mutating_input.c ../lib/urlparse.c
 
+url_test: url_test.c ../src/mutating_input.c ../lib/urlparse.c
+	gcc -o url_test url_test.c ../src/mutating_input.c ../lib/urlparse.c
+
 clean:
 	rm -rf $(EXECS) $(OBJS)
