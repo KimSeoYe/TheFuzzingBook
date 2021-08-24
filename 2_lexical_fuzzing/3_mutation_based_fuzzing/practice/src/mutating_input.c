@@ -2,7 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
-#include <math.h>
+
+#include "../include/mutating_input.h"
 
 #define DEBUG
 
@@ -96,17 +97,4 @@ mutate (char * dst, char * seed, int seed_len)
     }
 
     return new_len ;
-}
-
-// temp
-int
-main ()
-{
-    srand(time(0x0)) ;
-
-    char seed_input[] = "A quick brown fox" ;
-    char dst[128] ;
-
-    mutate(dst, seed_input, strlen(seed_input)) ;
-    printf(">> %s\n", dst) ;
 }
