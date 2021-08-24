@@ -15,7 +15,7 @@
 ///////////////////////////////////// Fuzzer Status /////////////////////////////////////
 
 static int trials ;
-fuzopt_t fuzz_option ;
+fuzopt_t option ;
 static int fuzzed_args_num = 0 ;
 static int is_source ;
 static char source_path[PATH_MAX] ;
@@ -38,11 +38,11 @@ copy_status (test_config_t * config)
     trials = config->trials ;
     fuzargs = config->fuzargs ; 
 
-    fuzz_option = config->fuzz_option ;
-    if (fuzz_option == ARGUMENT) {
+    option = config->option ;
+    if (option == ARGUMENT) {
         fuzzed_args_num = config->fuzzed_args_num ;
         if (fuzzed_args_num == 0) {
-            perror("copy_status: Invalid fuzzed_args_num for fuzz_option ARGUMENT") ;
+            perror("copy_status: Invalid fuzzed_args_num for option ARGUMENT") ;
             exit(1) ;
         }
     }
@@ -214,11 +214,11 @@ write_input_files (content_t contents, char * input, int input_len, int trial)
 void 
 execute_target(content_t contents, char * input, int input_len, int trial)
 {
-    if (fuzz_option == STD_IN) write_input_files(contents, input, input_len, trial) ;
+    if (option == STD_IN) write_input_files(contents, input, input_len, trial) ;
 
     alarm(runargs.timeout) ;
 
-    if (fuzz_option == STD_IN) {
+    if (option == STD_IN) {
         if (write(stdin_pipes[1], input, input_len) != input_len) {
             perror("execute_target: write") ;
         }
@@ -418,8 +418,8 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
     char * input = (char *) malloc(sizeof(char) * (fuzargs.f_max_len + 1)) ;
     for (int i = 0; i < trials; i++) {
         int input_len = 0 ;
-        if (fuzz_option == STD_IN) input_len = fuzz_input(&fuzargs, input) ;
-        else if (fuzz_option == ARGUMENT) fuzz_argument(contents, &fuzargs, i) ;
+        if (option == STD_IN) input_len = fuzz_input(&fuzargs, input) ;
+        else if (option == ARGUMENT) fuzz_argument(contents, &fuzargs, i) ;
 
         return_codes[i] = run(contents, input, input_len, i) ;
 
