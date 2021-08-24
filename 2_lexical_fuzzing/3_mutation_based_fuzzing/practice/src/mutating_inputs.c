@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 
 #define DEBUG
 
@@ -20,10 +21,8 @@ delete_random_character (char * dst, char * seed, int seed_len)
     printf("Deleting %c at %d\n", seed[position], position) ;
 #endif
 
-    strncpy(dst, seed, position) ;
-    dst[position] = 0x0 ;
-
-    strcat(dst, seed + position + 1) ;
+    memcpy(dst, seed, position) ;
+    memcpy(dst + position, seed + position + 1, seed_len - position - 1) ;
     dst[seed_len - 1] = 0x0 ;
 
     return seed_len - 1 ;
@@ -44,11 +43,10 @@ insert_random_character (char * dst, char * seed, int seed_len)
     printf("Inserting %c at %d\n", rand_char, position) ;
 #endif
 
-    strncpy(dst, seed, position) ;
+    memcpy(dst, seed, position) ;
     dst[position] = rand_char ;
-    dst[position + 1] = 0x0 ;
 
-    strcat(dst, seed + position) ;
+    memcpy(dst + position + 1, seed + position, seed_len - position) ;
     dst[seed_len + 1] = 0x0 ;
 
     return seed_len + 1 ;
@@ -63,17 +61,17 @@ flip_random_character (char * dst, char * seed, int seed_len)
     } 
 
     int position = rand() % seed_len ;
-    char rand_char = (char) (rand() % 96 + 32) ; 
+    int bit = 1 << (rand() % 7) ;
+    char new_char = (char) seed[position] ^ bit ;   // Q.
 
 #ifdef DEBUG
-    printf("Flipping %c at %d\n", rand_char, position) ;
+    printf("Flipping %d in %d giving %c at %d\n", bit, seed[position], new_char, position) ;
 #endif
 
-    strncpy(dst, seed, position) ;
-    dst[position] = rand_char ;
-    dst[position + 1] = 0x0 ;
+    memcpy(dst, seed, position) ;
+    dst[position] = new_char ;
 
-    strcat(dst, seed + position + 1) ;
+    memcpy(dst + position + 1, seed + position + 1, seed_len - position - 1) ;
     dst[seed_len] = 0x0 ;
 
     return seed_len ;
@@ -109,9 +107,6 @@ main ()
     char seed_input[] = "A quick brown fox" ;
     char dst[128] ;
 
-    // delete_random_character(dst, seed_input, strlen(seed_input)) ;
-    // insert_random_character(dst, seed_input, strlen(seed_input)) ;
-    // flip_random_character(dst, seed_input, strlen(seed_input)) ;
     mutate(dst, seed_input, strlen(seed_input)) ;
     printf(">> %s\n", dst) ;
 }
