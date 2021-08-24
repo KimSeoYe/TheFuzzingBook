@@ -5,6 +5,8 @@
 #include <time.h>
 #include <signal.h>
 #include <sys/time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "../include/fuzzer.h"
 #include "../include/fuzz_input.h"
@@ -36,7 +38,6 @@ void
 copy_status (test_config_t * config)
 {
     trials = config->trials ;
-    fuzargs = config->fuzargs ; 
 
     option = config->option ;
     if (option == ARGUMENT) {
@@ -46,6 +47,28 @@ copy_status (test_config_t * config)
             exit(1) ;
         }
     }
+
+
+    fuzargs.f_max_len = config->fuzargs.f_max_len ;
+    fuzargs.f_min_len = config->fuzargs.f_min_len ;
+
+    fuzargs.f_char_start = config->fuzargs.f_char_start ;
+    fuzargs.f_char_range = config->fuzargs.f_char_range ;
+
+    struct stat st_seed_dir ;
+    if (stat(config->fuzargs.seed_dir, &st_seed_dir) == -1) {
+        perror("copy_status: stat") ;
+        exit(1) ;
+    }
+
+    if (S_ISDIR(st_seed_dir.st_mode)) {
+        strcpy(fuzargs.seed_dir, config->fuzargs.seed_dir) ;
+    }
+    else {
+        perror("copy_status: S_ISDIR: Invalid seed_dir") ;
+        exit(1) ;
+    }
+    
 
     is_source = config->is_source ;
     if (is_source) {

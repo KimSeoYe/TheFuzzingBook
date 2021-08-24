@@ -12,6 +12,7 @@ typedef struct fuzarg {
 
     int f_char_start ;  // starting point of the input range
     int f_char_range ;  // range of input characters (ascii)
+    char seed_dir[PATH_MAX] ;
 } fuzarg_t ;
 
 typedef struct runarg { 

@@ -43,6 +43,7 @@ set_configs (test_config_t * config)
     config->fuzargs.f_char_range = 255 ;
     // config->fuzargs.f_min_len = 100 ;
     // config->fuzargs.f_max_len = 100 ;
+    strcpy(config->fuzargs.seed_dir, "./seed_dir") ;
 
     config->option = ARGUMENT ;
     config->fuzzed_args_num = 1 ;
