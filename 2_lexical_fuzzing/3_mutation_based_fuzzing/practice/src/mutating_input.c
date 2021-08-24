@@ -12,8 +12,9 @@ typedef enum mutator { DELETE = 0, INSERT, FLIP } mutator_t ;
 int
 delete_random_character (char * dst, char * seed, int seed_len) 
 {
-    if (strcmp(seed, "") == 0) {
-        strncpy(dst, seed, seed_len) ;
+    if (seed_len == 0) {
+        dst[0] = 0x0 ;
+        perror("delete_random_character: seed_len == 0") ;
         return 0 ;
     } 
 
@@ -32,8 +33,9 @@ delete_random_character (char * dst, char * seed, int seed_len)
 int
 insert_random_character (char * dst, char * seed, int seed_len) 
 {
-    if (strcmp(seed, "") == 0) {
-        strncpy(dst, seed, seed_len) ;
+    if (seed_len == 0) {
+        dst[0] = 0x0 ;
+        perror("insert_random_character: seed_len == 0") ;
         return 0 ;
     } 
 
@@ -56,8 +58,9 @@ insert_random_character (char * dst, char * seed, int seed_len)
 int
 flip_random_character (char * dst, char * seed, int seed_len) 
 {
-    if (strcmp(seed, "") == 0) {
+    if (seed_len == 0) {
         dst[0] = 0x0 ;
+        perror("flip_random_character: seed_len == 0") ;
         return 0 ;
     } 
 
