@@ -13,7 +13,7 @@ init_config (test_config_t * config)
     config->fuzargs.f_char_start = 32 ;
     config->fuzargs.f_char_range = 32 ;
 
-    config->option = STD_IN ;
+    config->fuzz_option = STD_IN ;
     config->fuzzed_args_num = 0 ;
 
     config->is_source = 0 ;
