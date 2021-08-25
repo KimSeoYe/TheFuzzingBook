@@ -3,8 +3,6 @@
 #include <string.h>
 #include <regex.h>
 
-#include "../include/urlparse.h"
-
 #define URL_MAX 2048 // URLs over 2,000 characters will not work in the most popular web browsers. (https://web.archive.org/web/20190902193246/https://boutell.com/newfaq/misc/urllength.html)
 
 // Q. sizes ?
@@ -33,8 +31,6 @@ urlparse (url_t * result, char * url)
         perror("urlparse: regexec: Invalid url") ;
         return -1 ;
     }
-
-    printf("%s\n", url + pmatch[0].rm_so) ;
 
     memcpy(result->scheme, url + pmatch[1].rm_so, pmatch[1].rm_eo - pmatch[1].rm_so) ;
     result->scheme[pmatch[1].rm_eo - pmatch[1].rm_so] = 0x0 ;
@@ -79,4 +75,16 @@ is_valid_url (char * url)
         perror("is_valid_url: ") ;
         return 0 ;
     }
+}
+
+int
+main (int argc, char * argv[])
+{
+    if (argc != 2) {
+        perror("usage: ./urlparse \"url\"") ;
+        return 1 ;
+    }
+
+    printf("INPUT: %s\n", argv[1]) ;
+    is_valid_url(argv[1]) ;
 }
