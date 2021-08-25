@@ -135,8 +135,6 @@ get_src_cnts (char * source_filename)
     }
     fclose(fp) ;
 
-    remove_gcda(source_filename) ;
-
     return cnt ;
 }
 
