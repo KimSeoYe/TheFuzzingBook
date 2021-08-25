@@ -263,9 +263,15 @@ write_input_files (content_t contents, char * input, int input_len, int trial)
 {
     char in_path[RESULT_PATH_MAX] ;
     get_path(in_path, trial, 0) ;
+    printf("[DEBUG] %d get_path : %s\n", __LINE__, in_path) ;
 
-    strncpy(contents.input_contents[trial], input, CONTENTS_MAX - 1) ;
-    contents.input_contents[trial][CONTENTS_MAX - 1] = 0x0 ;
+    if (input_len >= CONTENTS_MAX - 1) {
+        memcpy(contents.input_contents[trial], input, CONTENTS_MAX - 1) ;
+        contents.input_contents[trial][CONTENTS_MAX - 1] = 0x0 ;
+    }
+    else {
+        memcpy(contents.input_contents[trial], input, input_len) ;
+    }
 
     FILE * in_fp = fopen(in_path, "wb") ;
     if (in_fp == 0x0) {
@@ -325,8 +331,14 @@ write_output_files (content_t contents, int trial, int fd){
     
     if (fd == 1) {
         while ((s = read(stdout_pipes[0], buf, 1024)) > 0) {
-            strncpy(contents.stdout_contents[trial], buf, CONTENTS_MAX - 1) ;
-            contents.stdout_contents[trial][CONTENTS_MAX - 1] = 0x0 ;
+            if (s >= CONTENTS_MAX - 1) {
+                memcpy(contents.stdout_contents[trial], buf, CONTENTS_MAX - 1) ;
+                contents.stdout_contents[trial][CONTENTS_MAX - 1] = 0x0 ;
+            }
+            else {
+                memcpy(contents.stdout_contents[trial], buf, s) ;
+            }
+            
 
             if (fwrite(buf, 1, s, fp) != s) {
                 perror("fwrite: save_results: stdout") ;
@@ -336,8 +348,13 @@ write_output_files (content_t contents, int trial, int fd){
     }
     else if (fd == 2) {
         while ((s = read(stderr_pipes[0], buf, 1024)) > 0) {
-            strncpy(contents.stderr_contents[trial], buf, CONTENTS_MAX - 1) ;
-            contents.stderr_contents[trial][CONTENTS_MAX - 1] = 0x0 ;
+            if (s >= CONTENTS_MAX - 1) {
+                memcpy(contents.stderr_contents[trial], buf, CONTENTS_MAX - 1) ;
+                contents.stderr_contents[trial][CONTENTS_MAX - 1] = 0x0 ;
+            }
+            else {
+                memcpy(contents.stderr_contents[trial], buf, s) ;
+            }
 
             if (fwrite(buf, 1, s, fp) != s) {
                 perror("fwrite: save_results: stderr") ;
@@ -440,7 +457,7 @@ write_input_args_file (content_t contents, int first_input_len, int trial)
     char in_path[RESULT_PATH_MAX] ;
     get_path(in_path, trial, 0) ;
 
-    if (strlen(parsed_args[cmd_args_num - 1]) > CONTENTS_MAX - 1) {  // TODO. strlen
+    if (strlen(parsed_args[cmd_args_num - 1]) >= CONTENTS_MAX - 1) {  // TODO. strlen, strcpy
         strncpy(contents.input_contents[trial], parsed_args[cmd_args_num - 1], CONTENTS_MAX - 1) ;  
         contents.input_contents[trial][CONTENTS_MAX - 1] = 0x0 ;
     }
@@ -513,11 +530,14 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
         else if (fuzz_option == ARGUMENT) fuzz_argument(contents, &fuzargs, i) ;
 
         return_codes[i] = run(contents, input, input_len, i) ;
+        printf("[DEBUG] %d run end w/ return code %d\n", i, return_codes[i]) ;
 
         if (is_source) {
             coverage_t cov = get_coverage(cov_set, src_cnts, source_filename) ;
+            printf("[DEBUG] %d get_coverage end w/ ", i) ;
             coverages[i].line = cov.line ;
             coverages[i].branch = cov.branch ;
+            printf("line %d, branch %d\n", coverages[i].line, coverages[i].branch) ;
         }
 
         results[i] = oracle_run(return_codes[i], i) ;
@@ -560,17 +580,6 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
     int total_line_coverage = 0 ;
     int total_branch_coverage = 0 ;
     if (is_source) {
-    #ifdef LINE_COVERAGES
-        printf("\n=======================================================\n") ;
-        printf("LINE COVERAGES\n") ;
-        printf("=======================================================\n") ;
-        for (int i = 0; i < trials; i++) {
-            printf("%d : ", coverages[i].line) ;
-            for (int j = 0; j < coverages[i].line; j++) printf("#") ;
-            printf("\n") ;
-        }
-        printf("=======================================================\n") ;
-    #endif
         for (int i = 0; i < cov_set_len; i++) {
             total_line_coverage += cov_set[i].line ;
             total_branch_coverage += cov_set[i].branch ;
