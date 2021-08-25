@@ -49,16 +49,18 @@ copy_status (test_config_t * config)
 
     fuzz_type = config->fuzz_type ;
     if (fuzz_type == MUTATION) {
+        if (realpath(config->fuzargs.seed_dir, fuzargs.seed_dir) == 0x0) {
+            perror("copy_status: realpath: fuzargs.seed_dir") ;
+            exit(1) ;
+        }
+
         struct stat st_seed_dir ;
-        if (stat(config->fuzargs.seed_dir, &st_seed_dir) == -1) {
+        if (stat(fuzargs.seed_dir, &st_seed_dir) == -1) {
             perror("copy_status: stat") ;
             exit(1) ;
         }
 
-        if (S_ISDIR(st_seed_dir.st_mode)) {
-            strcpy(fuzargs.seed_dir, config->fuzargs.seed_dir) ;
-        }
-        else {
+        if (!S_ISDIR(st_seed_dir.st_mode)) {
             perror("copy_status: S_ISDIR: Invalid seed_dir") ;
             exit(1) ;
         }
