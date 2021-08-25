@@ -440,8 +440,13 @@ write_input_args_file (content_t contents, int first_input_len, int trial)
     char in_path[RESULT_PATH_MAX] ;
     get_path(in_path, trial, 0) ;
 
-    strncpy(contents.input_contents[trial], parsed_args[cmd_args_num - 1], CONTENTS_MAX - 1) ;  // TODO. buggy..?
-    contents.input_contents[trial][CONTENTS_MAX - 1] = 0x0 ;
+    if (strlen(parsed_args[cmd_args_num - 1]) > CONTENTS_MAX - 1) {  // TODO. strlen
+        strncpy(contents.input_contents[trial], parsed_args[cmd_args_num - 1], CONTENTS_MAX - 1) ;  
+        contents.input_contents[trial][CONTENTS_MAX - 1] = 0x0 ;
+    }
+    else {
+        strcpy(contents.input_contents[trial], parsed_args[cmd_args_num - 1]) ;
+    }
 
     FILE * in_fp = fopen(in_path, "wb") ;
     if (in_fp == 0x0) {
