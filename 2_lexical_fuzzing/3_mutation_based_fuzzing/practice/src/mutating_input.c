@@ -5,7 +5,7 @@
 
 #include "../include/mutating_input.h"
 
-// #define DEBUG
+#define DEBUG
 
 typedef enum mutator { DELETE = 0, INSERT, FLIP } mutator_t ;
 
