@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 #include "../include/fuzzer.h"
@@ -39,8 +40,6 @@ set_configs (test_config_t * config)
     config->is_source = 1 ;
     strcpy(config->source_path, "../lib/troff_bug_simulate.c") ;
 
-    config->trials = 100 ;
-    
     config->fuzargs.f_char_start = 0 ;
     config->fuzargs.f_char_range = 255 ;
     
@@ -55,8 +54,11 @@ main (int argc, char * argv[])
     set_configs(&config) ;
 
     int opt ;
-    while ((opt = getopt(argc, argv, "m:")) != -1) {
+    while ((opt = getopt(argc, argv, "t:m:")) != -1) {
         switch(opt) {
+            case 't':
+                config.trials = atoi(optarg) ;
+                break ;
             case 'm':
                 config.fuzz_type = MUTATION ;
                 strcpy(config.fuzargs.seed_dir, optarg) ;

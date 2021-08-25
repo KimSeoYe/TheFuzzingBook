@@ -23,10 +23,10 @@ print_stderr (int trial)
 }
 
 int 
-hunspell_oracle (int return_code, int trial)
+oracle (int return_code, int trial)
 {
     if (return_code != 0) {
-        print_stderr(trial) ;
+        // print_stderr(trial) ;
         return -1 ;   
     }
 
@@ -36,10 +36,18 @@ hunspell_oracle (int return_code, int trial)
 void
 set_configs (test_config_t * config)
 {
-    strcpy(config->runargs.binary_path, "/usr/local/bin/hunspell") ;
-    config->fuzargs.f_char_start = 32 ;
-    config->fuzargs.f_char_range = 95 ;
-    config->oracle = hunspell_oracle ;
+    config->is_source = 1 ;
+    strcpy(config->source_path, "../lib/urlparse.c") ;
+
+    config->runargs.timeout = 2 ;
+
+    config->fuzargs.f_char_start = 0 ;
+    config->fuzargs.f_char_range = 255 ;
+
+    config->fuzz_option = ARGUMENT ;
+    config->fuzzed_args_num = 1 ;
+    
+    config->oracle = oracle ;
 }
 
 int

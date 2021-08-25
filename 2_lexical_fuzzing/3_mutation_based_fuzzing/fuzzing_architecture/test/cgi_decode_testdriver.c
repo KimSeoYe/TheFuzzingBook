@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 #include "../include/fuzzer.h"
@@ -47,8 +48,6 @@ set_configs (test_config_t * config)
 
     config->fuzz_option = ARGUMENT ;
     config->fuzzed_args_num = 1 ;
-
-    config->trials = 100 ;
     
     config->oracle = oracle ;
 }
@@ -61,8 +60,11 @@ main (int argc, char * argv[])
     set_configs(&config) ;
 
     int opt ;
-    while ((opt = getopt(argc, argv, "m:")) != -1) {
+    while ((opt = getopt(argc, argv, "t:m:")) != -1) {
         switch(opt) {
+            case 't':
+                config.trials = atoi(optarg) ;
+                break ;
             case 'm':
                 config.fuzz_type = MUTATION ;
                 strcpy(config.fuzargs.seed_dir, optarg) ;

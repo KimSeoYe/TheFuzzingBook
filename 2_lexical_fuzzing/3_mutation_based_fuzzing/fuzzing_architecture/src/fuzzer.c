@@ -464,8 +464,14 @@ fuzz_argument (content_t contents, fuzarg_t * fuzargs, int trial)
     int i ;
     for (i = cmd_args_num - 1; i < cmd_args_num + fuzzed_args_num - 1; i++) {
         parsed_args[i] = (char *) malloc(sizeof(char) * (fuzargs->f_max_len + 1)) ;
-        // first_input_len = fuzz_input(fuzargs, parsed_args[i]) ;
-        first_input_len = mutate_input(parsed_args[i], fuzargs, seed_filenames[trial % seed_files_num]) ;
+        switch (fuzz_type) {
+            case RANDOM: 
+                first_input_len = fuzz_input(fuzargs, parsed_args[i]) ;
+                break ;
+            case MUTATION:
+                first_input_len = mutate_input(parsed_args[i], fuzargs, seed_filenames[trial % seed_files_num]) ;
+                break ;
+        }
     }
     parsed_args[i] = 0x0 ;
 
@@ -485,7 +491,8 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
 {
     clock_t start = clock() ;
 
-    char * input = (char *) malloc(sizeof(char) * (fuzargs.f_max_len + 1)) ;
+    char * input = (char *) malloc(sizeof(char) * (fuzargs.f_max_len + 1)) ;    // TODO -> mutation ?
+    
     for (int i = 0; i < trials; i++) {
         int input_len = 0 ;
         if (fuzz_option == STD_IN) {
@@ -498,7 +505,6 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
                     break ;
             }
         }
-        // if (fuzz_option == STD_IN) input_len = mutate_input(input, &fuzargs, seed_filenames[i % seed_files_num]) ;
         else if (fuzz_option == ARGUMENT) fuzz_argument(contents, &fuzargs, i) ;
 
         return_codes[i] = run(contents, input, input_len, i) ;
