@@ -7,14 +7,18 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <dirent.h>
 
 #include "../include/fuzzer.h"
 #include "../include/fuzz_input.h"
 #include "../include/gcov_runner.h"
+#include "../include/mutate.h"
 
 // #define DEBUG
 
 ///////////////////////////////////// Fuzzer Status /////////////////////////////////////
+
+# define SEED_CNT_MAX 512
 
 static int trials ;
 fuzopt_t option ;
@@ -28,9 +32,12 @@ static int (* oracle) (int return_code, int trial) ;
 
 // Q. static global ?
 static char dir_name[RESULT_PATH_MAX] ;  
-static char ** parsed_args ; // TODO. as a local var.
+
+static char ** parsed_args ; // Q. local var ?
 static int cmd_args_num = 2 ;
 
+static char ** seed_filenames ;
+static int seed_files_num ;
 
 ///////////////////////////////////// Fuzzer Init /////////////////////////////////////
 
@@ -47,7 +54,6 @@ copy_status (test_config_t * config)
             exit(1) ;
         }
     }
-
 
     fuzargs.f_max_len = config->fuzargs.f_max_len ;
     fuzargs.f_min_len = config->fuzargs.f_min_len ;
@@ -87,7 +93,7 @@ copy_status (test_config_t * config)
     strcpy(runargs.cmd_args, config->runargs.cmd_args) ;
     runargs.timeout = config->runargs.timeout ;
 
-    oracle = config->oracle ; // Q.
+    oracle = config->oracle ; 
 }
 
 void
@@ -113,7 +119,7 @@ parse_args ()
 }
 
 int
-default_oracle (int return_codes, int trial)    // Q.
+default_oracle (int return_codes, int trial)
 {
     if (return_codes == 0) return 0 ;
     else return -1 ;
@@ -132,9 +138,46 @@ create_temp_dir ()
 }
 
 void
+read_seed_dir ()
+{
+    int num_files = 0 ;
+
+    DIR * dir_ptr = 0x0 ;
+    struct dirent * entry = 0x0 ;
+
+    if ((dir_ptr = opendir(fuzargs.seed_dir)) == 0x0) {
+        perror("read_seed_dir: opendir") ;
+        exit(1) ;
+    }
+
+    seed_filenames = (char **) malloc(sizeof(char *) * SEED_CNT_MAX) ;
+
+    while ((entry = readdir(dir_ptr)) != 0x0) {
+        if (num_files != 0 && num_files % SEED_CNT_MAX == 0) {
+            seed_filenames = realloc(seed_filenames, sizeof(char *) * (num_files / SEED_CNT_MAX + 1)) ;
+            if (seed_filenames == 0x0) {
+                perror("read_seed_dir: realloc") ;
+                break ;
+            }
+        }
+
+        if (entry->d_name[0] != '.') {  // TODO. more condition ?
+            seed_filenames[num_files] = (char *) malloc(sizeof(char) * (strlen(entry->d_name) + 1)) ;
+            strcpy(seed_filenames[num_files], entry->d_name) ;
+            num_files++ ;
+        }
+    }
+    seed_files_num = num_files ;
+
+    closedir(dir_ptr) ;
+}
+
+void
 fuzzer_init (test_config_t * config)
 {
     copy_status(config) ;
+
+    read_seed_dir() ;
 
     if (fuzargs.f_min_len > fuzargs.f_max_len) {
         perror("fuzzer_init: invalid fuzzer arguments:\n\tf_min_len is bigger than f_max_len") ;
@@ -418,7 +461,7 @@ fuzz_argument (content_t contents, fuzarg_t * fuzargs, int trial)
     int i ;
     for (i = cmd_args_num - 1; i < cmd_args_num + fuzzed_args_num - 1; i++) {
         parsed_args[i] = (char *) malloc(sizeof(char) * (fuzargs->f_max_len + 1)) ;
-        first_input_len = fuzz_input(fuzargs, parsed_args[i]) ;
+        first_input_len = mutate_input(parsed_args[i], fuzargs, seed_filenames[trial % seed_files_num]) ;
     }
     parsed_args[i] = 0x0 ;
 
@@ -441,7 +484,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
     char * input = (char *) malloc(sizeof(char) * (fuzargs.f_max_len + 1)) ;
     for (int i = 0; i < trials; i++) {
         int input_len = 0 ;
-        if (option == STD_IN) input_len = fuzz_input(&fuzargs, input) ;
+        if (option == STD_IN) input_len = mutate_input(input, &fuzargs, seed_filenames[i % seed_files_num]) ;
         else if (option == ARGUMENT) fuzz_argument(contents, &fuzargs, i) ;
 
         return_codes[i] = run(contents, input, input_len, i) ;
@@ -475,7 +518,7 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
     for (int i = 0; i < trials; i++) {
         printf("(CompletedProcess(target='%s', args='%s', ", runargs.binary_path, runargs.cmd_args) ;
         if (is_source) printf("line_coverage='%d', branch_coverage='%d', ", coverages[i].line, coverages[i].branch) ;
-        printf("returncode='%d', input = '%s', stdout='%s', stderr='%s', result='%s'))\n", return_codes[i], contents.input_contents[i], contents.stdout_contents[i], contents.stderr_contents[i], result_strings[results[i]]) ;
+        printf("returncode='%d', input='%s', stdout='%s', stderr='%s', result='%s'))\n", return_codes[i], contents.input_contents[i], contents.stdout_contents[i], contents.stderr_contents[i], result_strings[results[i]]) ;
         
         switch(results[i]) {
             case PASS:
@@ -569,6 +612,15 @@ free_contents (content_t contents)
     free(contents.stderr_contents) ;
 }
 
+void
+free_seed_filenames ()
+{
+    for (int i = 0; i < seed_files_num; i++) {
+        free(seed_filenames[i]) ;
+    }
+    free(seed_filenames) ;
+}
+
 
 ///////////////////////////////////// Fuzzer Main /////////////////////////////////////
 
@@ -618,7 +670,6 @@ fuzzer_main (test_config_t * config)
     double exec_time_ms = fuzzer_loop (return_codes, results, contents, coverages, cov_set, src_cnts) ;
     fuzzer_summary(return_codes, results, contents, coverages, cov_set, cov_set_len, src_cnts, exec_time_ms) ;
 
-
     if (is_source) {
         remove_files(runargs.binary_path, source_filename) ;
         free(coverages) ;
@@ -628,5 +679,6 @@ fuzzer_main (test_config_t * config)
     free(return_codes) ;
     free(results) ;
     free_parsed_args() ;
+    free_seed_filenames() ;
     remove_temp_dir() ;  
 }

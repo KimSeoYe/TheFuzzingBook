@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "../include/mutate.h"
 #include "../include/config.h"
+#include "../include/mutate.h"
 #include "../include/fuzzer.h"
 
 // #define DEBUG
@@ -104,12 +104,49 @@ mutate (char * dst, char * seed, int seed_len)
     return new_len ;
 }
 
-int
-mutate_input (char * dst, fuzarg_t * fuzargs)
+void
+get_seed_path (char * dst, char * dir_name, char * file_name)
 {
-    /*
-        
-        read file
-        mutate
-    */
+    if (strlen(dir_name) + strlen(file_name) + 1 > PATH_MAX) {
+        perror("get_seed_path: Too long path") ;
+        exit(1) ;
+    }
+    strcpy(dst, dir_name) ;
+    if (dst[strlen(dst) - 1] != '/') {
+        strcat(dst, "/") ;
+    }
+    strcat(dst, file_name) ;
+}
+
+int
+mutate_input (char * dst, fuzarg_t * fuzargs, char * seed_filename)
+{
+    char seed_path[PATH_MAX] ;
+    get_seed_path(seed_path, fuzargs->seed_dir, seed_filename) ;
+
+    FILE * fp = fopen(seed_path, "rb") ;
+    if (fp == 0x0) {
+        perror("mutate_input: fopen") ;
+        exit(1) ;
+    }
+
+    int input_max = 1024 ;
+    char * seed_input = (char *) malloc(sizeof(char) * input_max) ;
+
+    int s, total_len = 0 ;
+    char buf[1024] ;
+    while ((s = fread(buf, 1, 1024, fp)) > 0) {
+        if (total_len + s > 1024) {
+            seed_input = realloc(seed_input, sizeof(char) * ((total_len + s) / 1024 + 1)) ;
+        }
+
+        memcpy(seed_input + total_len, buf, s) ;
+        total_len += s ;
+    }
+    fclose(fp) ;
+
+    int mutate_len = mutate(dst, seed_input, total_len) ;
+    free(seed_input) ;
+    
+    return mutate_len ;
 }
