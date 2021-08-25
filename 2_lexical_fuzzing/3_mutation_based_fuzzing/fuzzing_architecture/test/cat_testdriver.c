@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "../include/fuzzer.h"
 
@@ -79,18 +80,28 @@ void
 set_configs (test_config_t * config)
 {
     strcpy(config->runargs.binary_path, "/bin/cat") ;
-    // strcpy(config->runargs.cmd_args, "-b -e") ;
-    strcpy(config->fuzargs.seed_dir, "./seed_dir") ;
     config->oracle = cat_oracle ;
-    config->fuzz_type = MUTATION ;
 }
 
 int
-main ()
+main (int argc, char * argv[])
 {
+    // ./cat_testdriver -m ./seed_dir
+
     test_config_t config ;
     init_config(&config) ;
     set_configs(&config) ;
+
+    int opt ;
+    while ((opt = getopt(argc, argv, "m:")) != -1) {
+        switch(opt) {
+            case 'm':
+                config.fuzz_type = MUTATION ;
+                strcpy(config.fuzargs.seed_dir, optarg) ;
+                printf(">> %s\n", config.fuzargs.seed_dir) ;
+                break ;
+        }
+    }
 
     fuzzer_main(&config) ;
 }

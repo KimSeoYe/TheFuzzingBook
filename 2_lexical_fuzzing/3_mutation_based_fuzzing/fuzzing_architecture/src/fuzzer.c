@@ -180,7 +180,7 @@ fuzzer_init (test_config_t * config)
 {
     copy_status(config) ;
 
-    read_seed_dir() ;
+    if (fuzz_type == MUTATION) read_seed_dir() ;
 
     if (fuzargs.f_min_len > fuzargs.f_max_len) {
         perror("fuzzer_init: invalid fuzzer arguments:\n\tf_min_len is bigger than f_max_len") ;

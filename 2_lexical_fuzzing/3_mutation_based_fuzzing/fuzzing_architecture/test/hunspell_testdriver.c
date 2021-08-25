@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "../include/fuzzer.h"
 
@@ -42,11 +43,21 @@ set_configs (test_config_t * config)
 }
 
 int
-main ()
+main (int argc, char * argv[])
 {
     test_config_t config ;
     init_config(&config) ;
     set_configs(&config) ;
+
+    int opt ;
+    while ((opt = getopt(argc, argv, "m:")) != -1) {
+        switch(opt) {
+            case 'm':
+                config.fuzz_type = MUTATION ;
+                strcpy(config.fuzargs.seed_dir, optarg) ;
+                break ;
+        }
+    }
 
     fuzzer_main(&config) ;
 }

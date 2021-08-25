@@ -5,16 +5,12 @@ SRCS=../src/config.c ../src/fuzzer.c ../src/fuzz_input.c ../src/gcov_runner.c ..
 
 all: $(TARGETS) $(SRCS)
 	gcc -o cat_testdriver cat_testdriver.c ../src/config.c ../src/fuzzer.c ../src/fuzz_input.c ../src/gcov_runner.c ../src/mutate.c
-	gcc -o ../lib/troff_bug_simulate ../lib/troff_bug_simulate.c 
 	gcc -o troff_testdriver troff_testdriver.c ../src/config.c ../src/fuzzer.c ../src/fuzz_input.c ../src/gcov_runner.c ../src/mutate.c
 	gcc -o hunspell_testdriver hunspell_testdriver.c ../src/config.c ../src/fuzzer.c ../src/fuzz_input.c ../src/gcov_runner.c ../src/mutate.c
 	gcc -o cgi_decode_testdriver cgi_decode_testdriver.c ../src/config.c ../src/fuzzer.c ../src/fuzz_input.c ../src/gcov_runner.c ../src/mutate.c
 
 cat_testdriver: cat_testdriver.c ../src/config.c ../src/fuzzer.c ../src/fuzz_input.c ../src/gcov_runner.c ../src/mutate.c
 	gcc -o cat_testdriver cat_testdriver.c ../src/config.c ../src/fuzzer.c ../src/fuzz_input.c ../src/gcov_runner.c ../src/mutate.c
-
-troff_bug_simulate: ../lib/troff_bug_simulate.c 
-	gcc -o ../lib/troff_bug_simulate ../lib/troff_bug_simulate.c 
 
 troff_testdriver: ../lib/troff_bug_simulate.c troff_testdriver.c ../src/config.c ../src/fuzzer.c ../src/fuzz_input.c ../src/gcov_runner.c ../src/mutate.c
 	# gcc -o ../lib/troff_bug_simulate ../lib/troff_bug_simulate.c 
