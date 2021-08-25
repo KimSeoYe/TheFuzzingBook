@@ -45,10 +45,12 @@ set_configs (test_config_t * config)
     // config->fuzargs.f_max_len = 100 ;
     strcpy(config->fuzargs.seed_dir, "./seed_dir") ;
 
-    config->option = ARGUMENT ;
+    config->fuzz_option = ARGUMENT ;
     config->fuzzed_args_num = 1 ;
 
     config->trials = 100 ;
+    config->fuzz_type = MUTATION ;
+    
     config->oracle = oracle ;
 }
 

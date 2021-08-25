@@ -43,6 +43,7 @@ set_configs (test_config_t * config)
     config->fuzargs.f_char_start = 0 ;
     config->fuzargs.f_char_range = 255 ;
     strcpy(config->fuzargs.seed_dir, "./seed_dir") ;
+    config->fuzz_type = MUTATION ;
     
     config->oracle = troff_oracle ;
 }

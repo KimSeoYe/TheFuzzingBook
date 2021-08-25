@@ -5,6 +5,7 @@
 #define ARG_MAX 1024
 
 typedef enum fuzopt { STD_IN = 0, ARGUMENT, FILE_CONTENTS } fuzopt_t ;
+typedef enum fuztype { RANDOM = 0, MUTATION } fuztype_t ;
 
 typedef struct fuzarg {
     int f_min_len ;     // minimum length of fuzzer input
@@ -23,12 +24,17 @@ typedef struct runarg {
 
 typedef struct test_config {   
     int trials ;                    // total trials
-    fuzopt_t option ;               // fuzzing option : fuzz stdin | argument | file contents
-    int fuzzed_args_num ;                  // target program's argument # (default 0)
+    fuztype_t fuzz_type ;
+
+    fuzopt_t fuzz_option ;          // fuzzing fuzz_option : fuzz stdin | argument | file contents
+    int fuzzed_args_num ;           // target program's argument # (default 0)
+
     int is_source ;                 // is the target c source file ? (1: true, 0: false)
     char source_path[PATH_MAX] ;    // path of c source file (if is_source is true)
+
     fuzarg_t fuzargs ;              
     runarg_t runargs ;
+
     int (* oracle) (int return_code, int trial) ;
 } test_config_t ;
 

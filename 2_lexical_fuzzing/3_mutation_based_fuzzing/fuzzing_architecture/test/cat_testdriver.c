@@ -82,6 +82,7 @@ set_configs (test_config_t * config)
     // strcpy(config->runargs.cmd_args, "-b -e") ;
     strcpy(config->fuzargs.seed_dir, "./seed_dir") ;
     config->oracle = cat_oracle ;
+    config->fuzz_type = MUTATION ;
 }
 
 int

@@ -21,7 +21,8 @@
 # define SEED_CNT_MAX 512
 
 static int trials ;
-fuzopt_t option ;
+fuztype_t fuzz_type ;
+fuzopt_t fuzz_option ;
 static int fuzzed_args_num = 0 ;
 static int is_source ;
 static char source_path[PATH_MAX] ;
@@ -46,11 +47,28 @@ copy_status (test_config_t * config)
 {
     trials = config->trials ;
 
-    option = config->option ;
-    if (option == ARGUMENT) {
+    fuzz_type = config->fuzz_type ;
+    if (fuzz_type == MUTATION) {
+        struct stat st_seed_dir ;
+        if (stat(config->fuzargs.seed_dir, &st_seed_dir) == -1) {
+            perror("copy_status: stat") ;
+            exit(1) ;
+        }
+
+        if (S_ISDIR(st_seed_dir.st_mode)) {
+            strcpy(fuzargs.seed_dir, config->fuzargs.seed_dir) ;
+        }
+        else {
+            perror("copy_status: S_ISDIR: Invalid seed_dir") ;
+            exit(1) ;
+        }
+    }
+
+    fuzz_option = config->fuzz_option ;
+    if (fuzz_option == ARGUMENT) {
         fuzzed_args_num = config->fuzzed_args_num ;
         if (fuzzed_args_num == 0) {
-            perror("copy_status: Invalid fuzzed_args_num for option ARGUMENT") ;
+            perror("copy_status: Invalid fuzzed_args_num for fuzz_option ARGUMENT") ;
             exit(1) ;
         }
     }
@@ -60,21 +78,6 @@ copy_status (test_config_t * config)
 
     fuzargs.f_char_start = config->fuzargs.f_char_start ;
     fuzargs.f_char_range = config->fuzargs.f_char_range ;
-
-    struct stat st_seed_dir ;
-    if (stat(config->fuzargs.seed_dir, &st_seed_dir) == -1) {
-        perror("copy_status: stat") ;
-        exit(1) ;
-    }
-
-    if (S_ISDIR(st_seed_dir.st_mode)) {
-        strcpy(fuzargs.seed_dir, config->fuzargs.seed_dir) ;
-    }
-    else {
-        perror("copy_status: S_ISDIR: Invalid seed_dir") ;
-        exit(1) ;
-    }
-    
 
     is_source = config->is_source ;
     if (is_source) {
@@ -280,11 +283,11 @@ write_input_files (content_t contents, char * input, int input_len, int trial)
 void 
 execute_target(content_t contents, char * input, int input_len, int trial)
 {
-    if (option == STD_IN) write_input_files(contents, input, input_len, trial) ;
+    if (fuzz_option == STD_IN) write_input_files(contents, input, input_len, trial) ;
 
     alarm(runargs.timeout) ;
 
-    if (option == STD_IN) {
+    if (fuzz_option == STD_IN) {
         if (write(stdin_pipes[1], input, input_len) != input_len) {
             perror("execute_target: write") ;
         }
@@ -461,6 +464,7 @@ fuzz_argument (content_t contents, fuzarg_t * fuzargs, int trial)
     int i ;
     for (i = cmd_args_num - 1; i < cmd_args_num + fuzzed_args_num - 1; i++) {
         parsed_args[i] = (char *) malloc(sizeof(char) * (fuzargs->f_max_len + 1)) ;
+        // first_input_len = fuzz_input(fuzargs, parsed_args[i]) ;
         first_input_len = mutate_input(parsed_args[i], fuzargs, seed_filenames[trial % seed_files_num]) ;
     }
     parsed_args[i] = 0x0 ;
@@ -484,8 +488,18 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
     char * input = (char *) malloc(sizeof(char) * (fuzargs.f_max_len + 1)) ;
     for (int i = 0; i < trials; i++) {
         int input_len = 0 ;
-        if (option == STD_IN) input_len = mutate_input(input, &fuzargs, seed_filenames[i % seed_files_num]) ;
-        else if (option == ARGUMENT) fuzz_argument(contents, &fuzargs, i) ;
+        if (fuzz_option == STD_IN) {
+            switch (fuzz_type) {
+                case RANDOM: 
+                    input_len = fuzz_input(&fuzargs, input) ;
+                    break ;
+                case MUTATION:
+                    input_len = mutate_input(input, &fuzargs, seed_filenames[i % seed_files_num]) ;
+                    break ;
+            }
+        }
+        // if (fuzz_option == STD_IN) input_len = mutate_input(input, &fuzargs, seed_filenames[i % seed_files_num]) ;
+        else if (fuzz_option == ARGUMENT) fuzz_argument(contents, &fuzargs, i) ;
 
         return_codes[i] = run(contents, input, input_len, i) ;
 
