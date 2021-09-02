@@ -120,7 +120,7 @@ get_seed_path (char * dst, char * dir_name, char * file_name)
 
 int
 mutate_input (char * dst, fuzarg_t * fuzargs, char * seed_filename)
-{
+{ 
     char seed_path[PATH_MAX] ;
     get_seed_path(seed_path, fuzargs->seed_dir, seed_filename) ;
 

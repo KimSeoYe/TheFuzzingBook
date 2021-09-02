@@ -39,11 +39,6 @@ set_configs (test_config_t * config)
     config->is_source = 1 ;
     strcpy(config->source_path, "../lib/urlparse.c") ;
 
-    config->runargs.timeout = 2 ;
-
-    config->fuzargs.f_char_start = 0 ;
-    config->fuzargs.f_char_range = 255 ;
-
     config->fuzz_option = ARGUMENT ;
     config->fuzzed_args_num = 1 ;
     

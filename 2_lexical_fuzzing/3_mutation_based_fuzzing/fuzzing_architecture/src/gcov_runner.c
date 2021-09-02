@@ -55,6 +55,7 @@ int
 exec_program (char * program, char ** arguments)
 {
     pid_t child_pid = fork() ;
+
     if (child_pid == 0) {
         if (execv(program, arguments) == -1) {
             perror("exec_program: execv") ;
@@ -68,7 +69,7 @@ exec_program (char * program, char ** arguments)
 
     int exit_code ;
     wait(&exit_code) ;
-
+    
     return exit_code ;
 }
 
@@ -76,7 +77,7 @@ void
 compile_with_coverage (char * target_path, char * target_path_c)
 {
     char * compile_args[] = { "/usr/bin/gcc", "--coverage", "-o", target_path, target_path_c, 0x0 } ;
-
+    
     if (exec_program("/usr/bin/gcc", compile_args) != 0) {
         perror("compile_with_coverage: exec_program") ;
         exit(1) ;

@@ -87,4 +87,6 @@ main (int argc, char * argv[])
 
     printf("INPUT: %s\n", argv[1]) ;
     is_valid_url(argv[1]) ;
+
+    return 0 ;
 }

@@ -14,7 +14,7 @@
 #include "../include/gcov_runner.h"
 #include "../include/mutate.h"
 
-// #define DEBUG
+#define DEBUG
 
 ///////////////////////////////////// Fuzzer Status /////////////////////////////////////
 
@@ -104,14 +104,14 @@ copy_status (test_config_t * config)
 void
 parse_args ()
 {   
-    parsed_args = (char **) malloc(sizeof(char *) * ARG_N_MAX) ;
+    parsed_args = (char **) malloc(sizeof(char *) * ARG_N_MAX) ;    // Q.
 
     parsed_args[0] = (char *) malloc(sizeof(char) * (strlen(runargs.binary_path) + 1)) ;
     strcpy(parsed_args[0], runargs.binary_path) ;
 
     int i ;
     char * tok_ptr = strtok(runargs.cmd_args, " ") ; 
-    for (i = 1; tok_ptr != NULL; i++) { 
+    for (i = 1; tok_ptr != 0x0; i++) { 
         cmd_args_num++ ;
         parsed_args[i] = (char *) malloc(sizeof(char) * (strlen(tok_ptr) + 1)) ;
         strcpy(parsed_args[i], tok_ptr) ;
@@ -182,8 +182,6 @@ fuzzer_init (test_config_t * config)
 {
     copy_status(config) ;
 
-    if (fuzz_type == MUTATION) read_seed_dir() ;
-
     if (fuzargs.f_min_len > fuzargs.f_max_len) {
         perror("fuzzer_init: invalid fuzzer arguments:\n\tf_min_len is bigger than f_max_len") ;
         exit(1) ;
@@ -232,6 +230,8 @@ fuzzer_init (test_config_t * config)
     }
 #endif
 
+    if (fuzz_type == MUTATION) read_seed_dir() ;
+
     create_temp_dir() ;
 }
 
@@ -265,7 +265,6 @@ write_input_files (content_t contents, char * input, int input_len, int trial)
 {
     char in_path[RESULT_PATH_MAX] ;
     get_path(in_path, trial, 0) ;
-    printf("[DEBUG] %d get_path : %s\n", __LINE__, in_path) ;
 
     if (input_len >= CONTENTS_MAX - 1) {
         memcpy(contents.input_contents[trial], input, CONTENTS_MAX - 1) ;
@@ -487,7 +486,7 @@ fuzz_argument (content_t contents, fuzarg_t * fuzargs, int trial)
 
     int i ;
     for (i = cmd_args_num - 1; i < cmd_args_num + fuzzed_args_num - 1; i++) {
-        parsed_args[i] = (char *) malloc(sizeof(char) * (fuzargs->f_max_len + 1)) ;
+        parsed_args[i] = (char *) malloc(sizeof(char) * (fuzargs->f_max_len + 1)) ; // TODO. mutation ?
         switch (fuzz_type) {
             case RANDOM: 
                 first_input_len = fuzz_input(fuzargs, parsed_args[i]) ;
@@ -532,11 +531,9 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
         else if (fuzz_option == ARGUMENT) fuzz_argument(contents, &fuzargs, i) ;
 
         return_codes[i] = run(contents, input, input_len, i) ;
-        printf("[DEBUG] %d run end w/ return code %d\n", i, return_codes[i]) ;
 
         if (is_source) {
             coverage_t cov = get_coverage(cov_set, src_cnts, source_filename) ;
-            printf("[DEBUG] %d get_coverage end w/ ", i) ;
             coverages[i].line = cov.line ;
             coverages[i].branch = cov.branch ;
             printf("line %d, branch %d\n", coverages[i].line, coverages[i].branch) ;
@@ -712,9 +709,10 @@ fuzzer_main (test_config_t * config)
         free(cov_set) ;
     }
 
+    if (fuzz_type == MUTATION) free_seed_filenames() ;
+
     free(return_codes) ;
     free(results) ;
     free_parsed_args() ;
-    free_seed_filenames() ;
     remove_temp_dir() ;  
 }
