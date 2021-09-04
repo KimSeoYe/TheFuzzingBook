@@ -14,7 +14,7 @@
 #include "../include/gcov_runner.h"
 #include "../include/mutate.h"
 
-#define DEBUG
+// #define DEBUG
 
 ///////////////////////////////////// Fuzzer Status /////////////////////////////////////
 
@@ -272,6 +272,7 @@ write_input_files (content_t contents, char * input, int input_len, int trial)
     }
     else {
         memcpy(contents.input_contents[trial], input, input_len) ;
+        contents.input_contents[trial][input_len] = 0x0 ;
     }
 
     FILE * in_fp = fopen(in_path, "wb") ;
@@ -290,7 +291,7 @@ write_input_files (content_t contents, char * input, int input_len, int trial)
 void 
 execute_target(content_t contents, char * input, int input_len, int trial)
 {
-    if (fuzz_option == STD_IN) write_input_files(contents, input, input_len, trial) ;
+    // if (fuzz_option == STD_IN) write_input_files(contents, input, input_len, trial) ;
 
     alarm(runargs.timeout) ;
 
@@ -329,18 +330,21 @@ write_output_files (content_t contents, int trial, int fd){
 
     char buf[1024] ;
     int s = 0 ;
+    int is_first = 1 ;
     
     if (fd == 1) {
         while ((s = read(stdout_pipes[0], buf, 1024)) > 0) {
-            if (s >= CONTENTS_MAX - 1) {
-                memcpy(contents.stdout_contents[trial], buf, CONTENTS_MAX - 1) ;
-                contents.stdout_contents[trial][CONTENTS_MAX - 1] = 0x0 ;
+            if (is_first) {
+                if (s >= CONTENTS_MAX - 1) {
+                    memcpy(contents.stdout_contents[trial], buf, CONTENTS_MAX - 1) ;
+                    contents.stdout_contents[trial][CONTENTS_MAX - 1] = 0x0 ;
+                }
+                else {
+                    memcpy(contents.stdout_contents[trial], buf, s) ;
+                    contents.stdout_contents[trial][s] = 0x0 ;
+                }
+                is_first = 0 ;
             }
-            else {
-                memcpy(contents.stdout_contents[trial], buf, s) ;
-            }
-            
-
             if (fwrite(buf, 1, s, fp) != s) {
                 perror("fwrite: save_results: stdout") ;
             }
@@ -349,12 +353,16 @@ write_output_files (content_t contents, int trial, int fd){
     }
     else if (fd == 2) {
         while ((s = read(stderr_pipes[0], buf, 1024)) > 0) {
-            if (s >= CONTENTS_MAX - 1) {
-                memcpy(contents.stderr_contents[trial], buf, CONTENTS_MAX - 1) ;
-                contents.stderr_contents[trial][CONTENTS_MAX - 1] = 0x0 ;
-            }
-            else {
-                memcpy(contents.stderr_contents[trial], buf, s) ;
+            if (is_first) {
+                if (s >= CONTENTS_MAX - 1) {
+                    memcpy(contents.stderr_contents[trial], buf, CONTENTS_MAX - 1) ;
+                    contents.stderr_contents[trial][CONTENTS_MAX - 1] = 0x0 ;
+                }
+                else {
+                    memcpy(contents.stderr_contents[trial], buf, s) ;
+                    contents.stderr_contents[trial][s] = 0x0 ;
+                }
+                is_first = 0 ;
             }
 
             if (fwrite(buf, 1, s, fp) != s) {
@@ -402,6 +410,8 @@ run (content_t contents, char * input, int input_len, int trial)
     if (pipe(stdout_pipes) != 0) goto pipe_err ;
     if (pipe(stderr_pipes) != 0) goto pipe_err ;
 
+    if (fuzz_option == STD_IN) write_input_files(contents, input, input_len, trial) ;
+
     child_pid = fork() ;
     if (child_pid == 0) {
         execute_target(contents, input, input_len, trial) ;
@@ -419,6 +429,8 @@ run (content_t contents, char * input, int input_len, int trial)
 #ifdef DEBUG
     printf("%d terminated w/ exit code %d\n", term_pid, exit_code) ;
 #endif
+
+    printf("RUN END: %s\n", contents.input_contents[trial]) ;
 
     return exit_code ;
 
@@ -458,12 +470,13 @@ write_input_args_file (content_t contents, int first_input_len, int trial)
     char in_path[RESULT_PATH_MAX] ;
     get_path(in_path, trial, 0) ;
 
-    if (strlen(parsed_args[cmd_args_num - 1]) >= CONTENTS_MAX - 1) {  // TODO. strlen, strcpy
-        strncpy(contents.input_contents[trial], parsed_args[cmd_args_num - 1], CONTENTS_MAX - 1) ;  
+    if (strlen(parsed_args[cmd_args_num - 1]) >= CONTENTS_MAX - 1) {  // TODO. strlen
+        memcpy(contents.input_contents[trial], parsed_args[cmd_args_num - 1], CONTENTS_MAX - 1) ;  
         contents.input_contents[trial][CONTENTS_MAX - 1] = 0x0 ;
     }
     else {
-        strcpy(contents.input_contents[trial], parsed_args[cmd_args_num - 1]) ;
+        memcpy(contents.input_contents[trial], parsed_args[cmd_args_num - 1], strlen(parsed_args[cmd_args_num - 1])) ;  // TODO. strlen
+        contents.input_contents[trial][strlen(parsed_args[cmd_args_num - 1])] = 0x0 ;
     }
 
     FILE * in_fp = fopen(in_path, "wb") ;
@@ -531,6 +544,9 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
         else if (fuzz_option == ARGUMENT) fuzz_argument(contents, &fuzargs, i) ;
 
         return_codes[i] = run(contents, input, input_len, i) ;
+
+        // DEBUG
+        printf("contents.input_content[%d] = %s\n", i, contents.input_contents[i]) ;
 
         if (is_source) {
             coverage_t cov = get_coverage(cov_set, src_cnts, source_filename) ;
@@ -714,5 +730,5 @@ fuzzer_main (test_config_t * config)
     free(return_codes) ;
     free(results) ;
     free_parsed_args() ;
-    remove_temp_dir() ;  
+    // remove_temp_dir() ;  
 }
