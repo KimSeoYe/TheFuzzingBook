@@ -18,10 +18,10 @@ Mutation-Based Fuzzing Architecture
   int mutate_input (char * dst, fuzarg_t * fuzargs, char * seed_filename) ;
   ```
 
-### new target programs in lib\urlparse.c
+## New target programs in lib\urlparse.c
 It simply parses the given url and checks if it is valid url (w/ http | https).
 
-### testdrivers usage
+## Testdrivers usage
 ```
 $ ./[testdriver] -m [seed_dir] -t [trials]
 ```
