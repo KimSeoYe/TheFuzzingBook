@@ -430,8 +430,6 @@ run (content_t contents, char * input, int input_len, int trial)
     printf("%d terminated w/ exit code %d\n", term_pid, exit_code) ;
 #endif
 
-    printf("RUN END: %s\n", contents.input_contents[trial]) ;
-
     return exit_code ;
 
 pipe_err:
@@ -544,9 +542,6 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
         else if (fuzz_option == ARGUMENT) fuzz_argument(contents, &fuzargs, i) ;
 
         return_codes[i] = run(contents, input, input_len, i) ;
-
-        // DEBUG
-        printf("contents.input_content[%d] = %s\n", i, contents.input_contents[i]) ;
 
         if (is_source) {
             coverage_t cov = get_coverage(cov_set, src_cnts, source_filename) ;
@@ -730,5 +725,5 @@ fuzzer_main (test_config_t * config)
     free(return_codes) ;
     free(results) ;
     free_parsed_args() ;
-    // remove_temp_dir() ;  
+    remove_temp_dir() ;  
 }
