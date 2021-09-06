@@ -8,6 +8,22 @@
 
 // #define DEBUG
 
+int
+get_total_line_cnt (char * source_path)
+{
+    int cnt = 0 ;
+
+    FILE * fp = fopen(source_path, "rb") ;
+    char * buf = 0x0 ;
+    size_t line_max = 0 ;
+    while(getline(&buf, &line_max, fp) > 0) {   // Q.
+        cnt++ ;
+    }
+    fclose(fp) ;
+
+    return cnt ;
+}
+
 void
 get_source_filename (char * dst, char * src)
 {
@@ -140,7 +156,7 @@ get_src_cnts (char * source_filename)
 }
 
 coverage_t
-read_gcov_file (coverage_t * cov_set, coverage_t src_cnts, char * source_filename) 
+read_gcov_file (coverage_t * cov_set, int cov_set_len, char * source_filename) 
 {
     char gcov_file[PATH_MAX] ;
     sprintf(gcov_file, "%s.gcov", source_filename) ;
@@ -155,8 +171,8 @@ read_gcov_file (coverage_t * cov_set, coverage_t src_cnts, char * source_filenam
     cov.line = 0 ;
     cov.branch = 0 ;
 
-    int * line_result = (int *) malloc(sizeof(int) * src_cnts.line) ;
-    int * branch_result = (int *) malloc(sizeof(int) * src_cnts.branch) ;
+    int * line_result = (int *) malloc(sizeof(int) * cov_set_len) ;  
+    int * branch_result = (int *) malloc(sizeof(int) * cov_set_len) ;
     
     char * buf = (char *) malloc(sizeof(char) * LINE_MAX) ;
     size_t line_max = LINE_MAX ;
@@ -179,6 +195,7 @@ read_gcov_file (coverage_t * cov_set, coverage_t src_cnts, char * source_filenam
     for (int i = 0; i < cov.line; i++) {
         cov_set[line_result[i]].line = 1 ;
     }
+
     for (int i = 0; i < cov.branch; i++) {
         cov_set[branch_result[i]].branch = 1 ;
     }
@@ -192,10 +209,10 @@ read_gcov_file (coverage_t * cov_set, coverage_t src_cnts, char * source_filenam
 }
 
 coverage_t
-get_coverage (coverage_t * cov_set, coverage_t src_cnts, char * source_filename)
+get_coverage (coverage_t * cov_set, int cov_set_len, char * source_filename)
 {
     run_gcov(source_filename) ;
-    coverage_t coverage = read_gcov_file(cov_set, src_cnts, source_filename) ;
+    coverage_t coverage = read_gcov_file(cov_set, cov_set_len, source_filename) ;
     remove_gcda(source_filename) ;
     
     return coverage ;

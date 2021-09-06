@@ -14,6 +14,8 @@ typedef struct coverage {
     int branch ;
 } coverage_t ;
 
+int get_total_line_cnt (char * source_path) ;
+
 void get_source_filename (char * dst, char * src) ;
 
 void get_executable_real_path (char * executable_path, char * source_path) ;
@@ -26,7 +28,7 @@ void run_gcov (char * source_filename) ;
 
 coverage_t get_src_cnts (char * source_filename) ;
 
-coverage_t get_coverage (coverage_t * cov_set, coverage_t src_cnts, char * source_filename) ;
+coverage_t get_coverage (coverage_t * cov_set, int cov_set_len, char * source_filename) ;
 
 void remove_files (char * executable, char * source_filename) ;
 
