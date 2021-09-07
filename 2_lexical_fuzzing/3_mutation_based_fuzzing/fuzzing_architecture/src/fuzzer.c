@@ -543,8 +543,10 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
 
         return_codes[i] = run(contents, input, input_len, i) ;
 
+        int is_cov_grow = 0 ;
         if (is_source) {
-            coverage_t cov = get_coverage(cov_set, cov_set_len, source_filename) ;
+            coverage_t cov ;
+            is_cov_grow = get_coverage(&cov, cov_set, cov_set_len, source_filename) ;
             coverages[i].line = cov.line ;
             coverages[i].branch = cov.branch ;
             printf("line %d, branch %d\n", coverages[i].line, coverages[i].branch) ;

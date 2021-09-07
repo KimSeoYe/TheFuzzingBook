@@ -155,8 +155,8 @@ get_src_cnts (char * source_filename)
     return cnt ;
 }
 
-coverage_t
-read_gcov_file (coverage_t * cov_set, int cov_set_len, char * source_filename) 
+int
+read_gcov_file (coverage_t * cov, coverage_t * cov_set, int cov_set_len, char * source_filename) 
 {
     char gcov_file[PATH_MAX] ;
     sprintf(gcov_file, "%s.gcov", source_filename) ;
@@ -167,9 +167,9 @@ read_gcov_file (coverage_t * cov_set, int cov_set_len, char * source_filename)
         exit(1) ;
     }
 
-    coverage_t cov ;
-    cov.line = 0 ;
-    cov.branch = 0 ;
+    // coverage_t cov ;
+    cov->line = 0 ;
+    cov->branch = 0 ;
 
     int * line_result = (int *) malloc(sizeof(int) * cov_set_len) ;  
     int * branch_result = (int *) malloc(sizeof(int) * cov_set_len) ;
@@ -180,7 +180,7 @@ read_gcov_file (coverage_t * cov_set, int cov_set_len, char * source_filename)
     for (int branch_num = 0 ; getline(&buf, &line_max, fp) > 0; ) {
         if (strncmp(buf, "branch", 6) == 0) {
             if (strstr(buf, "taken") != 0x0) {
-                branch_result[cov.branch++] = branch_num ;
+                branch_result[cov->branch++] = branch_num ;
             }
             branch_num++ ;
         }
@@ -188,15 +188,21 @@ read_gcov_file (coverage_t * cov_set, int cov_set_len, char * source_filename)
         char * covered = strtok(buf, ":") ; 
         if (atoi(covered) > 0) { 
             char * line_number = strtok(0x0, ":") ;
-            line_result[cov.line++] = atoi(line_number) ;
+            line_result[cov->line++] = atoi(line_number) ;
         }
     }
 
-    for (int i = 0; i < cov.line; i++) {
+    int is_cov_grow = 0 ;
+
+    for (int i = 0; i < cov->line; i++) {
         cov_set[line_result[i]].line = 1 ;
     }
 
-    for (int i = 0; i < cov.branch; i++) {
+    for (int i = 0; i < cov->branch; i++) {
+        if (cov_set[branch_result[i]].branch == 0) {
+            // Q. how to notify that it grows coverage?
+            is_cov_grow = 1 ;
+        }
         cov_set[branch_result[i]].branch = 1 ;
     }
 
@@ -205,17 +211,19 @@ read_gcov_file (coverage_t * cov_set, int cov_set_len, char * source_filename)
     free(line_result) ;
     free(branch_result) ;
 
-    return cov ;
+    // return cov ;
+    return is_cov_grow ;
 }
 
-coverage_t
-get_coverage (coverage_t * cov_set, int cov_set_len, char * source_filename)
+int
+get_coverage (coverage_t * coverage, coverage_t * cov_set, int cov_set_len, char * source_filename)
 {
     run_gcov(source_filename) ;
-    coverage_t coverage = read_gcov_file(cov_set, cov_set_len, source_filename) ;
+    int is_cov_grow = read_gcov_file(coverage, cov_set, cov_set_len, source_filename) ;
+    // coverage_t coverage = read_gcov_file(cov_set, cov_set_len, source_filename) ;
     remove_gcda(source_filename) ;
     
-    return coverage ;
+    return is_cov_grow ;
 }
 
 void 
