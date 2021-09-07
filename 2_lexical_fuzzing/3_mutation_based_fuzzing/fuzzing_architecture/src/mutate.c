@@ -104,10 +104,14 @@ bit_flip (char * dst, char * seed, int seed_len)
         return 0 ;
     } 
 
-    int position = rand() % seed_len ;
-    int bit = 1 << (rand() % 7) ;
-    char new_char = (char) seed[position] ^ bit ;   // Q.
+    int bit_size[3] = { 1, 3, 15 } ;
+    int bit_index = rand() % 3 ;
 
+    int position = rand() % seed_len ;
+    int bit = bit_size[bit_index] << (rand() % 7) ;
+
+    char new_char = (char) seed[position] ^ bit ;   // Q.
+    
 #ifdef DEBUG
     printf("Bit-flip %d in %d giving %c at %d\n", bit, seed[position], new_char, position) ;
 #endif
@@ -136,7 +140,8 @@ byte_flip (char * dst, char * seed, int seed_len)
     int byte_size[3] = { 1, 2, 4 } ;
     for (int i = 2; i >= 0; i--) {
         if (seed_len >= byte_size[i]) {
-            position = rand() % (seed_len - byte_size[i]) ;
+            if (seed_len == byte_size[i]) position = 0 ;
+            else position = rand() % (seed_len - byte_size[i]) ;
             new_char = (char) seed[position] ^ 0xff ;
             break ;
         }
