@@ -130,12 +130,20 @@ byte_flip (char * dst, char * seed, int seed_len)
         return 0 ;
     } 
 
-    int position = rand() % seed_len ;
-    int bit = 1 << (rand() % 7) ;
-    char new_char = (char) seed[position] ^ bit ;   // Q.
+    int position ;
+    char new_char ;
+
+    int byte_size[3] = { 1, 2, 4 } ;
+    for (int i = 2; i >= 0; i--) {
+        if (seed_len >= byte_size[i]) {
+            position = rand() % (seed_len - byte_size[i]) ;
+            new_char = (char) seed[position] ^ 0xff ;
+            break ;
+        }
+    }
 
 #ifdef DEBUG
-    printf("Bit-flip %d in %d giving %c at %d\n", bit, seed[position], new_char, position) ;
+    printf("Byte-flip: seed[position]=%d, new_char=%c, position=%d\n", seed[position], new_char, position) ;
 #endif
 
     memcpy(dst, seed, position) ;
