@@ -194,12 +194,15 @@ read_gcov_file (coverage_t * cov, coverage_t * cov_set, int cov_set_len, char * 
     int is_cov_grow = 0 ;
 
     for (int i = 0; i < cov->line; i++) {
+        if (cov_set[line_result[i]].line == 0) {
+            is_cov_grow = 1 ;
+        }
         cov_set[line_result[i]].line = 1 ;
     }
 
     for (int i = 0; i < cov->branch; i++) {
         if (cov_set[branch_result[i]].branch == 0) {
-            is_cov_grow = 1 ;   // Q. how to notify if coverage grows?
+            is_cov_grow = 1 ; 
         }
         cov_set[branch_result[i]].branch = 1 ;
     }
