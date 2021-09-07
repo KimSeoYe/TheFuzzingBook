@@ -601,7 +601,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
             is_cov_grow = get_coverage(&cov, cov_set, cov_set_len, source_filename) ;
             coverages[i].line = cov.line ;
             coverages[i].branch = cov.branch ;
-            if (is_cov_grow) {
+            if (is_cov_grow && fuzz_type == MUTATION) { // TODO. if not mutation
                 update_corpus(input, input_len, i) ;
             }
         }
@@ -626,7 +626,8 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
     int fail_cnt = 0 ;
     int unresolved_cnt = 0 ;
 
-    coverage_t src_cnts = get_src_cnts(source_filename) ;
+    coverage_t src_cnts ;
+    if (is_source) src_cnts = get_src_cnts(source_filename) ;
 
     for (int i = 0; i < trials; i++) {
         printf("(CompletedProcess(target='%s', args='%s', ", runargs.binary_path, runargs.cmd_args) ;
@@ -766,7 +767,6 @@ fuzzer_main (test_config_t * config)
         memset(cov_set, 0, sizeof(coverage_t) * cov_set_len) ;
     }
 
-    
     double exec_time_ms = fuzzer_loop (return_codes, results, contents, coverages, cov_set, cov_set_len) ;
     fuzzer_summary(return_codes, results, contents, coverages, cov_set, cov_set_len, exec_time_ms) ;
 
@@ -781,5 +781,6 @@ fuzzer_main (test_config_t * config)
     free(return_codes) ;
     free(results) ;
     free_parsed_args() ;
+    free(parsed_args_lengths) ;
     remove_temp_dir() ;  
 }
