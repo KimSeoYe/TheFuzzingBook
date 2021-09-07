@@ -35,6 +35,7 @@ static int (* oracle) (int return_code, int trial) ;
 static char dir_name[RESULT_PATH_MAX] ;  
 
 static char ** parsed_args ; // Q. local var ?
+static int * parsed_args_lengths ;
 static int cmd_args_num = 2 ;
 
 static char ** seed_filenames ;
@@ -105,8 +106,10 @@ void
 parse_args ()
 {   
     parsed_args = (char **) malloc(sizeof(char *) * ARG_N_MAX) ;    // Q.
+    parsed_args_lengths = (int *) malloc(sizeof(int) * ARG_N_MAX) ;
 
     parsed_args[0] = (char *) malloc(sizeof(char) * (strlen(runargs.binary_path) + 1)) ;
+    parsed_args_lengths[0] = strlen(runargs.binary_path) ;
     strcpy(parsed_args[0], runargs.binary_path) ;
 
     int i ;
@@ -114,12 +117,14 @@ parse_args ()
     for (i = 1; tok_ptr != 0x0; i++) { 
         cmd_args_num++ ;
         parsed_args[i] = (char *) malloc(sizeof(char) * (strlen(tok_ptr) + 1)) ;
+        parsed_args_lengths[i] = strlen(tok_ptr) ;
         strcpy(parsed_args[i], tok_ptr) ;
 
         tok_ptr = strtok(0x0, " ") ;
     }
     
     parsed_args[i] = (char *) malloc(sizeof(char) * 1) ;
+    parsed_args_lengths[i] = 0 ;
     parsed_args[i] = 0x0 ;
 }
 
@@ -225,7 +230,7 @@ fuzzer_init (test_config_t * config)
     parse_args() ;
 #ifdef DEBUG
     for (int i = 0; i < cmd_args_num; i++) {
-        if (parsed_args[i] != 0x0) printf("parsed_args[%d] %s\n", i, parsed_args[i]) ;
+        if (parsed_args[i] != 0x0) printf("parsed_args[%d] %s(%d)\n", i, parsed_args[i], parsed_args_lengths[i]) ;
         else printf("parsed_args[%d] 0x0\n", i) ;
     }
 #endif
@@ -291,8 +296,6 @@ write_input_files (content_t contents, char * input, int input_len, int trial)
 void 
 execute_target(content_t contents, char * input, int input_len, int trial)
 {
-    // if (fuzz_option == STD_IN) write_input_files(contents, input, input_len, trial) ;
-
     alarm(runargs.timeout) ;
 
     if (fuzz_option == STD_IN) {
@@ -463,18 +466,31 @@ oracle_run (int return_code, int trial)   // Q. useless..?
 ///////////////////////////////////// Fuzzer Loop /////////////////////////////////////
 
 void
-write_input_args_file (content_t contents, int first_input_len, int trial)
+write_fuzzed_args_to_file (FILE * fp)
+{
+    for (int i = 1; i <= fuzzed_args_num; i++) {
+        if (fwrite(parsed_args[cmd_args_num - i], 1, parsed_args_lengths[cmd_args_num - i], fp) !=  parsed_args_lengths[cmd_args_num - i]) {
+            perror("write_input_ars_file: fwrite") ;
+        }
+        if (fwrite(" ", 1, 1, fp) != 1) {     
+            perror("write_input_ars_file: fwrite") ;
+        }
+    }
+}
+
+void
+write_input_args_file (content_t contents, int trial)
 {
     char in_path[RESULT_PATH_MAX] ;
     get_path(in_path, trial, 0) ;
 
-    if (strlen(parsed_args[cmd_args_num - 1]) >= CONTENTS_MAX - 1) {  // TODO. strlen
+    if (parsed_args_lengths[cmd_args_num - 1] >= CONTENTS_MAX - 1) { 
         memcpy(contents.input_contents[trial], parsed_args[cmd_args_num - 1], CONTENTS_MAX - 1) ;  
         contents.input_contents[trial][CONTENTS_MAX - 1] = 0x0 ;
     }
     else {
-        memcpy(contents.input_contents[trial], parsed_args[cmd_args_num - 1], strlen(parsed_args[cmd_args_num - 1])) ;  // TODO. strlen
-        contents.input_contents[trial][strlen(parsed_args[cmd_args_num - 1])] = 0x0 ;
+        memcpy(contents.input_contents[trial], parsed_args[cmd_args_num - 1], parsed_args_lengths[cmd_args_num - 1]) ;
+        contents.input_contents[trial][parsed_args_lengths[cmd_args_num - 1]] = 0x0 ;
     }
 
     FILE * in_fp = fopen(in_path, "wb") ;
@@ -483,9 +499,7 @@ write_input_args_file (content_t contents, int first_input_len, int trial)
         exit(1) ;
     }
 
-    if (fwrite(parsed_args[cmd_args_num - 1], 1, first_input_len, in_fp) != first_input_len) {  
-        perror("write_input_ars_file: fwrite") ;
-    }
+    write_fuzzed_args_to_file (in_fp) ;
 
     fclose(in_fp) ;
 }
@@ -493,31 +507,69 @@ write_input_args_file (content_t contents, int first_input_len, int trial)
 void
 fuzz_argument (content_t contents, fuzarg_t * fuzargs, int trial)
 {
-    int first_input_len ;
-
     int i ;
     for (i = cmd_args_num - 1; i < cmd_args_num + fuzzed_args_num - 1; i++) {
         parsed_args[i] = (char *) malloc(sizeof(char) * (fuzargs->f_max_len + 1)) ; // TODO. mutation ?
         switch (fuzz_type) {
             case RANDOM: 
-                first_input_len = fuzz_input(fuzargs, parsed_args[i]) ;
+                parsed_args_lengths[i] = fuzz_input(fuzargs, parsed_args[i]) ;
                 break ;
             case MUTATION:
-                first_input_len = mutate_input(parsed_args[i], fuzargs, seed_filenames[trial % seed_files_num]) ;
+                parsed_args_lengths[i] = mutate_input(parsed_args[i], fuzargs, seed_filenames[trial % seed_files_num]) ;   
                 break ;
         }
     }
     parsed_args[i] = 0x0 ;
+    parsed_args_lengths[i] = 0 ;
 
 #ifdef DEBUG
     printf("TOTAL ARGS NUM: %d\n", cmd_args_num + fuzzed_args_num) ;
     printf("ARGS AFTER FUZZ\n") ;
     for (i = 0; i < cmd_args_num + fuzzed_args_num; i++) {
-        printf("[%d] %s\n", i, parsed_args[i]) ;
+        printf("[%d] %s(%d)\n", i, parsed_args[i], parsed_args_lengths[i]) ;
     }
 #endif
 
-    write_input_args_file (contents, first_input_len, trial) ;
+    write_input_args_file (contents, trial) ;
+}
+
+void
+update_corpus (char * input, int input_len, int trial)
+{
+    char new_seed_file[PATH_MAX] ;
+    sprintf(new_seed_file, "mutated_seed_%d", trial) ; // trial : to make a unique name
+
+    if (seed_files_num % SEED_CNT_MAX == 0 && seed_files_num / SEED_CNT_MAX > 0) {
+        seed_filenames = realloc(seed_filenames, sizeof(char *) * (seed_files_num / SEED_CNT_MAX + 1)) ;
+        if (seed_filenames == 0x0) {
+            perror("update_corpus: realloc") ;
+            exit(1) ;
+        }
+    }
+
+    seed_filenames[seed_files_num] = (char *) malloc(sizeof(char) * strlen(new_seed_file)) ;
+    strcpy(seed_filenames[seed_files_num], new_seed_file) ;
+    seed_files_num++ ;
+
+    char new_seed_path[PATH_MAX] ;
+    sprintf(new_seed_path, "%s/%s", fuzargs.seed_dir, new_seed_file) ;
+
+    FILE * fp = fopen(new_seed_path, "wb") ;
+    if (fp == 0x0) {
+        perror("update_corpus: fopen") ;
+        exit(1) ;
+    }
+
+    if (fuzz_option == STD_IN) {
+        if (fwrite(input, 1, input_len, fp) != input_len) {
+            perror("write_mutated_input: fwrite") ;
+        }
+    }
+    else if (fuzz_option == ARGUMENT) {
+        write_fuzzed_args_to_file(fp) ;
+    }
+
+    fclose(fp) ;
 }
 
 double
@@ -532,7 +584,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
         if (fuzz_option == STD_IN) {
             switch (fuzz_type) {
                 case RANDOM: 
-                    input_len = fuzz_input(&fuzargs, input) ;
+                    input_len = fuzz_input(&fuzargs, input) ;   // TODO. input as a first param.
                     break ;
                 case MUTATION:
                     input_len = mutate_input(input, &fuzargs, seed_filenames[i % seed_files_num]) ;
@@ -549,7 +601,9 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
             is_cov_grow = get_coverage(&cov, cov_set, cov_set_len, source_filename) ;
             coverages[i].line = cov.line ;
             coverages[i].branch = cov.branch ;
-            printf("line %d, branch %d\n", coverages[i].line, coverages[i].branch) ;
+            if (is_cov_grow) {
+                update_corpus(input, input_len, i) ;
+            }
         }
 
         results[i] = oracle_run(return_codes[i], i) ;

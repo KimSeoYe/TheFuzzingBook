@@ -167,7 +167,6 @@ read_gcov_file (coverage_t * cov, coverage_t * cov_set, int cov_set_len, char * 
         exit(1) ;
     }
 
-    // coverage_t cov ;
     cov->line = 0 ;
     cov->branch = 0 ;
 
@@ -200,8 +199,7 @@ read_gcov_file (coverage_t * cov, coverage_t * cov_set, int cov_set_len, char * 
 
     for (int i = 0; i < cov->branch; i++) {
         if (cov_set[branch_result[i]].branch == 0) {
-            // Q. how to notify that it grows coverage?
-            is_cov_grow = 1 ;
+            is_cov_grow = 1 ;   // Q. how to notify if coverage grows?
         }
         cov_set[branch_result[i]].branch = 1 ;
     }
@@ -211,7 +209,6 @@ read_gcov_file (coverage_t * cov, coverage_t * cov_set, int cov_set_len, char * 
     free(line_result) ;
     free(branch_result) ;
 
-    // return cov ;
     return is_cov_grow ;
 }
 
@@ -220,7 +217,6 @@ get_coverage (coverage_t * coverage, coverage_t * cov_set, int cov_set_len, char
 {
     run_gcov(source_filename) ;
     int is_cov_grow = read_gcov_file(coverage, cov_set, cov_set_len, source_filename) ;
-    // coverage_t coverage = read_gcov_file(cov_set, cov_set_len, source_filename) ;
     remove_gcda(source_filename) ;
     
     return is_cov_grow ;
