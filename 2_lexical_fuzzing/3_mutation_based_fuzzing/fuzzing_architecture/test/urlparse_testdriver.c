@@ -41,6 +41,8 @@ set_configs (test_config_t * config)
 
     config->fuzz_option = ARGUMENT ;
     config->fuzzed_args_num = 1 ;
+
+    config->coverage_on = 1 ;
     
     config->oracle = oracle ;
 }

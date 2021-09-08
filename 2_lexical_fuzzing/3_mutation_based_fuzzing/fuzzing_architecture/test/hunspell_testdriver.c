@@ -40,6 +40,8 @@ set_configs (test_config_t * config)
     config->fuzargs.f_char_start = 32 ;
     config->fuzargs.f_char_range = 95 ;
     config->oracle = hunspell_oracle ;
+
+    config->coverage_on = 1 ;
 }
 
 int

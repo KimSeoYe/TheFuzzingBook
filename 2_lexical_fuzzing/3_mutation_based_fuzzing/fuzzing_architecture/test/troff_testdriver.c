@@ -42,6 +42,8 @@ set_configs (test_config_t * config)
 
     config->fuzargs.f_char_start = 0 ;
     config->fuzargs.f_char_range = 255 ;
+
+    config->coverage_on = 1 ;
     
     config->oracle = troff_oracle ;
 }

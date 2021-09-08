@@ -84,13 +84,15 @@ copy_status (test_config_t * config)
     fuzargs.f_char_range = config->fuzargs.f_char_range ;
 
     is_source = config->is_source ;
-    if (is_source) {
+
+    if (strcmp(config->source_path, "") != 0) { // MODIFIED HERE
         if (realpath(config->source_path, source_path) == 0x0) {
             perror("copy_status: realpath: source_path") ;
             exit(1) ;
         }
     }  
-    else {
+
+    if (strcmp(config->runargs.binary_path, "") != 0) { // MODIFIED HERE
         if (realpath(config->runargs.binary_path, runargs.binary_path) == 0x0) {
             perror("copy_status: realpath: runargs.binary_path") ;
             exit(1) ;
@@ -213,7 +215,7 @@ fuzzer_init (test_config_t * config)
 
         get_source_filename(source_filename, source_path) ;
         get_executable_real_path(runargs.binary_path, source_path) ;
-        compile_with_coverage(runargs.binary_path, source_path) ;
+        if (coverage_on) compile_with_coverage(runargs.binary_path, source_path) ;  // MODIFIED HERE
     }
 
     if (access(runargs.binary_path, X_OK) == -1) {
@@ -599,7 +601,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
         return_codes[i] = run(contents, input, input_len, i) ;
 
         int is_cov_grow = 0 ;
-        if (is_source) {
+        if (coverage_on) {  // MODIFIED HERE
             coverage_t cov ;
             is_cov_grow = get_coverage(&cov, cov_set, cov_set_len, source_filename) ;
             coverages[i].line = cov.line ;
@@ -630,11 +632,11 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
     int unresolved_cnt = 0 ;
 
     coverage_t src_cnts ;
-    if (is_source) src_cnts = get_src_cnts(source_filename) ;
+    if (coverage_on) src_cnts = get_src_cnts(source_filename) ;
 
     for (int i = 0; i < trials; i++) {
         printf("(CompletedProcess(target='%s', args='%s', ", runargs.binary_path, runargs.cmd_args) ;
-        if (is_source) printf("line_coverage='%d', branch_coverage='%d', ", coverages[i].line, coverages[i].branch) ;
+        if (coverage_on) printf("line_coverage='%d', branch_coverage='%d', ", coverages[i].line, coverages[i].branch) ;
         printf("returncode='%d', input='%s', stdout='%s', stderr='%s', result='%s'))\n", return_codes[i], contents.input_contents[i], contents.stdout_contents[i], contents.stderr_contents[i], result_strings[results[i]]) ;
         
         switch(results[i]) {
@@ -652,7 +654,7 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
     int total_line_coverage = 0 ;
     int total_branch_coverage = 0 ;
 
-    if (is_source) {
+    if (coverage_on) {
         for (int i = 0; i < cov_set_len; i++) {
             total_line_coverage += cov_set[i].line ;
             total_branch_coverage += cov_set[i].branch ;
@@ -664,7 +666,7 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
     printf("=======================================================\n") ;
     printf("# TRIALS : %d\n", trials) ;
     printf("# EXEC TIME : %.f ms\n", exec_time_ms) ;
-    if (is_source) {
+    if (coverage_on) {
         printf("# LINE COVERED : %d / %d = %.1f%%\n", total_line_coverage, src_cnts.line, (double)total_line_coverage * 100.0 / src_cnts.line) ;
         printf("# BRANCH COVERED : %d / %d = %.1f%%\n", total_branch_coverage, src_cnts.branch, (double)total_branch_coverage * 100.0 / src_cnts.branch) ;
     }
@@ -762,7 +764,7 @@ fuzzer_main (test_config_t * config)
 
     int cov_set_len ;
 
-    if (is_source) {
+    if (coverage_on) {
         coverages = (coverage_t *) malloc(sizeof(coverage_t) * trials) ;
         cov_set_len = get_total_line_cnt(source_path) ;
 
@@ -773,8 +775,8 @@ fuzzer_main (test_config_t * config)
     double exec_time_ms = fuzzer_loop (return_codes, results, contents, coverages, cov_set, cov_set_len) ;
     fuzzer_summary(return_codes, results, contents, coverages, cov_set, cov_set_len, exec_time_ms) ;
 
-    if (is_source) {
-        remove_files(runargs.binary_path, source_filename) ;
+    if (coverage_on) {  // MODIFIED HERE
+        if (is_source) remove_files(runargs.binary_path, source_filename) ;
         free(coverages) ;
         free(cov_set) ;
     }

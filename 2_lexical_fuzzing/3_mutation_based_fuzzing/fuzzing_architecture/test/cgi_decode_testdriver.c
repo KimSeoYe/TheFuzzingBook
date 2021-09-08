@@ -41,6 +41,8 @@ set_configs (test_config_t * config)
 
     config->runargs.timeout = 2 ;
 
+    config->coverage_on = 1 ;
+    
     config->fuzargs.f_char_start = 0 ;
     config->fuzargs.f_char_range = 255 ;
     // config->fuzargs.f_min_len = 100 ;
