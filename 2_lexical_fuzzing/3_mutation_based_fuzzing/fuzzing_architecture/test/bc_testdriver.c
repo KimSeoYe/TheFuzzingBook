@@ -24,7 +24,7 @@ main (int argc, char * argv[])
     set_configs(&config) ;
 
     int opt ;
-    while ((opt = getopt(argc, argv, "t:m:")) != -1) {
+    while ((opt = getopt(argc, argv, "t:m:c")) != -1) {
         switch(opt) {
             case 't':
                 config.trials = atoi(optarg) ;
@@ -32,6 +32,9 @@ main (int argc, char * argv[])
             case 'm':
                 config.fuzz_type = MUTATION ;
                 strcpy(config.fuzargs.seed_dir, optarg) ;
+                break ;
+            case 'c':
+                config.coverage_on = 1 ;
                 break ;
         }
     }

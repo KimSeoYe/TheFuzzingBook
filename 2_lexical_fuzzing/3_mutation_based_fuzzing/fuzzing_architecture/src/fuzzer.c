@@ -207,7 +207,7 @@ fuzzer_init (test_config_t * config)
         exit(1) ;
     }
 
-    if (is_source) {
+    if (is_source || coverage_on) { // MODIFIED HERE
         if (access(source_path, R_OK) == -1) {
             perror("copy_status: access: cannot access to the source path") ;
             exit(1) ;
@@ -215,7 +215,7 @@ fuzzer_init (test_config_t * config)
 
         get_source_filename(source_filename, source_path) ;
         get_executable_real_path(runargs.binary_path, source_path) ;
-        if (coverage_on) compile_with_coverage(runargs.binary_path, source_path) ;  // MODIFIED HERE
+        compile_with_coverage(runargs.binary_path, source_path) ;  
     }
 
     if (access(runargs.binary_path, X_OK) == -1) {
