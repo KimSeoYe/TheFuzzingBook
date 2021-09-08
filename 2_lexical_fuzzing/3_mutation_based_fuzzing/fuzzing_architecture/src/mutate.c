@@ -104,7 +104,7 @@ bit_flip (char * dst, char * seed, int seed_len)
         return 0 ;
     } 
 
-    int bit_size[3] = { 1, 3, 15 } ;
+    int bit_size[3] = { 0b0001, 0b0011, 0b1111 } ;
     int bit_index = rand() % 3 ;
 
     int position = rand() % seed_len ;
@@ -151,6 +151,7 @@ byte_flip (char * dst, char * seed, int seed_len)
     printf("Byte-flip: seed[position]=%d, new_char=%c, position=%d\n", seed[position], new_char, position) ;
 #endif
 
+    // TODO -> fix bug
     memcpy(dst, seed, position) ;
     dst[position] = new_char ;
 
