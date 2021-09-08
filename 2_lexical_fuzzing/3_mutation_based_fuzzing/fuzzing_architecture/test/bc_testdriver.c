@@ -8,7 +8,12 @@
 void
 set_configs (test_config_t * config)
 {
-    strcpy(config->runargs.binary_path, "/usr/bin/bc") ;
+    strcpy(config->source_path, "../lib/bc-1.07.1/bc/bc.c") ;
+    strcpy(config->runargs.binary_path, "../lib/bc-1.07.1/bc/bc") ;
+    // absolute : /Users/kimseoye/Developer/git/TheFuzzingBook/2_lexical_fuzzing/3_mutation_based_fuzzing/fuzzing_architecture/lib/bc-1.07.1/bc
+
+    config->is_source = 0 ;
+    config->coverage_on = 1 ;
 }
 
 int
