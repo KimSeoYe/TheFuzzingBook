@@ -32,6 +32,8 @@ typedef struct test_config {
     int is_source ;                 // is the target c source file ? (1: true, 0: false)
     char source_path[PATH_MAX] ;    // path of c source file (if is_source is true)
 
+    int coverage_on ;               // turn on calculating coverage part if coverage_on is true
+
     fuzarg_t fuzargs ;              
     runarg_t runargs ;
 

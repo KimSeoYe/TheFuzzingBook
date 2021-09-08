@@ -23,6 +23,8 @@ init_config (test_config_t * config)
     config->is_source = 0 ;
     strcpy(config->source_path, "") ;
 
+    config->coverage_on = 0 ;
+
     strcpy(config->runargs.binary_path, "") ;
     strcpy(config->runargs.cmd_args, "") ;
     config->runargs.timeout = 5 ;

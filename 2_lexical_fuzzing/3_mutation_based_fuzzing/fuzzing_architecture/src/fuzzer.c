@@ -27,6 +27,7 @@ static int fuzzed_args_num = 0 ;
 static int is_source ;
 static char source_path[PATH_MAX] ;
 static char source_filename[PATH_MAX] ;
+int coverage_on ;
 static fuzarg_t fuzargs ;
 static runarg_t runargs ;
 static int (* oracle) (int return_code, int trial) ;
@@ -95,6 +96,8 @@ copy_status (test_config_t * config)
             exit(1) ;
         }  
     }   
+
+    coverage_on = config->coverage_on ;
 
     strcpy(runargs.cmd_args, config->runargs.cmd_args) ;
     runargs.timeout = config->runargs.timeout ;
