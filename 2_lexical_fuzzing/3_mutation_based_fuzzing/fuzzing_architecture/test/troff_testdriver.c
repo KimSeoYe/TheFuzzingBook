@@ -36,8 +36,8 @@ troff_oracle (int return_code, int trial)
 void
 set_configs (test_config_t * config)
 {
-    // strcpy(config->runargs.binary_path, "../lib/troff_bug_simulate") ;
-    strcpy(config->source_path, "../lib/troff_bug_simulate.c") ;
+    strcpy(config->runargs.binary_path, "../lib/troff_bug_simulate/troff_bug_simulate") ;
+    strcpy(config->source_path, "../lib/troff_bug_simulate/troff_bug_simulate.c") ;
 
     config->fuzargs.f_char_start = 0 ;
     config->fuzargs.f_char_range = 255 ;

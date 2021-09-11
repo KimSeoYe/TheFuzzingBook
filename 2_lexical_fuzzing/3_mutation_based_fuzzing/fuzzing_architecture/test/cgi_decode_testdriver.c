@@ -36,7 +36,8 @@ oracle (int return_code, int trial)
 void
 set_configs (test_config_t * config)
 {
-    strcpy(config->source_path, "../lib/cgi_decode.c") ;
+    strcpy(config->runargs.binary_path, "../lib/cgi_decode/cgi_decode") ;
+    strcpy(config->source_path, "../lib/cgi_decode/cgi_decode.c") ;
 
     config->runargs.timeout = 2 ;
     
