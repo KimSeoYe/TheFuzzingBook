@@ -1,5 +1,5 @@
-TARGETS=cat_testdriver.c ../lib/troff_bug_simulate.c troff_testdriver.c hunspell_testdriver.c cgi_decode_testdriver.c urlparse_testdriver.c bc_testdriver.c
-EXECS=cat_testdriver ../lib/troff_bug_simulate troff_testdriver hunspell_testdriver cgi_decode_testdriver urlparse_testdriver bc_testdriver
+TARGETS=cat_testdriver.c troff_testdriver.c hunspell_testdriver.c cgi_decode_testdriver.c urlparse_testdriver.c bc_testdriver.c
+EXECS=cat_testdriver troff_testdriver hunspell_testdriver cgi_decode_testdriver urlparse_testdriver bc_testdriver
 OBJS=config.o fuzzer.o fuzz_input.o gcov_runner.o mutate.o
 SRCS=../src/config.c ../src/fuzzer.c ../src/fuzz_input.c ../src/gcov_runner.c ../src/mutate.c
 
@@ -14,7 +14,7 @@ all: $(TARGETS) $(SRCS)
 cat_testdriver: cat_testdriver.c $(SRCS)
 	gcc -o cat_testdriver cat_testdriver.c $(SRCS)
 
-troff_testdriver: ../lib/troff_bug_simulate.c troff_testdriver.c $(SRCS)
+troff_testdriver: troff_testdriver.c $(SRCS)
 	gcc -o troff_testdriver troff_testdriver.c $(SRCS)
 
 hunspell_testdriver: hunspell_testdriver.c $(SRCS)
