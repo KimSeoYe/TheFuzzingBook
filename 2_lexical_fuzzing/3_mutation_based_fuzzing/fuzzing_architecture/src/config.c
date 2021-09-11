@@ -20,10 +20,12 @@ init_config (test_config_t * config)
     config->fuzz_option = STD_IN ;
     config->fuzzed_args_num = 0 ;
 
-    config->is_source = 0 ;
+    // config->is_source = 0 ;
     strcpy(config->source_path, "") ;
 
-    config->coverage_on = 0 ;
+    config->covargs.coverage_on = 0 ;
+    config->covargs.source_num = 0 ;
+    config->covargs.source_paths = 0x0 ;
 
     strcpy(config->runargs.binary_path, "") ;
     strcpy(config->runargs.cmd_args, "") ;

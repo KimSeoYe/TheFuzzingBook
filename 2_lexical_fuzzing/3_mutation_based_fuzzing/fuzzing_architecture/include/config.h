@@ -22,6 +22,12 @@ typedef struct runarg {
     int timeout ;                   // maximum time interval of each execution
 } runarg_t ;
 
+typedef struct covarg {
+    int coverage_on ;
+    char ** source_paths ;  // Q. array or pointer?
+    int source_num ;
+} covarg_t ;
+
 typedef struct test_config {   
     int trials ;                    // total trials
     fuztype_t fuzz_type ;
@@ -29,13 +35,13 @@ typedef struct test_config {
     fuzopt_t fuzz_option ;          // fuzzing fuzz_option : fuzz stdin | argument | file contents
     int fuzzed_args_num ;           // target program's argument # (default 0)
 
-    int is_source ;                 // is the target c source file ? (1: true, 0: false)
+    // int is_source ;                 // is the target c source file ? (1: true, 0: false)
     char source_path[PATH_MAX] ;    // path of c source file (if is_source is true)
-
-    int coverage_on ;               // turn on calculating coverage part if coverage_on is true
+    // int coverage_on ;               // turn on calculating coverage part if coverage_on is true
 
     fuzarg_t fuzargs ;              
     runarg_t runargs ;
+    covarg_t covargs ;
 
     int (* oracle) (int return_code, int trial) ;
 } test_config_t ;

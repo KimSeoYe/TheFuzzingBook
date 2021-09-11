@@ -24,12 +24,13 @@ static int trials ;
 fuztype_t fuzz_type ;
 fuzopt_t fuzz_option ;
 static int fuzzed_args_num = 0 ;
-static int is_source ;
+// static int is_source ;
 static char source_path[PATH_MAX] ;
 static char source_filename[PATH_MAX] ;
-int coverage_on ;
+// int coverage_on ;
 static fuzarg_t fuzargs ;
 static runarg_t runargs ;
+static covarg_t covargs ;
 static int (* oracle) (int return_code, int trial) ;
 
 // Q. static global ?
@@ -83,7 +84,7 @@ copy_status (test_config_t * config)
     fuzargs.f_char_start = config->fuzargs.f_char_start ;
     fuzargs.f_char_range = config->fuzargs.f_char_range ;
 
-    is_source = config->is_source ;
+    // is_source = config->is_source ;
 
     if (strcmp(config->source_path, "") != 0) { // MODIFIED HERE
         if (realpath(config->source_path, source_path) == 0x0) {
@@ -99,7 +100,7 @@ copy_status (test_config_t * config)
         }  
     }   
 
-    coverage_on = config->coverage_on ;
+    covargs.coverage_on = config->covargs.coverage_on ;
 
     strcpy(runargs.cmd_args, config->runargs.cmd_args) ;
     runargs.timeout = config->runargs.timeout ;
@@ -207,16 +208,19 @@ fuzzer_init (test_config_t * config)
         exit(1) ;
     }
 
-    if (is_source || coverage_on) { // MODIFIED HERE
+    if (covargs.coverage_on) { // MODIFIED HERE
         if (access(source_path, R_OK) == -1) {
             perror("copy_status: access: cannot access to the source path") ;
             exit(1) ;
         }
-
-        get_source_filename(source_filename, source_path) ;
-        get_executable_real_path(runargs.binary_path, source_path) ;
-        compile_with_coverage(runargs.binary_path, source_path) ;  
+        // get_source_filename(source_filename, source_path) ;      // TODO. move to read_gcov_file
     }
+
+    // if (is_source) {
+    //     get_source_filename(source_filename, source_path) ;      
+    //     get_executable_real_path(runargs.binary_path, source_path) ;
+    //     compile_with_coverage(runargs.binary_path, source_path) ;  
+    // }
 
     if (access(runargs.binary_path, X_OK) == -1) {
         perror("fuzzer_init: access: cannot access to the binary path") ;
@@ -471,19 +475,6 @@ oracle_run (int return_code, int trial)   // Q. useless..?
 ///////////////////////////////////// Fuzzer Loop /////////////////////////////////////
 
 void
-write_fuzzed_args_to_file (FILE * fp)
-{
-    for (int i = 1; i <= fuzzed_args_num; i++) {
-        if (fwrite(parsed_args[cmd_args_num - i], 1, parsed_args_lengths[cmd_args_num - i], fp) !=  parsed_args_lengths[cmd_args_num - i]) {
-            perror("write_input_ars_file: fwrite") ;
-        }
-        if (fwrite(" ", 1, 1, fp) != 1) {     
-            perror("write_input_ars_file: fwrite") ;
-        }
-    }
-}
-
-void
 write_input_args_file (content_t contents, int trial)
 {
     char in_path[RESULT_PATH_MAX] ;
@@ -536,6 +527,19 @@ fuzz_argument (content_t contents, fuzarg_t * fuzargs, int trial)
 #endif
 
     write_input_args_file (contents, trial) ;
+}
+
+void
+write_fuzzed_args_to_file (FILE * fp)
+{
+    for (int i = 1; i <= fuzzed_args_num; i++) {
+        if (fwrite(parsed_args[cmd_args_num - i], 1, parsed_args_lengths[cmd_args_num - i], fp) !=  parsed_args_lengths[cmd_args_num - i]) {
+            perror("write_input_ars_file: fwrite") ;
+        }
+        if (fwrite(" ", 1, 1, fp) != 1) {     
+            perror("write_input_ars_file: fwrite") ;
+        }
+    }
 }
 
 void
@@ -601,9 +605,9 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
         return_codes[i] = run(contents, input, input_len, i) ;
 
         int is_cov_grow = 0 ;
-        if (coverage_on) {  // MODIFIED HERE
+        if (covargs.coverage_on) {  // MODIFIED HERE
             coverage_t cov ;
-            is_cov_grow = get_coverage(&cov, cov_set, cov_set_len, source_filename) ;
+            is_cov_grow = get_coverage(&cov, cov_set, cov_set_len, source_path) ; 
             coverages[i].line = cov.line ;
             coverages[i].branch = cov.branch ;
             if (is_cov_grow && fuzz_type == MUTATION) { // TODO. if not mutation
@@ -632,11 +636,11 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
     int unresolved_cnt = 0 ;
 
     coverage_t src_cnts ;
-    if (coverage_on) src_cnts = get_src_cnts(source_filename) ;
+    if (covargs.coverage_on) src_cnts = get_src_cnts(source_path) ;
 
     for (int i = 0; i < trials; i++) {
         printf("(CompletedProcess(target='%s', args='%s', ", runargs.binary_path, runargs.cmd_args) ;
-        if (coverage_on) printf("line_coverage='%d', branch_coverage='%d', ", coverages[i].line, coverages[i].branch) ;
+        if (covargs.coverage_on) printf("line_coverage='%d', branch_coverage='%d', ", coverages[i].line, coverages[i].branch) ;
         printf("returncode='%d', input='%s', stdout='%s', stderr='%s', result='%s'))\n", return_codes[i], contents.input_contents[i], contents.stdout_contents[i], contents.stderr_contents[i], result_strings[results[i]]) ;
         
         switch(results[i]) {
@@ -654,7 +658,7 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
     int total_line_coverage = 0 ;
     int total_branch_coverage = 0 ;
 
-    if (coverage_on) {
+    if (covargs.coverage_on) {
         for (int i = 0; i < cov_set_len; i++) {
             total_line_coverage += cov_set[i].line ;
             total_branch_coverage += cov_set[i].branch ;
@@ -666,7 +670,7 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
     printf("=======================================================\n") ;
     printf("# TRIALS : %d\n", trials) ;
     printf("# EXEC TIME : %.f ms\n", exec_time_ms) ;
-    if (coverage_on) {
+    if (covargs.coverage_on) {
         printf("# LINE COVERED : %d / %d = %.1f%%\n", total_line_coverage, src_cnts.line, (double)total_line_coverage * 100.0 / src_cnts.line) ;
         printf("# BRANCH COVERED : %d / %d = %.1f%%\n", total_branch_coverage, src_cnts.branch, (double)total_branch_coverage * 100.0 / src_cnts.branch) ;
     }
@@ -764,7 +768,7 @@ fuzzer_main (test_config_t * config)
 
     int cov_set_len ;
 
-    if (coverage_on) {
+    if (covargs.coverage_on) {
         coverages = (coverage_t *) malloc(sizeof(coverage_t) * trials) ;
         cov_set_len = get_total_line_cnt(source_path) ;
 
@@ -775,8 +779,8 @@ fuzzer_main (test_config_t * config)
     double exec_time_ms = fuzzer_loop (return_codes, results, contents, coverages, cov_set, cov_set_len) ;
     fuzzer_summary(return_codes, results, contents, coverages, cov_set, cov_set_len, exec_time_ms) ;
 
-    if (coverage_on) {  // MODIFIED HERE
-        if (is_source) remove_files(runargs.binary_path, source_filename) ;
+    if (covargs.coverage_on) {  // MODIFIED HERE
+        remove_gcov_file(runargs.binary_path, source_path) ;
         free(coverages) ;
         free(cov_set) ;
     }

@@ -36,7 +36,6 @@ oracle (int return_code, int trial)
 void
 set_configs (test_config_t * config)
 {
-    config->is_source = 1 ;
     strcpy(config->source_path, "../lib/cgi_decode.c") ;
 
     config->runargs.timeout = 2 ;
@@ -70,7 +69,7 @@ main (int argc, char * argv[])
                 strcpy(config.fuzargs.seed_dir, optarg) ;
                 break ;
             case 'c':
-                config.coverage_on = 1 ;
+                config.covargs.coverage_on = 1 ;
                 break ;
         }
     }

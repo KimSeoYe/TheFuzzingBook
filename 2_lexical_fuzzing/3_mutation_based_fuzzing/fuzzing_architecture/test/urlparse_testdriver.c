@@ -36,8 +36,8 @@ oracle (int return_code, int trial)
 void
 set_configs (test_config_t * config)
 {
-    config->is_source = 1 ;
-    strcpy(config->source_path, "../lib/urlparse.c") ;
+    strcpy(config->source_path, "../lib/urlparse/urlparse.c") ;
+    strcpy(config->runargs.binary_path, "../lib/urlparse/urlparse") ;
 
     config->fuzz_option = ARGUMENT ;
     config->fuzzed_args_num = 1 ;
@@ -63,7 +63,7 @@ main (int argc, char * argv[])
                 strcpy(config.fuzargs.seed_dir, optarg) ;
                 break ;
             case 'c':
-                config.coverage_on = 1 ;
+                config.covargs.coverage_on = 1 ;
                 break ;
         }
     }

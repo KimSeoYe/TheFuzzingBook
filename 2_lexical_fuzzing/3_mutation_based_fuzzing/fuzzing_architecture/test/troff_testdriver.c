@@ -37,7 +37,6 @@ void
 set_configs (test_config_t * config)
 {
     // strcpy(config->runargs.binary_path, "../lib/troff_bug_simulate") ;
-    config->is_source = 1 ;
     strcpy(config->source_path, "../lib/troff_bug_simulate.c") ;
 
     config->fuzargs.f_char_start = 0 ;
@@ -64,7 +63,7 @@ main (int argc, char * argv[])
                 strcpy(config.fuzargs.seed_dir, optarg) ;
                 break ;
             case 'c':
-                config.coverage_on = 1 ;
+                config.covargs.coverage_on = 1 ;
                 break ;
         }
     }
