@@ -475,6 +475,19 @@ oracle_run (int return_code, int trial)   // Q. useless..?
 ///////////////////////////////////// Fuzzer Loop /////////////////////////////////////
 
 void
+write_fuzzed_args_to_file (FILE * fp)
+{
+    for (int i = 1; i <= fuzzed_args_num; i++) {
+        if (fwrite(parsed_args[cmd_args_num - i], 1, parsed_args_lengths[cmd_args_num - i], fp) !=  parsed_args_lengths[cmd_args_num - i]) {
+            perror("write_input_ars_file: fwrite") ;
+        }
+        if (fwrite(" ", 1, 1, fp) != 1) {     
+            perror("write_input_ars_file: fwrite") ;
+        }
+    }
+}
+
+void
 write_input_args_file (content_t contents, int trial)
 {
     char in_path[RESULT_PATH_MAX] ;
@@ -529,18 +542,6 @@ fuzz_argument (content_t contents, fuzarg_t * fuzargs, int trial)
     write_input_args_file (contents, trial) ;
 }
 
-void
-write_fuzzed_args_to_file (FILE * fp)
-{
-    for (int i = 1; i <= fuzzed_args_num; i++) {
-        if (fwrite(parsed_args[cmd_args_num - i], 1, parsed_args_lengths[cmd_args_num - i], fp) !=  parsed_args_lengths[cmd_args_num - i]) {
-            perror("write_input_ars_file: fwrite") ;
-        }
-        if (fwrite(" ", 1, 1, fp) != 1) {     
-            perror("write_input_ars_file: fwrite") ;
-        }
-    }
-}
 
 void
 update_corpus (char * input, int input_len, int trial)

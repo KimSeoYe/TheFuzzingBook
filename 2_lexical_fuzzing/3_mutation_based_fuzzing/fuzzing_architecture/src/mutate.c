@@ -142,7 +142,7 @@ byte_flip (char * dst, char * seed, int seed_len)
         if (seed_len >= byte_size[i]) {
             if (seed_len == byte_size[i]) position = 0 ;
             else position = rand() % (seed_len - byte_size[i]) ;
-            new_char = (char) seed[position] ^ 0xff ;
+            new_char = (char) seed[position] ^ 0xff ;   // TODO -> fix bug
             break ;
         }
     }
@@ -237,7 +237,7 @@ mutate (char * dst, char * seed, int seed_len)
     int mutator_idx = rand() % 6 ;
     int new_len = 0 ;
 
-    mutator[mutator_idx](dst, seed, seed_len) ; 
+    new_len = mutator[mutator_idx](dst, seed, seed_len) ; 
 
     return new_len ;
 }
