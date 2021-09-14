@@ -101,6 +101,16 @@ copy_status (test_config_t * config)
     }   
 
     covargs.coverage_on = config->covargs.coverage_on ;
+    covargs.source_num = config->covargs.source_num ;
+    covargs.source_paths = (char **) malloc(sizeof(char *) * covargs.source_num) ;
+    for (int i = 0; i < covargs.source_num; i++) {
+        covargs.source_paths[i] = (char *) malloc(sizeof(char) * PATH_MAX) ;
+        if (realpath(config->covargs.source_paths[i], covargs.source_paths[i]) == 0x0) {
+            perror("copy_status: realpath: covargs.source_paths[i]") ;
+            exit(1) ;
+        }
+        printf("[%d] %s\n", i, covargs.source_paths[i]) ; // DEBUG
+    }
 
     strcpy(runargs.cmd_args, config->runargs.cmd_args) ;
     runargs.timeout = config->runargs.timeout ;
@@ -209,18 +219,14 @@ fuzzer_init (test_config_t * config)
     }
 
     if (covargs.coverage_on) { // MODIFIED HERE
-        if (access(source_path, R_OK) == -1) {
-            perror("copy_status: access: cannot access to the source path") ;
-            exit(1) ;
+        for (int i = 0; i < covargs.source_num; i++) {
+            if (access(covargs.source_paths[i], R_OK) == -1) {
+                perror("fuzzer_init: access: cannot access to the source path") ;
+                exit(1) ;
+            }
         }
         // get_source_filename(source_filename, source_path) ;      // TODO. move to read_gcov_file
     }
-
-    // if (is_source) {
-    //     get_source_filename(source_filename, source_path) ;      
-    //     get_executable_real_path(runargs.binary_path, source_path) ;
-    //     compile_with_coverage(runargs.binary_path, source_path) ;  
-    // }
 
     if (access(runargs.binary_path, X_OK) == -1) {
         perror("fuzzer_init: access: cannot access to the binary path") ;
@@ -758,39 +764,39 @@ fuzzer_main (test_config_t * config)
     
     fuzzer_init(config) ;
 
-    int * return_codes = (int *) malloc(sizeof(int) * trials) ;
-    result_t * results = (result_t *) malloc(sizeof(result_t) * trials) ;
+    // int * return_codes = (int *) malloc(sizeof(int) * trials) ;
+    // result_t * results = (result_t *) malloc(sizeof(result_t) * trials) ;
     
-    content_t contents ;
-    allocate_contents(&contents) ;
+    // content_t contents ;
+    // allocate_contents(&contents) ;
 
-    coverage_t * coverages ;
-    coverage_t * cov_set ;
+    // coverage_t * coverages ;
+    // coverage_t * cov_set ;
 
-    int cov_set_len ;
+    // int cov_set_len ;
 
-    if (covargs.coverage_on) {
-        coverages = (coverage_t *) malloc(sizeof(coverage_t) * trials) ;
-        cov_set_len = get_total_line_cnt(source_path) ;
+    // if (covargs.coverage_on) {
+    //     coverages = (coverage_t *) malloc(sizeof(coverage_t) * trials) ;
+    //     cov_set_len = get_total_line_cnt(source_path) ;
 
-        cov_set = (coverage_t *) malloc(sizeof(coverage_t) * cov_set_len) ;
-        memset(cov_set, 0, sizeof(coverage_t) * cov_set_len) ;
-    }
+    //     cov_set = (coverage_t *) malloc(sizeof(coverage_t) * cov_set_len) ;
+    //     memset(cov_set, 0, sizeof(coverage_t) * cov_set_len) ;
+    // }
 
-    double exec_time_ms = fuzzer_loop (return_codes, results, contents, coverages, cov_set, cov_set_len) ;
-    fuzzer_summary(return_codes, results, contents, coverages, cov_set, cov_set_len, exec_time_ms) ;
+    // double exec_time_ms = fuzzer_loop (return_codes, results, contents, coverages, cov_set, cov_set_len) ;
+    // fuzzer_summary(return_codes, results, contents, coverages, cov_set, cov_set_len, exec_time_ms) ;
 
-    if (covargs.coverage_on) {  // MODIFIED HERE
-        remove_gcov_file(runargs.binary_path, source_path) ;
-        free(coverages) ;
-        free(cov_set) ;
-    }
+    // if (covargs.coverage_on) {  // MODIFIED HERE
+    //     remove_gcov_file(runargs.binary_path, source_path) ;
+    //     free(coverages) ;
+    //     free(cov_set) ;
+    // }
 
-    if (fuzz_type == MUTATION) free_seed_filenames() ;
+    // if (fuzz_type == MUTATION) free_seed_filenames() ;
 
-    free(return_codes) ;
-    free(results) ;
-    free_parsed_args() ;
-    free(parsed_args_lengths) ;
-    remove_temp_dir() ;  
+    // free(return_codes) ;
+    // free(results) ;
+    // free_parsed_args() ;
+    // free(parsed_args_lengths) ;
+    // remove_temp_dir() ;  
 }

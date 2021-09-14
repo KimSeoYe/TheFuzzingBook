@@ -8,9 +8,16 @@
 void
 set_configs (test_config_t * config)
 {
-    strcpy(config->source_path, "../lib/bc-1.07.1/bc/bc.c") ;
+    // strcpy(config->source_path, "../lib/bc-1.07.1/bc/bc.c") ;
+    char sources[10][PATH_MAX] = { "../lib/bc-1.07.1/bc/bc.c", "../lib/bc-1.07.1/bc/execute.c", "../lib/bc-1.07.1/bc/load.c", "../lib/bc-1.07.1/bc/main.c", "../lib/bc-1.07.1/bc/scan.c", "../lib/bc-1.07.1/bc/storage.c", "../lib/bc-1.07.1/bc/util.c", "../lib/bc-1.07.1/lib/getopt.c", "../lib/bc-1.07.1/lib/getopt1.c", "../lib/bc-1.07.1/lib/number.c"} ;
+    config->covargs.source_num = 10 ;
+    config->covargs.source_paths = (char **) malloc(sizeof(char *) * config->covargs.source_num) ;
+    for (int i = 0; i < config->covargs.source_num; i++) {
+        config->covargs.source_paths[i] = (char *) malloc(sizeof(char) * PATH_MAX) ;
+        strcpy(config->covargs.source_paths[i], sources[i]) ;
+    }
+
     strcpy(config->runargs.binary_path, "../lib/bc-1.07.1/bc/bc") ;
-    // absolute : /Users/kimseoye/Developer/git/TheFuzzingBook/2_lexical_fuzzing/3_mutation_based_fuzzing/fuzzing_architecture/lib/bc-1.07.1/bc
 }
 
 int
@@ -37,4 +44,9 @@ main (int argc, char * argv[])
     }
 
     fuzzer_main(&config) ;
+
+    for (int i = 0; i < config.covargs.source_num; i++) {
+        free(config.covargs.source_paths[i]) ;
+    }
+    free(config.covargs.source_paths) ;
 }
