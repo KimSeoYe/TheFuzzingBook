@@ -243,11 +243,11 @@ flip_known_constants (char * dst, char * seed, int seed_len, int position)
 }
 
 int
-increment_bytes (char * dst, char * seed, int seed_len, int position) 
+simple_arithmatic (char * dst, char * seed, int seed_len, int position) 
 {
     if (seed_len == 0) {
         dst[0] = 0x0 ;
-        perror("increment_bytes: seed_len is 0") ;
+        perror("simple_arithmatic: seed_len is 0") ;
         return 0 ;
     } 
 
@@ -278,33 +278,8 @@ increment_bytes (char * dst, char * seed, int seed_len, int position)
     dst[seed_len] = 0x0 ;
 
 #ifdef DEBUG
-    printf("increment_bytes: byte-size=%d, position=%d\n",byte_size[byte_idx], position) ;
+    printf("simple_arithmatic: byte-size=%d, position=%d\n",byte_size[byte_idx], position) ;
 #endif
-
-    return seed_len ;
-}
-
-int
-simple_arithmatic (char * dst, char * seed, int seed_len, int position) 
-{
-    if (seed_len == 0) {
-        dst[0] = 0x0 ;
-        perror("simple_arithmatic: seed_len is 0") ;
-        return 0 ;
-    } 
-
-    int add_operand = rand() % 71 - 35 ;
-    char new_char = (char) seed[position] + add_operand ;
-
-#ifdef DEBUG
-    printf("Simple arithmatic: seed[position]=%d, new_char=%c, position=%d\n", seed[position], new_char, position) ;
-#endif
-
-    memcpy(dst, seed, position) ;
-    dst[position] = new_char ;
-
-    memcpy(dst + position + 1, seed + position + 1, seed_len - position - 1) ;
-    dst[seed_len] = 0x0 ;
 
     return seed_len ;
 }
@@ -312,7 +287,7 @@ simple_arithmatic (char * dst, char * seed, int seed_len, int position)
 int
 mutate (char * dst, char * seed, int seed_len) 
 {
-    int (* mutator[]) (char *, char *, int, int) = { flip_bits, delete_bytes, insert_random_bytes, insert_known_constants, flip_bytes, flip_known_constants, increment_bytes } ;
+    int (* mutator[]) (char *, char *, int, int) = { flip_bits, delete_bytes, insert_random_bytes, insert_known_constants, flip_bytes, flip_known_constants, simple_arithmatic } ;
 
     int mutator_idx = rand() % 6 ;
     int new_len = 0 ;

@@ -40,7 +40,7 @@ main ()
     }
     printf("\n") ;
 
-    len = increment_bytes(dst, seed, strlen(seed), 0) ;
+    len = simple_arithmatic(dst, seed, strlen(seed), 0) ;
     printf(">> %s (%d)\n", dst, len) ;
     for (int i = 0; i < len; i++) {
         printf("%c(%x) -> %c(%x)\n", seed[i], seed[i], dst[i], dst[i]) ;
