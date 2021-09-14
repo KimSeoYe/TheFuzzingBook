@@ -107,7 +107,7 @@ delete_bytes (char * dst, int dst_len, char * seed, int seed_len, int position)
 }
 
 int
-insert_random_bytes (char * dst, int dst_len, char * seed, int seed_len, int position)   // TODO. dst buffer len check
+insert_random_bytes (char * dst, int dst_len, char * seed, int seed_len, int position)   
 {   
     int byte_size[3] = { 1, 2, 4 } ;
     int byte_idx = rand() % 3 ;
