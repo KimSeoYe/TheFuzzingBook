@@ -53,7 +53,7 @@ flip_bits (char * dst, char * seed, int seed_len, int position)
 {
     if (seed_len == 0) {
         dst[0] = 0x0 ;
-        perror("flip_bits: seed_len == 0") ;
+        perror("flip_bits: seed_len is 0") ;
         return 0 ;
     } 
 
@@ -82,7 +82,7 @@ delete_bytes (char * dst, char * seed, int seed_len, int position)
 {
     if (seed_len == 0) {
         dst[0] = 0x0 ;
-        perror("delete: seed_len == 0") ;
+        perror("delete: seed_len is 0") ;
         return 0 ;
     } 
 
@@ -134,12 +134,9 @@ insert_known_constants (char * dst, char * seed, int seed_len, int position)
 {   
     int byte_size[3] = { 1, 2, 4 } ;
     int byte_idx = rand() % 3 ;
-
-    memcpy(dst, seed, position) ;
     
     int known_constant_num[] = { 9, 10, 8 } ;
     int constant_idx ;
-
     switch (byte_idx) {
         case 0:
             constant_idx = rand() % known_constant_num[0] ;
@@ -156,6 +153,7 @@ insert_known_constants (char * dst, char * seed, int seed_len, int position)
     printf("insert_known_constants: byte-size=%d, position=%d\n", byte_size[byte_idx], position) ;
 #endif
 
+    memcpy(dst, seed, position) ;
     memcpy(dst + position + byte_size[byte_idx], seed + position, seed_len - position) ;
     dst[seed_len + byte_size[byte_idx]] = 0x0 ;
 
@@ -167,7 +165,7 @@ flip_bytes (char * dst, char * seed, int seed_len, int position)
 {
     if (seed_len == 0) {
         dst[0] = 0x0 ;
-        perror("flip_bytes: seed_len == 0") ;
+        perror("flip_bytes: seed_len is 0") ;
         return 0 ;
     } 
 
@@ -202,41 +200,86 @@ flip_bytes (char * dst, char * seed, int seed_len, int position)
 }
 
 int
-known_integers (char * dst, char * seed, int seed_len, int position) 
+flip_known_constants (char * dst, char * seed, int seed_len, int position) 
 {
     if (seed_len == 0) {
         dst[0] = 0x0 ;
-        perror("known_integers: seed_len == 0") ;
+        perror("flip_known_constants: seed_len is 0") ;
         return 0 ;
-    } 
-
-    int known_integers_num[] = { 9, 10, 8 } ;
-
-    int category = rand() % 3 ;
-    int index = rand() % known_integers_num[category] ;
-    char new_char ;
-
-    switch (category) {
-        case 0:
-            new_char = interesting_8[index] ;
-            break ;
-        case 1:
-            new_char = interesting_16[index] ;
-            break ;
-        case 2:
-            new_char = interesting_32[index] ;
-            break ;
     }
+    
+    int byte_size[3] = { 1, 2, 4 } ;
+    int byte_idx = rand() % 3 ;
+
+    if (seed_len - position < byte_size[byte_idx]) {
+        memcpy(dst, seed, seed_len + 1) ;   // contain 0x0
+        perror("flip_known_constatns: range overflow") ;
+        return seed_len ;
+    }
+    
+    int known_constant_num[] = { 9, 10, 8 } ;
+    int constant_idx ;
+    switch (byte_idx) {
+        case 0:
+            constant_idx = rand() % known_constant_num[0] ;
+            * (u_int8_t *)(dst + position) = interesting_8[constant_idx] ;
+        case 1:
+            constant_idx = rand() % known_constant_num[1] ;
+            * (u_int16_t *)(dst + position) = interesting_8[constant_idx] ;
+        case 2:
+            constant_idx = rand() % known_constant_num[2] ;
+            * (u_int32_t *)(dst + position) = interesting_8[constant_idx] ;
+    }  
 
 #ifdef DEBUG
-    printf("Known integer: seed[position]=%d, new_char=%c, position=%d\n", seed[position], new_char, position) ;
+    printf("flip_known_constants: byte-size=%d, position=%d\n", byte_size[byte_idx], position) ;
 #endif
 
     memcpy(dst, seed, position) ;
-    dst[position] = new_char ;
-
-    memcpy(dst + position + 1, seed + position + 1, seed_len - position - 1) ;
+    memcpy(dst + position + byte_size[byte_idx], seed + position + byte_size[byte_idx], seed_len - position - byte_size[byte_idx]) ;
     dst[seed_len] = 0x0 ;
+
+    return seed_len ;
+}
+
+int
+increment_bytes (char * dst, char * seed, int seed_len, int position) 
+{
+    if (seed_len == 0) {
+        dst[0] = 0x0 ;
+        perror("increment_bytes: seed_len is 0") ;
+        return 0 ;
+    } 
+
+    int byte_size[3] = { 1, 2, 4 } ;
+    int byte_idx = rand() % 3 ;
+
+    memcpy(dst, seed, position) ;
+
+    char new_char ;
+    int add_operand ;
+    if (seed_len - position <= byte_size[byte_idx]) {
+        for (int i = 0; i < seed_len - position; i++) {
+            add_operand = rand() % 71 - 35 ;
+            new_char = (char) seed[position] + add_operand ;
+            dst[position + i] = new_char ;
+        }
+    }
+    else {
+        for (int i = 0; i < byte_size[byte_idx]; i++) {
+            add_operand = rand() % 71 - 35 ;
+            new_char = (char) seed[position] + add_operand ;
+            dst[position + i] = new_char ;
+        }
+
+        memcpy(dst + position + byte_size[byte_idx], seed + position + byte_size[byte_idx], seed_len - position - byte_size[byte_idx]) ;
+    }
+
+    dst[seed_len] = 0x0 ;
+
+#ifdef DEBUG
+    printf("increment_bytes: byte-size=%d, position=%d\n",byte_size[byte_idx], position) ;
+#endif
 
     return seed_len ;
 }
@@ -246,7 +289,7 @@ simple_arithmatic (char * dst, char * seed, int seed_len, int position)
 {
     if (seed_len == 0) {
         dst[0] = 0x0 ;
-        perror("simple_arithmatic: seed_len == 0") ;
+        perror("simple_arithmatic: seed_len is 0") ;
         return 0 ;
     } 
 
@@ -269,7 +312,7 @@ simple_arithmatic (char * dst, char * seed, int seed_len, int position)
 int
 mutate (char * dst, char * seed, int seed_len) 
 {
-    int (* mutator[]) (char *, char *, int, int) = { flip_bits, delete_bytes, insert_random_bytes, insert_known_constants, flip_bytes, known_integers, simple_arithmatic } ;
+    int (* mutator[]) (char *, char *, int, int) = { flip_bits, delete_bytes, insert_random_bytes, insert_known_constants, flip_bytes, flip_known_constants, increment_bytes } ;
 
     int mutator_idx = rand() % 6 ;
     int new_len = 0 ;

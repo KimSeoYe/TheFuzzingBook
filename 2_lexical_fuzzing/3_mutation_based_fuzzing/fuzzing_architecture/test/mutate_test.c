@@ -26,17 +26,27 @@ main ()
     len = insert_known_constants(dst, seed, strlen(seed), 0) ;
     printf(">> %s (%d)\n>>", dst, len) ;
     for (int i = 0; i < len; i++) {
-        printf(" %x", dst[i]) ;
+        printf(" %c(%x)", dst[i], dst[i]) ;
     }
     printf("\n") ;
 
     len = flip_bytes(dst, seed, strlen(seed), 0) ;
     printf(">> %s (%d)\n", dst, len) ;
 
-    // len = simple_arithmatic(dst, seed, strlen(seed), 0) ;
-    // printf(">> %s (%d)\n", dst, len) ;
+    len = flip_known_constants(dst, seed, strlen(seed), 0) ;
+    printf(">> %s (%d)\n>>", dst, len) ;
+    for (int i = 0; i < len; i++) {
+        printf(" %c(%x)", dst[i], dst[i]) ;
+    }
+    printf("\n") ;
 
-    // len = known_integers(dst, seed, strlen(seed), 0) ;
+    len = increment_bytes(dst, seed, strlen(seed), 0) ;
+    printf(">> %s (%d)\n", dst, len) ;
+    for (int i = 0; i < len; i++) {
+        printf("%c(%x) -> %c(%x)\n", seed[i], seed[i], dst[i], dst[i]) ;
+    }
+
+    // len = simple_arithmatic(dst, seed, strlen(seed), 0) ;
     // printf(">> %s (%d)\n", dst, len) ;
 
     // len = mutate(dst, seed, strlen(seed)) ;

@@ -13,9 +13,9 @@ int insert_known_constants (char * dst, char * seed, int seed_len, int position)
 
 int flip_bytes (char * dst, char * seed, int seed_len, int position) ;
 
-int simple_arithmatic (char * dst, char * seed, int seed_len, int position) ;
+int flip_known_constants (char * dst, char * seed, int seed_len, int position) ;
 
-int known_integers (char * dst, char * seed, int seed_len, int position) ;
+int increment_bytes (char * dst, char * seed, int seed_len, int position) ;
 
 int mutate (char * dst, char * seed, int seed_len) ;
 
