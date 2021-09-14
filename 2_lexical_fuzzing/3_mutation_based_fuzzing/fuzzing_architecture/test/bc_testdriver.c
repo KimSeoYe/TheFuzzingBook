@@ -20,6 +20,16 @@ set_configs (test_config_t * config)
     strcpy(config->runargs.binary_path, "../lib/bc-1.07.1/bc/bc") ;
 }
 
+void
+free_conf_source_paths (test_config_t * config)
+{
+    for (int i = 0; i < config->covargs.source_num; i++) {
+        free(config->covargs.source_paths[i]) ;
+    }
+    free(config->covargs.source_paths) ;
+}
+
+
 int
 main (int argc, char * argv[])
 {
@@ -45,8 +55,5 @@ main (int argc, char * argv[])
 
     fuzzer_main(&config) ;
 
-    for (int i = 0; i < config.covargs.source_num; i++) {
-        free(config.covargs.source_paths[i]) ;
-    }
-    free(config.covargs.source_paths) ;
+    free_conf_source_paths(&config) ;
 }

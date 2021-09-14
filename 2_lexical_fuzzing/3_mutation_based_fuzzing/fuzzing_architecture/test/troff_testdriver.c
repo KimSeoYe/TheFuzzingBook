@@ -52,6 +52,15 @@ set_configs (test_config_t * config)
     config->oracle = troff_oracle ;
 }
 
+void
+free_conf_source_paths (test_config_t * config)
+{
+    for (int i = 0; i < config->covargs.source_num; i++) {
+        free(config->covargs.source_paths[i]) ;
+    }
+    free(config->covargs.source_paths) ;
+}
+
 int
 main (int argc, char * argv[])
 {
@@ -76,4 +85,6 @@ main (int argc, char * argv[])
     }
 
     fuzzer_main(&config) ;
+
+    free_conf_source_paths(&config) ;
 }

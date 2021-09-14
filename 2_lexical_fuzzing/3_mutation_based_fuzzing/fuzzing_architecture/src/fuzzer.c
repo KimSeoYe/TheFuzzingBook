@@ -727,6 +727,14 @@ free_seed_filenames ()
     free(seed_filenames) ;
 }
 
+void
+free_source_paths ()
+{
+    for (int i = 0; i < covargs.source_num; i++) {
+        free(covargs.source_paths[i]) ;
+    }
+    free(covargs.source_paths) ;
+}
 
 ///////////////////////////////////// Fuzzer Main /////////////////////////////////////
 
@@ -783,6 +791,7 @@ fuzzer_main (test_config_t * config)
     }
 
     if (fuzz_type == MUTATION) free_seed_filenames() ;
+    if (covargs.source_num != 0) free_source_paths() ;
 
     free(return_codes) ;
     free(results) ;
