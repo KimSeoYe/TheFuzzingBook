@@ -14,14 +14,21 @@ main ()
     char dst[32] ;
     int len = 0 ;
     
-    len = bit_flip(dst, seed, strlen(seed), 0) ;
+    len = flip_bits(dst, seed, strlen(seed), 0) ;
     printf(">> %s (%d)\n", dst, len) ;
 
     len = delete_bytes(dst, seed, strlen(seed), 0) ;
     printf(">> %s (%d)\n", dst, len) ;
 
-    len = insert_bytes(dst, seed, strlen(seed), 0) ;
+    len = insert_random_bytes(dst, seed, strlen(seed), 0) ;
     printf(">> %s (%d)\n", dst, len) ;
+
+    len = insert_known_constants(dst, seed, strlen(seed), 0) ;
+    printf(">> %s (%d)\n>>", dst, len) ;
+    for (int i = 0; i < len; i++) {
+        printf(" %x", dst[i]) ;
+    }
+    printf("\n") ;
 
     len = flip_bytes(dst, seed, strlen(seed), 0) ;
     printf(">> %s (%d)\n", dst, len) ;

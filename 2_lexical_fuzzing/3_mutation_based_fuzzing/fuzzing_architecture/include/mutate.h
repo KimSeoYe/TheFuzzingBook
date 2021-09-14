@@ -3,11 +3,13 @@
 
 #include "../include/config.h"
 
-int bit_flip (char * dst, char * seed, int seed_len, int position) ;
+int flip_bits (char * dst, char * seed, int seed_len, int position) ;
 
 int delete_bytes (char * dst, char * seed, int seed_len, int position) ;
 
-int insert_bytes (char * dst, char * seed, int seed_len, int position) ;
+int insert_random_bytes (char * dst, char * seed, int seed_len, int position) ;
+
+int insert_known_constants (char * dst, char * seed, int seed_len, int position) ;
 
 int flip_bytes (char * dst, char * seed, int seed_len, int position) ;
 
