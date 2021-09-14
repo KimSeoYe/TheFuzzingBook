@@ -82,7 +82,7 @@ delete_bytes (char * dst, int dst_len, char * seed, int seed_len, int position)
 {
     if (seed_len == 0) {
         dst[0] = 0x0 ;
-        perror("delete: seed_len is 0") ;
+        printf("delete_bytes: seed_len is 0\n") ;
         return 0 ;
     } 
 
