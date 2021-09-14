@@ -535,10 +535,11 @@ fuzz_argument (content_t contents, fuzarg_t * fuzargs, int trial)
 
 
 void
-update_corpus (char * input, int input_len, int trial)
+update_corpus (char * input, int input_len)
 {
     char new_seed_file[PATH_MAX] ;
-    sprintf(new_seed_file, "mutated_seed_%d", trial) ; // TODO. trial : to make a unique name
+    int rand_num = rand() % 100000 ;
+    sprintf(new_seed_file, "mutated_seed_%d", rand_num) ;
 
     if (seed_files_num % SEED_CNT_MAX == 0 && seed_files_num / SEED_CNT_MAX > 0) {
         seed_filenames = realloc(seed_filenames, sizeof(char *) * (seed_files_num / SEED_CNT_MAX + 1)) ;
@@ -603,7 +604,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
             coverages[i].line = cov.line ;
             coverages[i].branch = cov.branch ;
             if (is_cov_grow && fuzz_type == MUTATION) { // TODO. if not mutation
-                update_corpus(input, input_len, i) ;
+                update_corpus(input, input_len) ;
             }
         }
 
@@ -623,6 +624,16 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
 void
 fuzzer_summary (int * return_codes, result_t * results, content_t contents, coverage_t * coverages, covset_t * cov_sets, double exec_time_ms)
 {
+    // DEBUG
+    // for (int i = 0; i < covargs.source_num; i++) {
+    //     printf("[%d] cov_sets[i].len: %d\n", i, cov_sets[i].len) ;
+    //     for (int t = 0; t < cov_sets[i].len; t++) {
+    //         printf("%d-", cov_sets[i].set[t].line) ;
+    //     }
+    //     printf("\n") ;
+    // }
+
+    
     int pass_cnt = 0 ;
     int fail_cnt = 0 ;
     int unresolved_cnt = 0 ;
@@ -787,6 +798,7 @@ fuzzer_main (test_config_t * config)
             
             cov_sets[i].len = get_total_line_cnt(covargs.source_paths[i]) ;
             cov_sets[i].set = (coverage_t *) malloc(sizeof(coverage_t) * cov_sets[i].len) ;
+            memset(cov_sets[i].set, 0, sizeof(coverage_t) * cov_sets[i].len) ;
         }        
     }
 
