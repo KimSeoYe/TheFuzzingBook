@@ -30,7 +30,6 @@ static runarg_t runargs ;
 static covarg_t covargs ;
 static int (* oracle) (int return_code, int trial) ;
 
-// Q. static global ?
 static char dir_name[RESULT_PATH_MAX] ;  
 
 static char ** parsed_args ; // Q. local var ?
@@ -205,14 +204,13 @@ fuzzer_init (test_config_t * config)
         exit(1) ;
     }
 
-    if (covargs.coverage_on) { // MODIFIED HERE
+    if (covargs.coverage_on) {
         for (int i = 0; i < covargs.source_num; i++) {
             if (access(covargs.source_paths[i], R_OK) == -1) {
                 perror("fuzzer_init: access: cannot access to the source path") ;
                 exit(1) ;
             }
         }
-        // get_source_filename(source_filename, source_path) ;      // TODO. move to read_gcov_file
     }
 
     if (access(runargs.binary_path, X_OK) == -1) {
@@ -540,7 +538,7 @@ void
 update_corpus (char * input, int input_len, int trial)
 {
     char new_seed_file[PATH_MAX] ;
-    sprintf(new_seed_file, "mutated_seed_%d", trial) ; // trial : to make a unique name
+    sprintf(new_seed_file, "mutated_seed_%d", trial) ; // TODO. trial : to make a unique name
 
     if (seed_files_num % SEED_CNT_MAX == 0 && seed_files_num / SEED_CNT_MAX > 0) {
         seed_filenames = realloc(seed_filenames, sizeof(char *) * (seed_files_num / SEED_CNT_MAX + 1)) ;
@@ -576,7 +574,7 @@ update_corpus (char * input, int input_len, int trial)
 }
 
 double
-fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverage_t * coverages, coverage_t * cov_set, int cov_set_len) 
+fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverage_t * coverages, covset_t * cov_sets) 
 {
     clock_t start = clock() ;
 
@@ -599,9 +597,9 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
         return_codes[i] = run(contents, input, input_len, i) ;
 
         int is_cov_grow = 0 ;
-        if (covargs.coverage_on) {  // MODIFIED HERE
+        if (covargs.coverage_on) {
             coverage_t cov ;
-            is_cov_grow = get_coverage(&cov, cov_set, cov_set_len, covargs.source_paths[0]) ; 
+            is_cov_grow = get_coverage(&cov, cov_sets, covargs) ; 
             coverages[i].line = cov.line ;
             coverages[i].branch = cov.branch ;
             if (is_cov_grow && fuzz_type == MUTATION) { // TODO. if not mutation
@@ -623,14 +621,23 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
 ///////////////////////////////////// Fuzzer Summary /////////////////////////////////////
 
 void
-fuzzer_summary (int * return_codes, result_t * results, content_t contents, coverage_t * coverages, coverage_t * cov_set, int cov_set_len, double exec_time_ms)
+fuzzer_summary (int * return_codes, result_t * results, content_t contents, coverage_t * coverages, covset_t * cov_sets, double exec_time_ms)
 {
     int pass_cnt = 0 ;
     int fail_cnt = 0 ;
     int unresolved_cnt = 0 ;
 
-    coverage_t src_cnts ;
-    if (covargs.coverage_on) src_cnts = get_src_cnts(covargs.source_paths[0]) ;
+    coverage_t total_src_cnts ;
+    total_src_cnts.line = 0 ;
+    total_src_cnts.branch = 0 ;
+
+    if (covargs.coverage_on) {
+        for (int i = 0; i < covargs.source_num; i++) {
+            coverage_t src_cnts = get_src_cnts(covargs.source_paths[0]) ;
+            total_src_cnts.line += src_cnts.line ;
+            total_src_cnts.branch += src_cnts.branch ;
+        }
+    }
 
     for (int i = 0; i < trials; i++) {
         printf("(CompletedProcess(target='%s', args='%s', ", runargs.binary_path, runargs.cmd_args) ;
@@ -653,9 +660,11 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
     int total_branch_coverage = 0 ;
 
     if (covargs.coverage_on) {
-        for (int i = 0; i < cov_set_len; i++) {
-            total_line_coverage += cov_set[i].line ;
-            total_branch_coverage += cov_set[i].branch ;
+        for (int i = 0; i < covargs.source_num; i++) {
+            for (int t = 0; t < cov_sets[i].len; t++) {
+                total_line_coverage += cov_sets[i].set[t].line ;
+                total_branch_coverage += cov_sets[i].set[t].branch ;
+            }
         }
     }
     
@@ -665,8 +674,8 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
     printf("# TRIALS : %d\n", trials) ;
     printf("# EXEC TIME : %.f ms\n", exec_time_ms) ;
     if (covargs.coverage_on) {
-        printf("# LINE COVERED : %d / %d = %.1f%%\n", total_line_coverage, src_cnts.line, (double)total_line_coverage * 100.0 / src_cnts.line) ;
-        printf("# BRANCH COVERED : %d / %d = %.1f%%\n", total_branch_coverage, src_cnts.branch, (double)total_branch_coverage * 100.0 / src_cnts.branch) ;
+        printf("# LINE COVERED : %d / %d = %.1f%%\n", total_line_coverage, total_src_cnts.line, (double)total_line_coverage * 100.0 / total_src_cnts.line) ;
+        printf("# BRANCH COVERED : %d / %d = %.1f%%\n", total_branch_coverage, total_src_cnts.branch, (double)total_branch_coverage * 100.0 / total_src_cnts.branch) ;
     }
     printf("# PASS : %d\n", pass_cnt) ;
     printf("# FAIL : %d\n", fail_cnt) ;
@@ -765,26 +774,32 @@ fuzzer_main (test_config_t * config)
     content_t contents ;
     allocate_contents(&contents) ;
 
-    coverage_t * coverages ;
-    coverage_t * cov_set ;
-
-    int cov_set_len ;
+    coverage_t * coverages_per_trial ;
+    
+    covset_t * cov_sets ;
 
     if (covargs.coverage_on) {
-        coverages = (coverage_t *) malloc(sizeof(coverage_t) * trials) ;
-        cov_set_len = get_total_line_cnt(covargs.source_paths[0]) ;
+        coverages_per_trial = (coverage_t *) malloc(sizeof(coverage_t) * trials) ;
+        cov_sets = (covset_t *) malloc(sizeof(covset_t) * covargs.source_num) ;
 
-        cov_set = (coverage_t *) malloc(sizeof(coverage_t) * cov_set_len) ;
-        memset(cov_set, 0, sizeof(coverage_t) * cov_set_len) ;
+        for (int i = 0; i < covargs.source_num; i++) {
+            strcpy(cov_sets[i].filepath, covargs.source_paths[i]) ;
+            
+            cov_sets[i].len = get_total_line_cnt(covargs.source_paths[i]) ;
+            cov_sets[i].set = (coverage_t *) malloc(sizeof(coverage_t) * cov_sets[i].len) ;
+        }        
     }
 
-    double exec_time_ms = fuzzer_loop (return_codes, results, contents, coverages, cov_set, cov_set_len) ;
-    fuzzer_summary(return_codes, results, contents, coverages, cov_set, cov_set_len, exec_time_ms) ;
+    double exec_time_ms = fuzzer_loop (return_codes, results, contents, coverages_per_trial, cov_sets) ;
+    fuzzer_summary(return_codes, results, contents, coverages_per_trial, cov_sets, exec_time_ms) ;
 
-    if (covargs.coverage_on) {  // MODIFIED HERE
-        remove_gcov_file(runargs.binary_path, covargs.source_paths[0]) ;
-        free(coverages) ;
-        free(cov_set) ;
+    if (covargs.coverage_on) {  
+        free(coverages_per_trial) ;
+        for (int i = 0; i < covargs.source_num; i++) {
+            remove_gcov_file(runargs.binary_path, covargs.source_paths[i]) ;
+            free(cov_sets[i].set) ;
+        }
+        free(cov_sets) ;
     }
     else {
         if (covargs.source_num != 0) remove_gcda(covargs.source_paths[0]) ;

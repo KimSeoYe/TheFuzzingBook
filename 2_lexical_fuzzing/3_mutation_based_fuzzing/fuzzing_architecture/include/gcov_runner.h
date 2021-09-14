@@ -1,6 +1,8 @@
 #ifndef GCOV_RUNNER
 #define GCOV_RUNNER
 
+#include "config.h"
+
 #define LINE_MAX 256 // Q.
 #define COV_MAX 1024
 
@@ -13,6 +15,12 @@ typedef struct coverage {
     int line ;
     int branch ;
 } coverage_t ;
+
+typedef struct covset {
+    char filepath[PATH_MAX] ;
+    int len ;
+    coverage_t * set ;
+} covset_t ;
 
 int get_total_line_cnt (char * source_path) ;
 
@@ -30,7 +38,7 @@ void remove_gcda (char * source_path) ;
 
 coverage_t get_src_cnts (char * source_path) ;
 
-int get_coverage (coverage_t * coverage, coverage_t * cov_set, int cov_set_len, char * source_path) ;
+int get_coverage (coverage_t * coverage, covset_t * cov_sets, covarg_t covargs) ;
 
 void remove_gcov_file (char * executable, char * source_path) ;
 
