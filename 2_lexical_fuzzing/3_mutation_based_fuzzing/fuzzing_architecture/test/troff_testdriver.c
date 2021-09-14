@@ -37,7 +37,14 @@ void
 set_configs (test_config_t * config)
 {
     strcpy(config->runargs.binary_path, "../lib/troff_bug_simulate/troff_bug_simulate") ;
-    strcpy(config->source_path, "../lib/troff_bug_simulate/troff_bug_simulate.c") ;
+    // strcpy(config->source_path, "../lib/troff_bug_simulate/troff_bug_simulate.c") ;
+    char sources[1][PATH_MAX] = { "../lib/troff_bug_simulate/troff_bug_simulate.c"} ;
+    config->covargs.source_num = 1 ;
+    config->covargs.source_paths = (char **) malloc(sizeof(char *) * config->covargs.source_num) ;
+    for (int i = 0; i < config->covargs.source_num; i++) {
+        config->covargs.source_paths[i] = (char *) malloc(sizeof(char) * PATH_MAX) ;
+        strcpy(config->covargs.source_paths[i], sources[i]) ;
+    }
 
     config->fuzargs.f_char_start = 0 ;
     config->fuzargs.f_char_range = 255 ;

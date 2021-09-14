@@ -37,7 +37,14 @@ void
 set_configs (test_config_t * config)
 {
     strcpy(config->runargs.binary_path, "../lib/cgi_decode/cgi_decode") ;
-    strcpy(config->source_path, "../lib/cgi_decode/cgi_decode.c") ;
+    // strcpy(config->source_path, "../lib/cgi_decode/cgi_decode.c") ;
+    char sources[1][PATH_MAX] = { "../lib/cgi_decode/cgi_decode.c"} ;
+    config->covargs.source_num = 1 ;
+    config->covargs.source_paths = (char **) malloc(sizeof(char *) * config->covargs.source_num) ;
+    for (int i = 0; i < config->covargs.source_num; i++) {
+        config->covargs.source_paths[i] = (char *) malloc(sizeof(char) * PATH_MAX) ;
+        strcpy(config->covargs.source_paths[i], sources[i]) ;
+    }
 
     config->runargs.timeout = 2 ;
     
