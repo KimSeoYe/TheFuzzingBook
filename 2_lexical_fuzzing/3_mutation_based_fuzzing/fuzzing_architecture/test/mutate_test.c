@@ -13,10 +13,10 @@ main ()
     char * seed = "Hello World!\n" ;
     char dst[32] ;
     
-    delete_random_character(dst, seed, strlen(seed)) ;
+    delete_bytes(dst, seed, strlen(seed)) ;
     printf(">> %s\n", dst) ;
 
-    insert_random_character(dst, seed, strlen(seed)) ;
+    insert_bytes(dst, seed, strlen(seed)) ;
     printf(">> %s\n", dst) ;
 
     bit_flip(dst, seed, strlen(seed)) ;

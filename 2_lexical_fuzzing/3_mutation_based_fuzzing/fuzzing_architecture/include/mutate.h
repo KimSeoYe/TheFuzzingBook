@@ -3,9 +3,9 @@
 
 #include "../include/config.h"
 
-int delete_random_character (char * dst, char * seed, int seed_len) ;
+int delete_bytes (char * dst, char * seed, int seed_len) ;
 
-int insert_random_character (char * dst, char * seed, int seed_len) ;
+int insert_bytes (char * dst, char * seed, int seed_len) ;
 
 int bit_flip (char * dst, char * seed, int seed_len) ;
 
