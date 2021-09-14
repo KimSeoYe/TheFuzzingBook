@@ -26,6 +26,8 @@ void compile_with_coverage (char * target_path, char * target_path_c) ;
 
 void run_gcov (char * source_path) ;
 
+void remove_gcda (char * source_path) ;
+
 coverage_t get_src_cnts (char * source_path) ;
 
 int get_coverage (coverage_t * coverage, coverage_t * cov_set, int cov_set_len, char * source_path) ;

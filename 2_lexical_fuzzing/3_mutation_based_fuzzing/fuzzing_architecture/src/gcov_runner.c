@@ -120,7 +120,6 @@ remove_gcda (char * source_path)
 
     char gcda_file[PATH_MAX] ;
     sprintf(gcda_file, "%s.gcda", copied_path) ;
-    printf("GCDA: %s\n", gcda_file) ;
 
     if (access(gcda_file, F_OK) == 0) {
         if (remove(gcda_file) == -1) {

@@ -24,10 +24,7 @@ static int trials ;
 fuztype_t fuzz_type ;
 fuzopt_t fuzz_option ;
 static int fuzzed_args_num = 0 ;
-// static int is_source ;
-static char source_path[PATH_MAX] ;
 static char source_filename[PATH_MAX] ;
-// int coverage_on ;
 static fuzarg_t fuzargs ;
 static runarg_t runargs ;
 static covarg_t covargs ;
@@ -84,15 +81,6 @@ copy_status (test_config_t * config)
     fuzargs.f_char_start = config->fuzargs.f_char_start ;
     fuzargs.f_char_range = config->fuzargs.f_char_range ;
 
-    // is_source = config->is_source ;
-
-    if (strcmp(config->source_path, "") != 0) { // MODIFIED HERE
-        if (realpath(config->source_path, source_path) == 0x0) {
-            perror("copy_status: realpath: source_path") ;
-            exit(1) ;
-        }
-    }  
-
     if (strcmp(config->runargs.binary_path, "") != 0) { // MODIFIED HERE
         if (realpath(config->runargs.binary_path, runargs.binary_path) == 0x0) {
             perror("copy_status: realpath: runargs.binary_path") ;
@@ -109,7 +97,6 @@ copy_status (test_config_t * config)
             perror("copy_status: realpath: covargs.source_paths[i]") ;
             exit(1) ;
         }
-        printf("[%d] %s\n", i, covargs.source_paths[i]) ; // DEBUG
     }
 
     strcpy(runargs.cmd_args, config->runargs.cmd_args) ;
@@ -614,7 +601,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
         int is_cov_grow = 0 ;
         if (covargs.coverage_on) {  // MODIFIED HERE
             coverage_t cov ;
-            is_cov_grow = get_coverage(&cov, cov_set, cov_set_len, source_path) ; 
+            is_cov_grow = get_coverage(&cov, cov_set, cov_set_len, covargs.source_paths[0]) ; 
             coverages[i].line = cov.line ;
             coverages[i].branch = cov.branch ;
             if (is_cov_grow && fuzz_type == MUTATION) { // TODO. if not mutation
@@ -643,7 +630,7 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
     int unresolved_cnt = 0 ;
 
     coverage_t src_cnts ;
-    if (covargs.coverage_on) src_cnts = get_src_cnts(source_path) ;
+    if (covargs.coverage_on) src_cnts = get_src_cnts(covargs.source_paths[0]) ;
 
     for (int i = 0; i < trials; i++) {
         printf("(CompletedProcess(target='%s', args='%s', ", runargs.binary_path, runargs.cmd_args) ;
@@ -764,39 +751,42 @@ fuzzer_main (test_config_t * config)
     
     fuzzer_init(config) ;
 
-    // int * return_codes = (int *) malloc(sizeof(int) * trials) ;
-    // result_t * results = (result_t *) malloc(sizeof(result_t) * trials) ;
+    int * return_codes = (int *) malloc(sizeof(int) * trials) ;
+    result_t * results = (result_t *) malloc(sizeof(result_t) * trials) ;
     
-    // content_t contents ;
-    // allocate_contents(&contents) ;
+    content_t contents ;
+    allocate_contents(&contents) ;
 
-    // coverage_t * coverages ;
-    // coverage_t * cov_set ;
+    coverage_t * coverages ;
+    coverage_t * cov_set ;
 
-    // int cov_set_len ;
+    int cov_set_len ;
 
-    // if (covargs.coverage_on) {
-    //     coverages = (coverage_t *) malloc(sizeof(coverage_t) * trials) ;
-    //     cov_set_len = get_total_line_cnt(source_path) ;
+    if (covargs.coverage_on) {
+        coverages = (coverage_t *) malloc(sizeof(coverage_t) * trials) ;
+        cov_set_len = get_total_line_cnt(covargs.source_paths[0]) ;
 
-    //     cov_set = (coverage_t *) malloc(sizeof(coverage_t) * cov_set_len) ;
-    //     memset(cov_set, 0, sizeof(coverage_t) * cov_set_len) ;
-    // }
+        cov_set = (coverage_t *) malloc(sizeof(coverage_t) * cov_set_len) ;
+        memset(cov_set, 0, sizeof(coverage_t) * cov_set_len) ;
+    }
 
-    // double exec_time_ms = fuzzer_loop (return_codes, results, contents, coverages, cov_set, cov_set_len) ;
-    // fuzzer_summary(return_codes, results, contents, coverages, cov_set, cov_set_len, exec_time_ms) ;
+    double exec_time_ms = fuzzer_loop (return_codes, results, contents, coverages, cov_set, cov_set_len) ;
+    fuzzer_summary(return_codes, results, contents, coverages, cov_set, cov_set_len, exec_time_ms) ;
 
-    // if (covargs.coverage_on) {  // MODIFIED HERE
-    //     remove_gcov_file(runargs.binary_path, source_path) ;
-    //     free(coverages) ;
-    //     free(cov_set) ;
-    // }
+    if (covargs.coverage_on) {  // MODIFIED HERE
+        remove_gcov_file(runargs.binary_path, covargs.source_paths[0]) ;
+        free(coverages) ;
+        free(cov_set) ;
+    }
+    else {
+        remove_gcda(covargs.source_paths[0]) ;
+    }
 
-    // if (fuzz_type == MUTATION) free_seed_filenames() ;
+    if (fuzz_type == MUTATION) free_seed_filenames() ;
 
-    // free(return_codes) ;
-    // free(results) ;
-    // free_parsed_args() ;
-    // free(parsed_args_lengths) ;
-    // remove_temp_dir() ;  
+    free(return_codes) ;
+    free(results) ;
+    free_parsed_args() ;
+    free(parsed_args_lengths) ;
+    remove_temp_dir() ;  
 }
