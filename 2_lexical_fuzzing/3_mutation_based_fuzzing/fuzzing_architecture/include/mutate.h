@@ -17,6 +17,8 @@ int flip_known_constants (char * dst, char * seed, int seed_len, int position) ;
 
 int simple_arithmatic (char * dst, char * seed, int seed_len, int position) ;
 
+int copy_another_offset (char * dst, char * seed, int seed_len, int position) ;
+
 int mutate (char * dst, char * seed, int seed_len) ;
 
 int mutate_input (char * dst, fuzarg_t * fuzargs, char * seed_filename) ;

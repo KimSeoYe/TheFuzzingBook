@@ -90,7 +90,7 @@ delete_bytes (char * dst, char * seed, int seed_len, int position)
     int byte_idx = rand() % 3 ;
 
 #ifdef DEBUG
-    printf("delete_bytes: byte-size=%d, position=%d\n",byte_size[byte_idx], position) ;
+    printf("delete_bytes: byte-size=%d, position=%d\n", byte_size[byte_idx], position) ;
 #endif
 
     memcpy(dst, seed, position) ;
@@ -120,7 +120,7 @@ insert_random_bytes (char * dst, char * seed, int seed_len, int position)
     }
 
 #ifdef DEBUG
-    printf("insert_random_bytes: byte-size=%d, position=%d\n",byte_size[byte_idx], position) ;
+    printf("insert_random_bytes: byte-size=%d, position=%d\n", byte_size[byte_idx], position) ;
 #endif
 
     memcpy(dst + position + byte_size[byte_idx], seed + position, seed_len - position) ;
@@ -193,7 +193,7 @@ flip_bytes (char * dst, char * seed, int seed_len, int position)
     dst[seed_len] = 0x0 ;
 
 #ifdef DEBUG
-    printf("flip_bytes: byte-size=%d, position=%d\n",byte_size[byte_idx], position) ;
+    printf("flip_bytes: byte-size=%d, position=%d\n", byte_size[byte_idx], position) ;
 #endif
 
     return seed_len ;
@@ -213,7 +213,7 @@ flip_known_constants (char * dst, char * seed, int seed_len, int position)
 
     if (seed_len - position < byte_size[byte_idx]) {
         memcpy(dst, seed, seed_len + 1) ;   // contain 0x0
-        perror("flip_known_constatns: range overflow") ;
+        perror("flip_known_constatns: Range overflow") ;
         return seed_len ;
     }
     
@@ -278,7 +278,40 @@ simple_arithmatic (char * dst, char * seed, int seed_len, int position)
     dst[seed_len] = 0x0 ;
 
 #ifdef DEBUG
-    printf("simple_arithmatic: byte-size=%d, position=%d\n",byte_size[byte_idx], position) ;
+    printf("simple_arithmatic: byte-size=%d, position=%d\n", byte_size[byte_idx], position) ;
+#endif
+
+    return seed_len ;
+}
+
+int
+copy_another_offset (char * dst, char * seed, int seed_len, int position) 
+{
+    if (seed_len == 0) {
+        dst[0] = 0x0 ;
+        perror("copy_another_offset: seed_len is 0") ;
+        return 0 ;
+    } 
+
+    int byte_size[3] = { 1, 2, 4 } ;
+    int byte_idx = rand() % 3 ;
+
+    if (seed_len - position <= byte_size[byte_idx]) {
+        memcpy(dst, seed, seed_len + 1) ; 
+        perror("copy_another_offset: Range overflow") ;
+        return seed_len ;
+    }
+
+    int src_position = rand() % (seed_len - byte_size[byte_idx]) ;
+    
+    memcpy(dst, seed, position) ;
+    memcpy(dst + position, seed + src_position, byte_size[byte_idx]) ;
+    memcpy(dst + position + byte_size[byte_idx], seed + position + byte_size[byte_idx], seed_len - position - byte_size[byte_idx]) ;
+    
+    dst[seed_len] = 0x0 ;
+
+#ifdef DEBUG
+    printf("copy_another_offset: byte-size=%d, position=%d\n", byte_size[byte_idx], position) ;
 #endif
 
     return seed_len ;
@@ -287,7 +320,7 @@ simple_arithmatic (char * dst, char * seed, int seed_len, int position)
 int
 mutate (char * dst, char * seed, int seed_len) 
 {
-    int (* mutator[]) (char *, char *, int, int) = { flip_bits, delete_bytes, insert_random_bytes, insert_known_constants, flip_bytes, flip_known_constants, simple_arithmatic } ;
+    int (* mutator[]) (char *, char *, int, int) = { flip_bits, delete_bytes, insert_random_bytes, insert_known_constants, flip_bytes, flip_known_constants, simple_arithmatic, copy_another_offset } ;
 
     int mutator_idx = rand() % 6 ;
     int new_len = 0 ;
