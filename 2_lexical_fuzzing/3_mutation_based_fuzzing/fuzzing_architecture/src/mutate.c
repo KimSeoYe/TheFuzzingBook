@@ -48,65 +48,8 @@ static u_int32_t interesting_32[] = { INTERESTING_8, INTERESTING_16, INTERESTING
 
 typedef enum mutator { DELETE = 0, INSERT, BIT_FLIP, BYTE_FLIP, ARITHMATIC, KNOWN_INT } mutator_t ;
 
-
 int
-delete_bytes (char * dst, char * seed, int seed_len) 
-{
-    if (seed_len == 0) {
-        dst[0] = 0x0 ;
-        perror("delete: seed_len == 0") ;
-        return 0 ;
-    } 
-
-    int position = rand() % seed_len ;
-
-    int byte_size[3] = { 1, 2, 4 } ;
-    int byte_idx = rand() % 3 ;
-
-#ifdef DEBUG
-    printf("Deleting %c, %d-byte at %d\n", seed[position], byte_size[byte_idx], position) ;
-#endif
-
-    memcpy(dst, seed, position) ;
-    memcpy(dst + position, seed + position + byte_size[byte_idx], seed_len - position - byte_size[byte_idx]) ;
-    dst[seed_len - 1] = 0x0 ;
-
-    return seed_len - 1 ;
-}
-
-int
-insert_bytes (char * dst, char * seed, int seed_len) 
-{
-    if (seed_len == 0) {
-        dst[0] = 0x0 ;
-        perror("insert_random_character: seed_len == 0") ;
-        return 0 ;
-    } 
-
-    int position = rand() % seed_len ;
-    
-    int byte_size[3] = { 1, 2, 4 } ;
-    int byte_idx = rand() % 3 ;
-
-    memcpy(dst, seed, position) ;
-    // dst[position] = rand_char ;
-    for (int i = 0; i < byte_size[byte_idx]; i++) {
-        char rand_char = (char) (rand() % 96 + 32) ; // TODO. range
-        dst[position + i] = rand_char ;
-    }
-
-#ifdef DEBUG
-    printf("Inserting %d-byte at %d\n", byte_size[byte_idx], position) ;
-#endif
-
-    memcpy(dst + position + byte_size[byte_idx], seed + position, seed_len - position) ;
-    dst[seed_len + byte_size[byte_idx]] = 0x0 ;
-
-    return seed_len + byte_size[byte_idx] ;
-}
-
-int
-bit_flip (char * dst, char * seed, int seed_len) 
+bit_flip (char * dst, char * seed, int seed_len, int position) 
 {
     if (seed_len == 0) {
         dst[0] = 0x0 ;
@@ -115,15 +58,14 @@ bit_flip (char * dst, char * seed, int seed_len)
     } 
 
     int bit_size[3] = { 0b0001, 0b0011, 0b1111 } ;
-    int bit_index = rand() % 3 ;
+    int bit_idx = rand() % 3 ;
 
-    int position = rand() % seed_len ;
-    int bit = bit_size[bit_index] << (rand() % 7) ;
+    int bit = bit_size[bit_idx] << (rand() % 7) ;
 
-    char new_char = (char) seed[position] ^ bit ;   // Q.
+    char new_char = (char) seed[position] ^ bit ;
     
 #ifdef DEBUG
-    printf("Bit-flip %d in %d giving %c at %d\n", bit, seed[position], new_char, position) ;
+    printf("Byte-flip: byte-size=%d, position=%d\n", bit_size[bit_idx], position) ;
 #endif
 
     memcpy(dst, seed, position) ;
@@ -136,43 +78,99 @@ bit_flip (char * dst, char * seed, int seed_len)
 }
 
 int
-byte_flip (char * dst, char * seed, int seed_len) 
+delete_bytes (char * dst, char * seed, int seed_len, int position) 
 {
     if (seed_len == 0) {
         dst[0] = 0x0 ;
-        perror("byte_flip: seed_len == 0") ;
+        perror("delete: seed_len == 0") ;
         return 0 ;
     } 
 
-    int position ;
-    char new_char ;
-
     int byte_size[3] = { 1, 2, 4 } ;
-    for (int i = 2; i >= 0; i--) {
-        if (seed_len >= byte_size[i]) {
-            if (seed_len == byte_size[i]) position = 0 ;
-            else position = rand() % (seed_len - byte_size[i]) ;
-            new_char = (char) seed[position] ^ 0xff ;   // TODO -> fix bug
-            break ;
-        }
+    int byte_idx = rand() % 3 ;
+
+#ifdef DEBUG
+    printf("Byte-flip: byte-size=%d, position=%d\n",byte_size[byte_idx], position) ;
+#endif
+
+    memcpy(dst, seed, position) ;
+
+    if (byte_size[byte_idx] > seed_len - position) {
+        dst[position] = 0x0 ;
+        return position ;
+    }
+
+    memcpy(dst + position, seed + position + byte_size[byte_idx], seed_len - position - byte_size[byte_idx]) ;
+    dst[seed_len - byte_size[byte_idx]] = 0x0 ;
+
+    return seed_len - byte_size[byte_idx] ;
+}
+
+int
+insert_bytes (char * dst, char * seed, int seed_len, int position) 
+{   
+    int byte_size[3] = { 1, 2, 4 } ;
+    int byte_idx = rand() % 3 ;
+
+    memcpy(dst, seed, position) ;
+    
+    for (int i = 0; i < byte_size[byte_idx]; i++) {
+        char rand_char = (char) (rand() % 96 + 32) ; // TODO. range
+        dst[position + i] = rand_char ;
     }
 
 #ifdef DEBUG
-    printf("Byte-flip: seed[position]=%d, new_char=%c, position=%d\n", seed[position], new_char, position) ;
+    printf("Byte-flip: byte-size=%d, position=%d\n",byte_size[byte_idx], position) ;
 #endif
 
-    // TODO -> fix bug
-    memcpy(dst, seed, position) ;
-    dst[position] = new_char ;
+    memcpy(dst + position + byte_size[byte_idx], seed + position, seed_len - position) ;
+    dst[seed_len + byte_size[byte_idx]] = 0x0 ;
 
-    memcpy(dst + position + 1, seed + position + 1, seed_len - position - 1) ;
+    return seed_len + byte_size[byte_idx] ;
+}
+
+
+int
+flip_bytes (char * dst, char * seed, int seed_len, int position) 
+{
+    if (seed_len == 0) {
+        dst[0] = 0x0 ;
+        perror("flip_bytes: seed_len == 0") ;
+        return 0 ;
+    } 
+
+    int byte_size[3] = { 1, 2, 4 } ;
+    int byte_idx = rand() % 3 ;
+
+    memcpy(dst, seed, position) ;
+
+    char new_char ;
+    if (seed_len - position <= byte_size[byte_idx]) {  // flip all bytes   
+        for (int i = 0; i < seed_len - position; i++) {
+            new_char = (char) seed[position + i] ^ 0xff ;
+            dst[position + i] = new_char ;
+        }
+    }
+    else {
+        for (int i = 0; i < byte_size[byte_idx]; i++) {
+            new_char = (char) seed[position + i] ^ 0xff ;
+            dst[position + i] = new_char ;
+        }
+
+        memcpy(dst + position + byte_size[byte_idx], seed + position + byte_size[byte_idx], seed_len - position - byte_size[byte_idx]) ;
+    }
+
     dst[seed_len] = 0x0 ;
+
+#ifdef DEBUG
+    printf("Byte-flip: byte-size=%d, position=%d\n",byte_size[byte_idx], position) ;
+#endif
 
     return seed_len ;
 }
 
 int
-simple_arithmatic (char * dst, char * seed, int seed_len) 
+simple_arithmatic (char * dst, char * seed, int seed_len, int position) 
 {
     if (seed_len == 0) {
         dst[0] = 0x0 ;
@@ -180,7 +178,6 @@ simple_arithmatic (char * dst, char * seed, int seed_len)
         return 0 ;
     } 
 
-    int position = rand() % seed_len ;
     int add_operand = rand() % 71 - 35 ;
     char new_char = (char) seed[position] + add_operand ;
 
@@ -198,7 +195,7 @@ simple_arithmatic (char * dst, char * seed, int seed_len)
 }
 
 int
-known_integers (char * dst, char * seed, int seed_len) 
+known_integers (char * dst, char * seed, int seed_len, int position) 
 {
     if (seed_len == 0) {
         dst[0] = 0x0 ;
@@ -207,8 +204,6 @@ known_integers (char * dst, char * seed, int seed_len)
     } 
 
     int known_integers_num[] = { 9, 10, 8 } ;
-
-    int position = rand() % seed_len ;
 
     int category = rand() % 3 ;
     int index = rand() % known_integers_num[category] ;
@@ -242,12 +237,16 @@ known_integers (char * dst, char * seed, int seed_len)
 int
 mutate (char * dst, char * seed, int seed_len) 
 {
-    int (* mutator[6]) (char *, char *, int) = { delete_bytes, insert_bytes, bit_flip, byte_flip, simple_arithmatic, known_integers } ;
+    int (* mutator[6]) (char *, char *, int, int) = { delete_bytes, insert_bytes, bit_flip, flip_bytes, simple_arithmatic, known_integers } ;
 
     int mutator_idx = rand() % 6 ;
     int new_len = 0 ;
 
-    new_len = mutator[mutator_idx](dst, seed, seed_len) ; 
+    int position ;
+    if (seed_len != 0) position = rand() % seed_len ;
+    else position = 0 ;
+
+    new_len = mutator[mutator_idx](dst, seed, seed_len, position) ; 
 
     return new_len ;
 }

@@ -3,17 +3,17 @@
 
 #include "../include/config.h"
 
-int delete_bytes (char * dst, char * seed, int seed_len) ;
+int bit_flip (char * dst, char * seed, int seed_len, int position) ;
 
-int insert_bytes (char * dst, char * seed, int seed_len) ;
+int delete_bytes (char * dst, char * seed, int seed_len, int position) ;
 
-int bit_flip (char * dst, char * seed, int seed_len) ;
+int insert_bytes (char * dst, char * seed, int seed_len, int position) ;
 
-int byte_flip (char * dst, char * seed, int seed_len) ;
+int flip_bytes (char * dst, char * seed, int seed_len, int position) ;
 
-int simple_arithmatic (char * dst, char * seed, int seed_len) ;
+int simple_arithmatic (char * dst, char * seed, int seed_len, int position) ;
 
-int known_integers (char * dst, char * seed, int seed_len) ;
+int known_integers (char * dst, char * seed, int seed_len, int position) ;
 
 int mutate (char * dst, char * seed, int seed_len) ;
 
