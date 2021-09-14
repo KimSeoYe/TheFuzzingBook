@@ -49,7 +49,7 @@ static u_int32_t interesting_32[] = { INTERESTING_8, INTERESTING_16, INTERESTING
 typedef enum mutator { DELETE = 0, INSERT, BIT_FLIP, BYTE_FLIP, ARITHMATIC, KNOWN_INT } mutator_t ;
 
 int
-flip_bits (char * dst, char * seed, int seed_len, int position) 
+flip_bits (char * dst, int dst_len, char * seed, int seed_len, int position) 
 {
     if (seed_len == 0) {
         dst[0] = 0x0 ;
@@ -78,7 +78,7 @@ flip_bits (char * dst, char * seed, int seed_len, int position)
 }
 
 int
-delete_bytes (char * dst, char * seed, int seed_len, int position) 
+delete_bytes (char * dst, int dst_len, char * seed, int seed_len, int position) 
 {
     if (seed_len == 0) {
         dst[0] = 0x0 ;
@@ -107,10 +107,16 @@ delete_bytes (char * dst, char * seed, int seed_len, int position)
 }
 
 int
-insert_random_bytes (char * dst, char * seed, int seed_len, int position) 
+insert_random_bytes (char * dst, int dst_len, char * seed, int seed_len, int position)   // TODO. dst buffer len check
 {   
     int byte_size[3] = { 1, 2, 4 } ;
     int byte_idx = rand() % 3 ;
+
+    if (dst_len < seed_len + byte_size[byte_idx]) {
+        perror("insert_random_bytes: Overflow: dst_len must be larger than seed_len + byte_size") ;
+        memcpy(dst, seed, seed_len + 1) ;
+        return seed_len ;
+    }
 
     memcpy(dst, seed, position) ;
     
@@ -130,10 +136,16 @@ insert_random_bytes (char * dst, char * seed, int seed_len, int position)
 }
 
 int
-insert_known_constants (char * dst, char * seed, int seed_len, int position) 
+insert_known_constants (char * dst, int dst_len, char * seed, int seed_len, int position) 
 {   
     int byte_size[3] = { 1, 2, 4 } ;
     int byte_idx = rand() % 3 ;
+
+    if (dst_len < seed_len + byte_size[byte_idx]) {
+        perror("insert_known_constants: Overflow: dst_len must be larger than seed_len + byte_size") ;
+        memcpy(dst, seed, seed_len + 1) ;
+        return seed_len ;
+    }
     
     int known_constant_num[] = { 9, 10, 8 } ;
     int constant_idx ;
@@ -161,7 +173,7 @@ insert_known_constants (char * dst, char * seed, int seed_len, int position)
 }
 
 int
-flip_bytes (char * dst, char * seed, int seed_len, int position) 
+flip_bytes (char * dst, int dst_len, char * seed, int seed_len, int position) 
 {
     if (seed_len == 0) {
         dst[0] = 0x0 ;
@@ -200,7 +212,7 @@ flip_bytes (char * dst, char * seed, int seed_len, int position)
 }
 
 int
-flip_known_constants (char * dst, char * seed, int seed_len, int position) 
+flip_known_constants (char * dst, int dst_len, char * seed, int seed_len, int position) 
 {
     if (seed_len == 0) {
         dst[0] = 0x0 ;
@@ -243,7 +255,7 @@ flip_known_constants (char * dst, char * seed, int seed_len, int position)
 }
 
 int
-simple_arithmatic (char * dst, char * seed, int seed_len, int position) 
+simple_arithmatic (char * dst, int dst_len, char * seed, int seed_len, int position) 
 {
     if (seed_len == 0) {
         dst[0] = 0x0 ;
@@ -285,7 +297,7 @@ simple_arithmatic (char * dst, char * seed, int seed_len, int position)
 }
 
 int
-copy_another_offset (char * dst, char * seed, int seed_len, int position) 
+copy_another_offset (char * dst, int dst_len, char * seed, int seed_len, int position) 
 {
     if (seed_len == 0) {
         dst[0] = 0x0 ;
@@ -318,9 +330,9 @@ copy_another_offset (char * dst, char * seed, int seed_len, int position)
 }
 
 int
-mutate (char * dst, char * seed, int seed_len) 
+mutate (char * dst, int dst_len, char * seed, int seed_len) 
 {
-    int (* mutator[]) (char *, char *, int, int) = { flip_bits, delete_bytes, insert_random_bytes, insert_known_constants, flip_bytes, flip_known_constants, simple_arithmatic, copy_another_offset } ;
+    int (* mutator[]) (char *, int, char *, int, int) = { flip_bits, delete_bytes, insert_random_bytes, insert_known_constants, flip_bytes, flip_known_constants, simple_arithmatic, copy_another_offset } ;
 
     int mutator_idx = rand() % 6 ;
     int new_len = 0 ;
@@ -329,7 +341,7 @@ mutate (char * dst, char * seed, int seed_len)
     if (seed_len != 0) position = rand() % seed_len ;
     else position = 0 ;
 
-    new_len = mutator[mutator_idx](dst, seed, seed_len, position) ; 
+    new_len = mutator[mutator_idx](dst, dst_len, seed, seed_len, position) ; 
 
     return new_len ;
 }
@@ -349,7 +361,7 @@ get_seed_path (char * dst, char * dir_name, char * file_name)
 }
 
 int
-mutate_input (char * dst, fuzarg_t * fuzargs, char * seed_filename)
+mutate_input (char * dst, int dst_len, fuzarg_t * fuzargs, char * seed_filename)
 { 
     char seed_path[PATH_MAX] ;
     get_seed_path(seed_path, fuzargs->seed_dir, seed_filename) ;
@@ -375,7 +387,7 @@ mutate_input (char * dst, fuzarg_t * fuzargs, char * seed_filename)
     }
     fclose(fp) ;
 
-    int mutate_len = mutate(dst, seed_input, total_len) ;
+    int mutate_len = mutate(dst, dst_len, seed_input, total_len) ;
     free(seed_input) ;
     
     return mutate_len ;
