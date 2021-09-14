@@ -779,7 +779,7 @@ fuzzer_main (test_config_t * config)
         free(cov_set) ;
     }
     else {
-        remove_gcda(covargs.source_paths[0]) ;
+        if (covargs.source_num != 0) remove_gcda(covargs.source_paths[0]) ;
     }
 
     if (fuzz_type == MUTATION) free_seed_filenames() ;
