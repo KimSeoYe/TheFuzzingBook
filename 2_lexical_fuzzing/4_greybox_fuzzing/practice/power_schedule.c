@@ -72,6 +72,7 @@ main ()
     srand(time(NULL)) ;
 
     int seeds_cnt = 3 ;
+    int trials = 1000 ;
 
     seed_t * seeds = (seed_t *) malloc(sizeof(seed_t) * seeds_cnt) ;
     init_energy(seeds, seeds_cnt) ;
@@ -81,7 +82,7 @@ main ()
         hits[i] = 0 ;
     }
 
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < trials; i++) {
         int choice = choose_seed(seeds, seeds_cnt) ;
         hits[choice]++ ;
     }
