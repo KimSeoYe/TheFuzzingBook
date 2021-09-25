@@ -159,7 +159,7 @@ get_src_cnts (char * source_path)
 }
 
 int
-read_gcov_file (coverage_t * cov, covset_t cov_set, char * source_path) 
+read_gcov_file (coverage_t * cov, covset_t * cov_set, char * source_path) 
 {
     char source_filename[PATH_MAX] ;
     get_source_filename(source_filename, source_path) ;
@@ -176,13 +176,13 @@ read_gcov_file (coverage_t * cov, covset_t cov_set, char * source_path)
     cov->line = 0 ;
     cov->branch = 0 ; 
 
-    int * line_result = (int *) malloc(sizeof(int) * cov_set.len) ;  
-    int * branch_result = (int *) malloc(sizeof(int) * cov_set.len) ;
+    int * line_result = (int *) malloc(sizeof(int) * cov_set->len) ;  
+    int * branch_result = (int *) malloc(sizeof(int) * cov_set->len) ;
     
     char * buf = (char *) malloc(sizeof(char) * LINE_MAX) ;
     size_t line_max = LINE_MAX ;
 
-    for (int branch_num = 0 ; getline(&buf, &line_max, fp) > 0; ) {
+    for (int branch_num = 0 ; getline(&buf, &line_max, fp) > 0; ) { // TODO. what if, branch num is more than line num?
         if (strncmp(buf, "branch", 6) == 0) {
             if (strstr(buf, "taken") != 0x0) {
                 branch_result[cov->branch++] = branch_num ;
@@ -208,17 +208,17 @@ read_gcov_file (coverage_t * cov, covset_t cov_set, char * source_path)
     */
 
     for (int i = 0; i < cov->line; i++) {
-        if (cov_set.set[line_result[i]].line == 0) {
+        if (cov_set->set[line_result[i]].line == 0) {
             is_cov_grow = 1 ;
         }
-        cov_set.set[line_result[i]].line = 1 ;
+        cov_set->set[line_result[i]].line = 1 ;
     }
 
     for (int i = 0; i < cov->branch; i++) {
-        if (cov_set.set[branch_result[i]].branch == 0) {
+        if (cov_set->set[branch_result[i]].branch == 0) {
             is_cov_grow = 1 ; 
         }
-        cov_set.set[branch_result[i]].branch = 1 ;
+        cov_set->set[branch_result[i]].branch = 1 ;
     }
 
     free(buf) ;
@@ -233,14 +233,15 @@ int
 get_coverage (coverage_t * coverage, covset_t * cov_sets, covarg_t covargs)
 {
     int is_total_cov_grow = 0 ;
+
     coverage->line = 0 ;
     coverage->branch = 0 ;
-    coverage_t coverage_per_src ;
 
     for (int i = 0; i < covargs.source_num; i++) {
         run_gcov(covargs.source_paths[i]) ;
 
-        int is_cov_grow = read_gcov_file(&coverage_per_src, cov_sets[i], covargs.source_paths[i]) ;
+        coverage_t coverage_per_src ;
+        int is_cov_grow = read_gcov_file(&coverage_per_src, &cov_sets[i], covargs.source_paths[i]) ;
         if (!is_total_cov_grow && is_cov_grow) is_total_cov_grow = 1 ;
         
         coverage->line += coverage_per_src.line ;
