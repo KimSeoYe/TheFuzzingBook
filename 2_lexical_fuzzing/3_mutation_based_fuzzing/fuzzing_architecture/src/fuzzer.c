@@ -626,7 +626,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
 void
 fuzzer_summary (int * return_codes, result_t * results, content_t contents, coverage_t * coverages, covset_t * cov_sets, double exec_time_ms)
 {
-    // DEBUG
+    // // DEBUG
     // for (int i = 0; i < covargs.source_num; i++) {
     //     printf("[%d] cov_sets[i].len: %d\n", i, cov_sets[i].len) ;
     //     for (int t = 0; t < cov_sets[i].len; t++) {
@@ -788,7 +788,6 @@ fuzzer_main (test_config_t * config)
     allocate_contents(&contents) ;
 
     coverage_t * coverages_per_trial ;
-    
     covset_t * cov_sets ;
 
     if (covargs.coverage_on) {
@@ -800,6 +799,7 @@ fuzzer_main (test_config_t * config)
             
             cov_sets[i].len = get_total_line_cnt(covargs.source_paths[i]) ;
             cov_sets[i].set = (coverage_t *) malloc(sizeof(coverage_t) * cov_sets[i].len) ;
+
             memset(cov_sets[i].set, 0, sizeof(coverage_t) * cov_sets[i].len) ;
         }        
     }

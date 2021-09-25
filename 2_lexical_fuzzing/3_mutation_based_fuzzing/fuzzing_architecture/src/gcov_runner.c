@@ -174,7 +174,7 @@ read_gcov_file (coverage_t * cov, covset_t cov_set, char * source_path)
     }
 
     cov->line = 0 ;
-    cov->branch = 0 ;
+    cov->branch = 0 ; 
 
     int * line_result = (int *) malloc(sizeof(int) * cov_set.len) ;  
     int * branch_result = (int *) malloc(sizeof(int) * cov_set.len) ;
@@ -242,6 +242,7 @@ get_coverage (coverage_t * coverage, covset_t * cov_sets, covarg_t covargs)
 
         int is_cov_grow = read_gcov_file(&coverage_per_src, cov_sets[i], covargs.source_paths[i]) ;
         if (!is_total_cov_grow && is_cov_grow) is_total_cov_grow = 1 ;
+        
         coverage->line += coverage_per_src.line ;
         coverage->branch += coverage_per_src.branch ;
         
