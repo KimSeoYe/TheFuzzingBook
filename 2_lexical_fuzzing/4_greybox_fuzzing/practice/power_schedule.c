@@ -55,6 +55,8 @@ choose_seed (seed_t * seeds, int seeds_cnt)
 
     int choice = rand() % sum_energy ;
 
+    // TODO. use normalization...?
+
     int accumulate = 0 ;
     for (int i = 0; i < seeds_cnt; i++) {
         accumulate += seeds[i].energy ;
