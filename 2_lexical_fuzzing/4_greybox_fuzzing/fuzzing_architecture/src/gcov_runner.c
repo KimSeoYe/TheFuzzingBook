@@ -179,10 +179,8 @@ read_gcov_file (coverage_t * cov, covset_t * cov_set, char * source_path)
     int * line_result = (int *) malloc(sizeof(int) * cov_set->len) ;  
     int * branch_result = (int *) malloc(sizeof(int) * cov_set->len) ;
     
-    char * buf = (char *) malloc(sizeof(char) * LINE_MAX) ;
-    size_t line_max = LINE_MAX ;
-
-    for (int branch_num = 0 ; getline(&buf, &line_max, fp) > 0; ) { // TODO. what if, branch num is more than line num?
+    char buf[LINE_MAX] ;
+    for (int branch_num = 0 ; fgets(buf, LINE_MAX, fp) > 0; ) { // TODO. what if, branch num is more than line num?
         if (strncmp(buf, "branch", 6) == 0) {
             if (strstr(buf, "taken") != 0x0) {
                 branch_result[cov->branch++] = branch_num ;
@@ -196,7 +194,7 @@ read_gcov_file (coverage_t * cov, covset_t * cov_set, char * source_path)
             line_result[cov->line++] = atoi(line_number) ;
         }
     }
-
+ 
     fclose(fp) ;
 
     int is_cov_grow = 0 ;
@@ -223,7 +221,6 @@ read_gcov_file (coverage_t * cov, covset_t * cov_set, char * source_path)
         cov_set->set[branch_result[i]].branch = 1 ;
     }
 
-    // free(buf) ;
     // free(line_result) ;
     // free(branch_result) ;
 
