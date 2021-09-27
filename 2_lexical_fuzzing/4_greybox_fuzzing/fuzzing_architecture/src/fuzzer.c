@@ -634,7 +634,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
         int is_cov_grow = 0 ;
         if (covargs.coverage_on) {
             coverage_t cov ;
-            // is_cov_grow = get_coverage(&cov, cov_sets, covargs) ; // TODO. covargs to pointer
+            is_cov_grow = get_coverage(&cov, cov_sets, covargs) ; // TODO. covargs to pointer
 
             coverages[i].line = cov.line ;
             coverages[i].branch = cov.branch ;
@@ -670,7 +670,6 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
 
     if (covargs.coverage_on) {
         for (int i = 0; i < covargs.source_num; i++) {
-            printf("SOURCE PATH: %s\n", covargs.source_paths[i]) ;
             coverage_t src_cnts = get_src_cnts(covargs.source_paths[i]) ;
             total_src_cnts.line += src_cnts.line ;
             total_src_cnts.branch += src_cnts.branch ;
@@ -836,7 +835,6 @@ fuzzer_main (test_config_t * config)
         free(coverages_per_trial) ;
         for (int i = 0; i < covargs.source_num; i++) {
             remove_gcov_file(runargs.binary_path, covargs.source_paths[i]) ;
-            remove_gcda(covargs.source_paths[i]) ;
             free(cov_sets[i].set) ;
         }
         free(cov_sets) ;
