@@ -14,7 +14,7 @@
 #include "../include/gcov_runner.h"
 #include "../include/mutate.h"
 
-#define DEBUG
+// #define DEBUG
 
 ///////////////////////////////////// Fuzzer Status /////////////////////////////////////
 
@@ -37,6 +37,8 @@ static int cmd_args_num = 2 ;
 
 static char ** seed_filenames ;
 static int seed_files_num ;
+
+static int accumulated_coverage = 0 ;
 
 ///////////////////////////////////// Fuzzer Init /////////////////////////////////////
 
@@ -62,6 +64,7 @@ print_status ()
     printf("\t- timeout: %d\n", runargs.timeout) ;
     printf("# COVARGS\n") ;
     printf("\t- coverage_on: %d\n", covargs.coverage_on) ;
+    printf("\t- csv_filename: %s\n", covargs.csv_filename) ;
     printf("\t- source_num: %d\n", covargs.source_num) ;
     for (int i = 0; i < covargs.source_num; i++) {
         printf("\t---> [%d] %s\n", i, covargs.source_paths[i]) ;
@@ -125,15 +128,19 @@ copy_status (test_config_t * config)
             exit(1) ;
         }
     }
+    strcpy(covargs.csv_filename, config->covargs.csv_filename) ;
+    // TODO.
+    // if (realpath(config->covargs.csv_filename, covargs.csv_filename) == 0x0) {
+    //     perror("copy_status: realpath: covargs.csv_filename") ;
+    //     exit(1) ;
+    // }
 
     strcpy(runargs.cmd_args, config->runargs.cmd_args) ;
     runargs.timeout = config->runargs.timeout ;
 
     oracle = config->oracle ; 
 
-#ifdef DEBUG
     print_status() ;
-#endif
 }
 
 void
