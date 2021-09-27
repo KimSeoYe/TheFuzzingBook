@@ -9,8 +9,8 @@ void
 set_configs (test_config_t * config)
 {
     strcpy(config->runargs.binary_path, "../../lib/cJSON/parse_test") ;
-    char sources[2][PATH_MAX] = { "../../lib/cJSON/parse_test.c", "../../lib/cJSON/cJSON.c"} ;
-    config->covargs.source_num = 2 ;
+    char sources[1][PATH_MAX] = { "../../lib/cJSON/cJSON.c"} ;
+    config->covargs.source_num = 1 ;
     config->covargs.source_paths = (char **) malloc(sizeof(char *) * config->covargs.source_num) ;
     for (int i = 0; i < config->covargs.source_num; i++) {
         config->covargs.source_paths[i] = (char *) malloc(sizeof(char) * PATH_MAX) ;
