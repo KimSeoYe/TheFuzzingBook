@@ -14,7 +14,7 @@
 #include "../include/gcov_runner.h"
 #include "../include/mutate.h"
 
-// #define DEBUG
+#define DEBUG
 
 ///////////////////////////////////// Fuzzer Status /////////////////////////////////////
 
@@ -24,7 +24,6 @@ static int trials ;
 fuztype_t fuzz_type ;
 fuzopt_t fuzz_option ;
 static int fuzzed_args_num = 0 ;
-static char source_filename[PATH_MAX] ;
 static fuzarg_t fuzargs ;
 static runarg_t runargs ;
 static covarg_t covargs ;
@@ -40,6 +39,35 @@ static char ** seed_filenames ;
 static int seed_files_num ;
 
 ///////////////////////////////////// Fuzzer Init /////////////////////////////////////
+
+void
+print_status ()
+{
+    printf("=======================================================\n") ;
+    printf("FUZZER STATUS\n") ;
+    printf("=======================================================\n") ;
+    printf("# TRIALS: %d\n", trials) ;
+    printf("# FUZZ TYPE (0: RANDOM, 1: MUTATION) : %d\n", fuzz_type) ;
+    printf("# FUZZ OPTION (0: STD_IN, 1: ARGUMENT, 2: FILE_CONTENTS): %d\n", fuzz_option) ;
+    printf("# FUZZED ARGS NUM: %d\n", fuzzed_args_num) ;
+    printf("# FUZARGS\n") ;
+    printf("\t- f_min_len: %d / f_max_len: %d\n", fuzargs.f_min_len, fuzargs.f_max_len) ;
+    printf("\t- f_char_start: %d / f_char_range: %d\n", fuzargs.f_char_start, fuzargs.f_char_range) ;
+    if (fuzz_type == 1) {
+        printf("\t- seed_dir: %s\n", fuzargs.seed_dir) ;
+    }
+    printf("# RUNARGS\n") ;
+    printf("\t- binary_path: %s\n", runargs.binary_path) ;
+    printf("\t- cmd_args: %s\n", runargs.cmd_args) ;
+    printf("\t- timeout: %d\n", runargs.timeout) ;
+    printf("# COVARGS\n") ;
+    printf("\t- coverage_on: %d\n", covargs.coverage_on) ;
+    printf("\t- source_num: %d\n", covargs.source_num) ;
+    for (int i = 0; i < covargs.source_num; i++) {
+        printf("\t---> [%d] %s\n", i, covargs.source_paths[i]) ;
+    }
+    printf("=======================================================\n\n") ;
+}
 
 void
 copy_status (test_config_t * config)
@@ -102,6 +130,10 @@ copy_status (test_config_t * config)
     runargs.timeout = config->runargs.timeout ;
 
     oracle = config->oracle ; 
+
+#ifdef DEBUG
+    print_status() ;
+#endif
 }
 
 void
@@ -578,10 +610,10 @@ update_corpus (char * input, int input_len)
 double
 fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverage_t * coverages, covset_t * cov_sets) 
 {
-    clock_t start = clock() ;
-
     int input_size = fuzargs.f_char_start + 1 ; // TODO -> mutation ?
     char * input = (char *) malloc(sizeof(char) * input_size) ;    
+
+    clock_t start = clock() ;
     
     for (int i = 0; i < trials; i++) {
         int input_len = 0 ;
@@ -602,9 +634,11 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
         int is_cov_grow = 0 ;
         if (covargs.coverage_on) {
             coverage_t cov ;
-            is_cov_grow = get_coverage(&cov, cov_sets, covargs) ; 
+            is_cov_grow = get_coverage(&cov, cov_sets, covargs) ; // TODO. covargs to pointer
+
             coverages[i].line = cov.line ;
             coverages[i].branch = cov.branch ;
+
             if (is_cov_grow && fuzz_type == MUTATION) { // TODO. if not mutation
                 update_corpus(input, input_len) ;
             }
@@ -685,7 +719,7 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
     printf("TOTAL SUMMARY\n") ;
     printf("=======================================================\n") ;
     printf("# TRIALS : %d\n", trials) ;
-    printf("# EXEC TIME : %.f ms\n", exec_time_ms) ;
+    printf("# EXEC TIME : %.3f s\n", exec_time_ms / CLOCKS_PER_SEC) ;
     if (covargs.coverage_on) {
         printf("# LINE COVERED : %d / %d = %.1f%%\n", total_line_coverage, total_src_cnts.line, (double)total_line_coverage * 100.0 / total_src_cnts.line) ;
         printf("# BRANCH COVERED : %d / %d = %.1f%%\n", total_branch_coverage, total_src_cnts.branch, (double)total_branch_coverage * 100.0 / total_src_cnts.branch) ;
