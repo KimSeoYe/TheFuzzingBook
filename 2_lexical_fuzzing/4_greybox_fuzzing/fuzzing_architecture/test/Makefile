@@ -3,7 +3,7 @@ EXECS=cat_testdriver troff_testdriver hunspell_testdriver cgi_decode_testdriver 
 OBJS=config.o fuzzer.o fuzz_input.o gcov_runner.o mutate.o
 SRCS=../src/config.c ../src/fuzzer.c ../src/fuzz_input.c ../src/gcov_runner.c ../src/mutate.c
 
-all: $(TARGETS) $(SRCS)
+all: $(TARGETS) 
 	gcc -o cat_testdriver cat_testdriver.c $(SRCS)
 	gcc -o troff_testdriver troff_testdriver.c $(SRCS)
 	gcc -o hunspell_testdriver hunspell_testdriver.c $(SRCS)

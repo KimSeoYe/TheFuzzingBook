@@ -91,6 +91,6 @@ main (int argc, char * argv[])
     }
 
     fuzzer_main(&config) ;
-
+    
     free_conf_source_paths(&config) ;
 }
