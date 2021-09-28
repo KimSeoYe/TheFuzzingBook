@@ -26,6 +26,7 @@ typedef struct covarg {
     int coverage_on ;               // turn on calculating coverage part if coverage_on is true
     char ** source_paths ;          // Q. array or pointer?
     int source_num ;    
+    char source_dir[PATH_MAX] ;
     char csv_filename[PATH_MAX] ;   // result file name
 } covarg_t ;
 
