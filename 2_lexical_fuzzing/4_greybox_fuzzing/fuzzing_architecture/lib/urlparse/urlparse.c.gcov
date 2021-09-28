@@ -1,0 +1,113 @@
+        -:    0:Source:urlparse.c
+        -:    0:Graph:/Users/kimseoye/Developer/git/TheFuzzingBook/2_lexical_fuzzing/4_greybox_fuzzing/fuzzing_architecture/lib/urlparse/urlparse.gcno
+        -:    0:Data:-
+        -:    0:Runs:0
+        -:    0:Programs:0
+        -:    1:#include <stdio.h>
+        -:    2:#include <stdlib.h>
+        -:    3:#include <string.h>
+        -:    4:#include <regex.h>
+        -:    5:
+        -:    6:#define URL_MAX 2048 // URLs over 2,000 characters will not work in the most popular web browsers. (https://web.archive.org/web/20190902193246/https://boutell.com/newfaq/misc/urllength.html)
+        -:    7:
+        -:    8:// Q. sizes ?
+        -:    9:typedef struct url {
+        -:   10:    char scheme[64] ;
+        -:   11:    char netloc[128] ;
+        -:   12:    char path[512] ;
+        -:   13:    char query[512] ;
+        -:   14:    char fragment[512] ;
+        -:   15:} url_t ;
+        -:   16:
+        -:   17:int
+function urlparse called 0 returned 0% blocks executed 0%
+    #####:   18:urlparse (url_t * result, char * url)
+        -:   19:{
+        -:   20:    regex_t preg ;
+    #####:   21:    char * pattern = "^([a-z]+)://([a-z0-9.]+)/?([a-zA-Z0-9./]*)\\?\?([a-zA-Z0-9=]*)#?([a-zA-Z0-9]*)" ;
+    #####:   22:    size_t nmatch = 6 ;
+        -:   23:    regmatch_t pmatch[6] ;
+        -:   24:
+    #####:   25:    if (regcomp(&preg, pattern, REG_EXTENDED) != 0) {
+branch  0 never executed
+branch  1 never executed
+    #####:   26:        perror("urlparse: regcomp") ;
+    #####:   27:        return -1 ;
+        -:   28:    }
+        -:   29:
+    #####:   30:    if (regexec(&preg, url, nmatch, pmatch, 0) != 0) {
+branch  0 never executed
+branch  1 never executed
+    #####:   31:        perror("urlparse: regexec: Invalid url") ;
+    #####:   32:        return -1 ;
+        -:   33:    }
+        -:   34:
+    #####:   35:    memcpy(result->scheme, url + pmatch[1].rm_so, pmatch[1].rm_eo - pmatch[1].rm_so) ;
+    #####:   36:    result->scheme[pmatch[1].rm_eo - pmatch[1].rm_so] = 0x0 ;
+        -:   37:
+    #####:   38:    memcpy(result->netloc, url + pmatch[2].rm_so, pmatch[2].rm_eo - pmatch[2].rm_so) ;
+    #####:   39:    result->netloc[pmatch[2].rm_eo - pmatch[2].rm_so] = 0x0 ;
+        -:   40:
+    #####:   41:    memcpy(result->path, url + pmatch[3].rm_so, pmatch[3].rm_eo - pmatch[3].rm_so) ;
+    #####:   42:    result->path[pmatch[3].rm_eo - pmatch[3].rm_so] = 0x0 ;
+        -:   43:
+    #####:   44:    memcpy(result->query, url + pmatch[4].rm_so, pmatch[4].rm_eo - pmatch[4].rm_so) ;
+    #####:   45:    result->query[pmatch[4].rm_eo - pmatch[4].rm_so] = 0x0 ;
+        -:   46:
+    #####:   47:    memcpy(result->fragment, url + pmatch[5].rm_so, pmatch[5].rm_eo - pmatch[5].rm_so) ;
+    #####:   48:    result->fragment[pmatch[5].rm_eo - pmatch[5].rm_so] = 0x0 ;
+        -:   49:
+    #####:   50:    return 0 ;
+    #####:   51:}
+        -:   52:
+        -:   53:// TODO. more detail http program
+        -:   54:int
+function http_program called 0 returned 0% blocks executed 0%
+    #####:   55:http_program (char * url)
+        -:   56:{
+        -:   57:    // TODO. supported_schemes = ["http", "https"]
+        -:   58:    url_t result ;
+    #####:   59:    urlparse(&result, url) ;
+    #####:   60:    if (strcmp(result.scheme, "http") != 0 && strcmp(result.scheme, "https") != 0) {
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:   61:        perror("http_program: scheme must be one of http, https") ;
+    #####:   62:        return -1 ;
+        -:   63:    }
+        -:   64:
+    #####:   65:    return 0 ;
+    #####:   66:}
+        -:   67:
+        -:   68:int
+function is_valid_url called 0 returned 0% blocks executed 0%
+    #####:   69:is_valid_url (char * url)
+        -:   70:{
+    #####:   71:    if (http_program(url) != -1) {
+branch  0 never executed
+branch  1 never executed
+    #####:   72:        return 1 ;
+        -:   73:    }
+        -:   74:    else {
+    #####:   75:        perror("is_valid_url: ") ;
+    #####:   76:        return 0 ;
+        -:   77:    }
+    #####:   78:}
+        -:   79:
+        -:   80:int
+function main called 0 returned 0% blocks executed 0%
+    #####:   81:main (int argc, char * argv[])
+        -:   82:{
+    #####:   83:    if (argc != 2) {
+branch  0 never executed
+branch  1 never executed
+    #####:   84:        perror("usage: ./urlparse \"url\"") ;
+    #####:   85:        return 1 ;
+        -:   86:    }
+        -:   87:
+    #####:   88:    printf("INPUT: %s\n", argv[1]) ;
+    #####:   89:    is_valid_url(argv[1]) ;
+        -:   90:
+    #####:   91:    return 0 ;
+    #####:   92:}

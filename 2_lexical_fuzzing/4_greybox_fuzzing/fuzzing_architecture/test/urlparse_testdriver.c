@@ -36,7 +36,6 @@ oracle (int return_code, int trial)
 void
 set_configs (test_config_t * config)
 {
-    // strcpy(config->source_path, "../lib/urlparse/urlparse.c") ;
     strcpy(config->runargs.binary_path, "../lib/urlparse/urlparse") ;
 
     strcpy(config->covargs.source_dir, "../lib/urlparse/") ;

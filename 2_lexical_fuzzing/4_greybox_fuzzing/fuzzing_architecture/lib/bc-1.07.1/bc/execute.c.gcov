@@ -1,0 +1,1054 @@
+        -:    0:Source:execute.c
+        -:    0:Graph:/Users/kimseoye/Developer/git/TheFuzzingBook/2_lexical_fuzzing/4_greybox_fuzzing/fuzzing_architecture/lib/bc-1.07.1/bc/execute.gcno
+        -:    0:Data:-
+        -:    0:Runs:0
+        -:    0:Programs:0
+        -:    1:/*  This file is part of GNU bc.
+        -:    2:
+        -:    3:    Copyright (C) 1991-1994, 1997, 2006, 2008, 2012-2017 Free Software Foundation, Inc.
+        -:    4:
+        -:    5:    This program is free software; you can redistribute it and/or modify
+        -:    6:    it under the terms of the GNU General Public License as published by
+        -:    7:    the Free Software Foundation; either version 3 of the License , or
+        -:    8:    (at your option) any later version.
+        -:    9:
+        -:   10:    This program is distributed in the hope that it will be useful,
+        -:   11:    but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   12:    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   13:    GNU General Public License for more details.
+        -:   14:
+        -:   15:    You should have received a copy of the GNU General Public License
+        -:   16:    along with this program; see the file COPYING.  If not, see
+        -:   17:    <http://www.gnu.org/licenses>.
+        -:   18:
+        -:   19:    You may contact the author by:
+        -:   20:       e-mail:  philnelson@acm.org
+        -:   21:      us-mail:  Philip A. Nelson
+        -:   22:                Computer Science Department, 9062
+        -:   23:                Western Washington University
+        -:   24:                Bellingham, WA 98226-9062
+        -:   25:       
+        -:   26:*************************************************************************/
+        -:   27:/* execute.c - run a bc program. */
+        -:   28:
+        -:   29:#include "bcdefs.h"
+        -:   30:#include <signal.h>
+        -:   31:#include "proto.h"
+        -:   32:
+        -:   33:
+        -:   34:/* The SIGINT interrupt handling routine. */
+        -:   35:
+        -:   36:int had_sigint;
+        -:   37:
+        -:   38:void
+function stop_execution called 0 returned 0% blocks executed 0%
+    #####:   39:stop_execution ( int sig )
+        -:   40:{
+    #####:   41:  had_sigint = TRUE;
+    #####:   42:}
+        -:   43:
+        -:   44:
+        -:   45:/* Get the current byte and advance the PC counter. */
+        -:   46:
+        -:   47:unsigned char
+function byte called 0 returned 0% blocks executed 0%
+    #####:   48:byte ( program_counter *p )
+        -:   49:{
+    #####:   50:  return (functions[p->pc_func].f_body[p->pc_addr++]);
+        -:   51:}
+        -:   52:
+        -:   53:
+        -:   54:/* The routine that actually runs the machine. */
+        -:   55:
+        -:   56:void
+function execute called 0 returned 0% blocks executed 0%
+    #####:   57:execute (void)
+        -:   58:{
+        -:   59:  unsigned long label_num, l_gp, l_off;
+        -:   60:  bc_label_group *gp;
+        -:   61:  
+        -:   62:  char inst, ch;
+        -:   63:  long  new_func;
+        -:   64:  long  var_name;
+        -:   65:
+        -:   66:  long const_base;
+        -:   67:
+    #####:   68:  bc_num temp_num;
+        -:   69:  arg_list *auto_list;
+        -:   70:
+        -:   71:  /* Initialize this run... */
+    #####:   72:  pc.pc_func = 0;
+    #####:   73:  pc.pc_addr = 0;
+    #####:   74:  runtime_error = FALSE;
+    #####:   75:  bc_init_num (&temp_num);
+        -:   76:
+        -:   77:  /* Set up the interrupt mechanism for an interactive session. */
+    #####:   78:  if (interactive)
+branch  0 never executed
+branch  1 never executed
+        -:   79:    {
+    #####:   80:      signal (SIGINT, stop_execution);
+    #####:   81:    }
+        -:   82:   
+    #####:   83:  had_sigint = FALSE;
+    #####:   84:  while (pc.pc_addr < functions[pc.pc_func].f_code_size
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:   85:	 && !runtime_error && !had_sigint)
+        -:   86:    {
+    #####:   87:      inst = byte(&pc);
+        -:   88:
+        -:   89:#if DEBUG > 3
+        -:   90:      { /* Print out address and the stack before each instruction.*/
+        -:   91:	int depth; estack_rec *temp = ex_stack;
+        -:   92:	
+        -:   93:	printf ("func=%d addr=%d inst=%c\n",pc.pc_func, pc.pc_addr, inst);
+        -:   94:	if (temp == NULL) printf ("empty stack.\n", inst);
+        -:   95:	else
+        -:   96:	  {
+        -:   97:	    depth = 1;
+        -:   98:	    while (temp != NULL)
+        -:   99:	      {
+        -:  100:		printf ("  %d = ", depth);
+        -:  101:		bc_out_num (temp->s_num, 10, out_char, std_only);
+        -:  102:		depth++;
+        -:  103:		temp = temp->s_next;
+        -:  104:	      }
+        -:  105:	    out_char ('\n');
+        -:  106:	  }
+        -:  107:      }
+        -:  108:#endif
+        -:  109:
+    #####:  110:    switch ( inst )
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+branch  6 never executed
+branch  7 never executed
+branch  8 never executed
+branch  9 never executed
+branch 10 never executed
+branch 11 never executed
+branch 12 never executed
+branch 13 never executed
+branch 14 never executed
+branch 15 never executed
+branch 16 never executed
+branch 17 never executed
+branch 18 never executed
+branch 19 never executed
+branch 20 never executed
+branch 21 never executed
+branch 22 never executed
+branch 23 never executed
+branch 24 never executed
+branch 25 never executed
+branch 26 never executed
+branch 27 never executed
+branch 28 never executed
+branch 29 never executed
+branch 30 never executed
+branch 31 never executed
+branch 32 never executed
+branch 33 never executed
+branch 34 never executed
+branch 35 never executed
+branch 36 never executed
+branch 37 never executed
+branch 38 never executed
+branch 39 never executed
+branch 40 never executed
+branch 41 never executed
+branch 42 never executed
+        -:  111:      {
+        -:  112:
+        -:  113:      case 'A' : /* increment array variable (Add one). */
+    #####:  114:	var_name = byte(&pc);
+    #####:  115:	if ((var_name & 0x80) != 0)
+branch  0 never executed
+branch  1 never executed
+    #####:  116:	  var_name = ((var_name & 0x7f) << 8) + byte(&pc);
+    #####:  117:	incr_array (var_name);
+    #####:  118:	break;
+        -:  119:
+        -:  120:      case 'B' : /* Branch to a label if TOS != 0. Remove value on TOS. */
+        -:  121:      case 'Z' : /* Branch to a label if TOS == 0. Remove value on TOS. */
+    #####:  122:	c_code = !bc_is_zero (ex_stack->s_num);
+    #####:  123:	pop ();
+        -:  124:	/*FALLTHROUGH*/ /* common branch and jump code */
+        -:  125:      case 'J' : /* Jump to a label. */
+    #####:  126:	label_num = byte(&pc);  /* Low order bits first. */
+    #####:  127:	label_num += byte(&pc) << 8;
+    #####:  128:	if (inst == 'J' || (inst == 'B' && c_code)
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  129:	    || (inst == 'Z' && !c_code)) {
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  130:	  gp = functions[pc.pc_func].f_label;
+    #####:  131:	  l_gp  = label_num >> BC_LABEL_LOG;
+    #####:  132:	  l_off = label_num % BC_LABEL_GROUP;
+    #####:  133:	  while (l_gp-- > 0) gp = gp->l_next;
+branch  0 never executed
+branch  1 never executed
+    #####:  134:          if (gp)
+branch  0 never executed
+branch  1 never executed
+    #####:  135:            pc.pc_addr = gp->l_adrs[l_off];
+        -:  136:          else {
+    #####:  137:            rt_error ("Internal error.");
+    #####:  138:            break;
+        -:  139:          }
+    #####:  140:	}
+        -:  141:	break;
+        -:  142:
+        -:  143:      case 'C' : /* Call a function. */
+        -:  144:	/* Get the function number. */
+    #####:  145:	new_func = byte(&pc);
+    #####:  146:	if ((new_func & 0x80) != 0) 
+branch  0 never executed
+branch  1 never executed
+    #####:  147:	  new_func = ((new_func & 0x7f) << 8) + byte(&pc);
+        -:  148:
+        -:  149:	/* Check to make sure it is defined. */
+    #####:  150:	if (!functions[new_func].f_defined)
+branch  0 never executed
+branch  1 never executed
+        -:  151:	  {
+    #####:  152:	    rt_error ("Function %s not defined.", f_names[new_func]);
+    #####:  153:	    break;
+        -:  154:	  }
+        -:  155:
+        -:  156:	/* Check and push parameters. */
+    #####:  157:	process_params (&pc, new_func);
+        -:  158:
+        -:  159:	/* Push auto variables. */
+    #####:  160:	for (auto_list = functions[new_func].f_autos;
+branch  0 never executed
+branch  1 never executed
+    #####:  161:	     auto_list != NULL;
+    #####:  162:	     auto_list = auto_list->next)
+    #####:  163:	  auto_var (auto_list->av_name);
+        -:  164:
+        -:  165:	/* Push pc and ibase. */
+    #####:  166:	fpush (pc.pc_func);
+    #####:  167:	fpush (pc.pc_addr);
+    #####:  168:	fpush (i_base);
+        -:  169:
+        -:  170:	/* Reset pc to start of function. */
+    #####:  171:	pc.pc_func = new_func;
+    #####:  172:	pc.pc_addr = 0;
+    #####:  173:	break;
+        -:  174:
+        -:  175:      case 'D' : /* Duplicate top of stack */
+    #####:  176:	push_copy (ex_stack->s_num);
+    #####:  177:	break;
+        -:  178:
+        -:  179:      case 'K' : /* Push a constant */
+        -:  180:	/* Get the input base and convert it to a bc number. */
+    #####:  181:	if (pc.pc_func == 0) 
+branch  0 never executed
+branch  1 never executed
+    #####:  182:	  const_base = i_base;
+        -:  183:	else
+    #####:  184:	  const_base = fn_stack->s_val;
+    #####:  185:	if (const_base == 10)
+branch  0 never executed
+branch  1 never executed
+    #####:  186:	  push_b10_const (&pc);
+        -:  187:	else
+    #####:  188:	  push_constant (prog_char, const_base);
+        -:  189:	break;
+        -:  190:
+        -:  191:      case 'L' : /* load array variable */
+    #####:  192:	var_name = byte(&pc);
+    #####:  193:	if ((var_name & 0x80) != 0)
+branch  0 never executed
+branch  1 never executed
+    #####:  194:	  var_name = ((var_name & 0x7f) << 8) + byte(&pc);
+    #####:  195:	load_array (var_name);
+    #####:  196:	break;
+        -:  197:
+        -:  198:      case 'M' : /* decrement array variable (Minus!) */
+    #####:  199:	var_name = byte(&pc);
+    #####:  200:	if ((var_name & 0x80) != 0)
+branch  0 never executed
+branch  1 never executed
+    #####:  201:	  var_name = ((var_name & 0x7f) << 8) + byte(&pc);
+    #####:  202:	decr_array (var_name);
+    #####:  203:	break;
+        -:  204:
+        -:  205:      case 'O' : /* Write a string to the output with processing. */
+    #####:  206:	while ((ch = byte(&pc)) != '"')
+branch  0 never executed
+branch  1 never executed
+    #####:  207:	  if (ch != '\\')
+branch  0 never executed
+branch  1 never executed
+    #####:  208:	    out_schar (ch);
+        -:  209:	  else
+        -:  210:	    {
+    #####:  211:	      ch = byte(&pc);
+    #####:  212:	      if (ch == '"') break;
+branch  0 never executed
+branch  1 never executed
+    #####:  213:	      switch (ch)
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+branch  6 never executed
+branch  7 never executed
+branch  8 never executed
+        -:  214:		{
+    #####:  215:		case 'a':  out_schar (007); break;
+    #####:  216:		case 'b':  out_schar ('\b'); break;
+    #####:  217:		case 'f':  out_schar ('\f'); break;
+    #####:  218:		case 'n':  out_schar ('\n'); break;
+    #####:  219:		case 'q':  out_schar ('"'); break;
+    #####:  220:		case 'r':  out_schar ('\r'); break;
+    #####:  221:		case 't':  out_schar ('\t'); break;
+    #####:  222:		case '\\': out_schar ('\\'); break;
+        -:  223:		default:  break;
+        -:  224:		}
+        -:  225:	    }
+    #####:  226:	fflush (stdout);
+    #####:  227:	break;
+        -:  228:
+        -:  229:      case 'R' : /* Return from function */
+    #####:  230:	if (pc.pc_func != 0)
+branch  0 never executed
+branch  1 never executed
+        -:  231:	  {
+        -:  232:	    /* "Pop" autos and parameters. */
+    #####:  233:	    pop_vars(functions[pc.pc_func].f_autos);
+    #####:  234:	    pop_vars(functions[pc.pc_func].f_params);
+        -:  235:	    /* reset the pc. */
+    #####:  236:	    fpop ();
+    #####:  237:	    pc.pc_addr = fpop ();
+    #####:  238:	    pc.pc_func = fpop ();
+    #####:  239:	  }
+        -:  240:	else
+    #####:  241:	  rt_error ("Return from main program.");
+        -:  242:	break;
+        -:  243:
+        -:  244:      case 'S' : /* store array variable */
+    #####:  245:	var_name = byte(&pc);
+    #####:  246:	if ((var_name & 0x80) != 0)
+branch  0 never executed
+branch  1 never executed
+    #####:  247:	  var_name = ((var_name & 0x7f ) << 8) + byte(&pc);
+    #####:  248:	store_array (var_name);
+    #####:  249:	break;
+        -:  250:
+        -:  251:      case 'T' : /* Test tos for zero */
+    #####:  252:	c_code = bc_is_zero (ex_stack->s_num);
+    #####:  253:	assign (c_code);
+    #####:  254:	break;
+        -:  255:
+        -:  256:      case 'W' : /* Write the value on the top of the stack. */
+        -:  257:      case 'P' : /* Write the value on the top of the stack.  No newline. */
+    #####:  258:	bc_out_num (ex_stack->s_num, o_base, out_char, std_only);
+    #####:  259:	if (inst == 'W') out_char ('\n');
+branch  0 never executed
+branch  1 never executed
+    #####:  260:	store_var (4);  /* Special variable "last". */
+    #####:  261:	fflush (stdout);
+    #####:  262:	pop ();
+    #####:  263:	break;
+        -:  264:
+        -:  265:      case 'c' : /* Call special function. */
+    #####:  266:	new_func = byte(&pc);
+        -:  267:
+    #####:  268:      switch (new_func)
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+        -:  269:	{
+        -:  270:	case 'L':  /* Length function. */
+        -:  271:	  /* For the number 0.xxxx,  0 is not significant. */
+    #####:  272:	  if (ex_stack->s_num->n_len == 1 &&
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  273:	      ex_stack->s_num->n_scale != 0 &&
+branch  0 never executed
+branch  1 never executed
+    #####:  274:	      ex_stack->s_num->n_value[0] == 0 )
+    #####:  275:	    bc_int2num (&ex_stack->s_num, ex_stack->s_num->n_scale);
+        -:  276:	  else
+    #####:  277:	    bc_int2num (&ex_stack->s_num, ex_stack->s_num->n_len
+    #####:  278:		     + ex_stack->s_num->n_scale);
+        -:  279:	  break;
+        -:  280:		
+        -:  281:	case 'S':  /* Scale function. */ 
+    #####:  282:	  bc_int2num (&ex_stack->s_num, ex_stack->s_num->n_scale);
+    #####:  283:	  break;
+        -:  284:
+        -:  285:	case 'R':  /* Square Root function. */
+    #####:  286:	  if (!bc_sqrt (&ex_stack->s_num, scale))
+branch  0 never executed
+branch  1 never executed
+    #####:  287:	    rt_error ("Square root of a negative number");
+        -:  288:	  break;
+        -:  289:
+        -:  290:	case 'I': /* Read function. */
+    #####:  291:	  push_constant (input_char, i_base);
+    #####:  292:	  break;
+        -:  293:
+        -:  294:	case 'X': /* Random function. */
+    #####:  295:	  push_copy (_zero_);
+    #####:  296:	  bc_int2num (&ex_stack->s_num, random());
+    #####:  297:	  break;
+        -:  298:	}
+        -:  299:	break;
+        -:  300:
+        -:  301:      case 'd' : /* Decrement number */
+    #####:  302:	var_name = byte(&pc);
+    #####:  303:	if ((var_name & 0x80) != 0)
+branch  0 never executed
+branch  1 never executed
+    #####:  304:	  var_name = ((var_name & 0x7f) << 8) + byte(&pc);
+    #####:  305:	decr_var (var_name);
+    #####:  306:	break;
+        -:  307:      
+        -:  308:      case 'h' : /* Halt the machine. */
+    #####:  309:	bc_exit (0);
+        -:  310:        /* NOTREACHED */
+    #####:  311:        break;
+        -:  312:
+        -:  313:      case 'i' : /* increment number */
+    #####:  314:	var_name = byte(&pc);
+    #####:  315:	if ((var_name & 0x80) != 0)
+branch  0 never executed
+branch  1 never executed
+    #####:  316:	  var_name = ((var_name & 0x7f) << 8) + byte(&pc);
+    #####:  317:	incr_var (var_name);
+    #####:  318:	break;
+        -:  319:
+        -:  320:      case 'l' : /* load variable */
+    #####:  321:	var_name = byte(&pc);
+    #####:  322:	if ((var_name & 0x80) != 0)
+branch  0 never executed
+branch  1 never executed
+    #####:  323:	  var_name = ((var_name & 0x7f) << 8) + byte(&pc);
+    #####:  324:	load_var (var_name);
+    #####:  325:	break;
+        -:  326:
+        -:  327:      case 'n' : /* Negate top of stack. */
+    #####:  328:	bc_sub (_zero_, ex_stack->s_num, &ex_stack->s_num, 0);
+    #####:  329:	break;
+        -:  330:
+        -:  331:      case 'p' : /* Pop the execution stack. */
+    #####:  332:	pop ();
+    #####:  333:	break;
+        -:  334:
+        -:  335:      case 's' : /* store variable */
+    #####:  336:	var_name = byte(&pc);
+    #####:  337:	if ((var_name & 0x80) != 0)
+branch  0 never executed
+branch  1 never executed
+    #####:  338:	  var_name = ((var_name & 0x7f) << 8) + byte(&pc);
+    #####:  339:	store_var (var_name);
+    #####:  340:	break;
+        -:  341:
+        -:  342:      case 'w' : /* Write a string to the output. */
+    #####:  343:	while ((ch = byte(&pc)) != '"') out_schar (ch);
+branch  0 never executed
+branch  1 never executed
+    #####:  344:	fflush (stdout);
+    #####:  345:	break;
+        -:  346:		   
+        -:  347:      case 'x' : /* Exchange Top of Stack with the one under the tos. */
+    #####:  348:	if (check_stack(2)) {
+branch  0 never executed
+branch  1 never executed
+    #####:  349:	  bc_num temp = ex_stack->s_num;
+    #####:  350:	  ex_stack->s_num = ex_stack->s_next->s_num;
+    #####:  351:	  ex_stack->s_next->s_num = temp;
+    #####:  352:	}
+        -:  353:	break;
+        -:  354:
+        -:  355:      case '0' : /* Load Constant 0. */
+    #####:  356:	push_copy (_zero_);
+    #####:  357:	break;
+        -:  358:
+        -:  359:      case '1' : /* Load Constant 1. */
+    #####:  360:	push_copy (_one_);
+    #####:  361:	break;
+        -:  362:
+        -:  363:      case '!' : /* Negate the boolean value on top of the stack. */
+    #####:  364:	c_code = bc_is_zero (ex_stack->s_num);
+    #####:  365:	assign (c_code);
+    #####:  366:	break;
+        -:  367:
+        -:  368:      case '&' : /* compare greater than */
+    #####:  369:	if (check_stack(2))
+branch  0 never executed
+branch  1 never executed
+        -:  370:	  {
+    #####:  371:	    c_code = !bc_is_zero (ex_stack->s_next->s_num)
+    #####:  372:	      && !bc_is_zero (ex_stack->s_num);
+branch  0 never executed
+branch  1 never executed
+    #####:  373:	    pop ();
+    #####:  374:	    assign (c_code);
+    #####:  375:	  }
+        -:  376:	break;
+        -:  377:
+        -:  378:      case '|' : /* compare greater than */
+    #####:  379:	if (check_stack(2))
+branch  0 never executed
+branch  1 never executed
+        -:  380:	  {
+    #####:  381:	    c_code = !bc_is_zero (ex_stack->s_next->s_num)
+    #####:  382:	      || !bc_is_zero (ex_stack->s_num);
+branch  0 never executed
+branch  1 never executed
+    #####:  383:	    pop ();
+    #####:  384:	    assign (c_code);
+    #####:  385:	  }
+        -:  386:	break;
+        -:  387:
+        -:  388:      case '+' : /* add */
+    #####:  389:	if (check_stack(2))
+branch  0 never executed
+branch  1 never executed
+        -:  390:	  {
+    #####:  391:	    bc_add (ex_stack->s_next->s_num, ex_stack->s_num, &temp_num, 0);
+    #####:  392:	    pop();
+    #####:  393:	    pop();
+    #####:  394:	    push_num (temp_num);
+    #####:  395:	    bc_init_num (&temp_num);
+    #####:  396:	  }
+        -:  397:	break;
+        -:  398:
+        -:  399:      case '-' : /* subtract */
+    #####:  400:	if (check_stack(2))
+branch  0 never executed
+branch  1 never executed
+        -:  401:	  {
+    #####:  402:	    bc_sub (ex_stack->s_next->s_num, ex_stack->s_num, &temp_num, 0);
+    #####:  403:	    pop();
+    #####:  404:	    pop();
+    #####:  405:	    push_num (temp_num);
+    #####:  406:	    bc_init_num (&temp_num);
+    #####:  407:	  }
+        -:  408:	break;
+        -:  409:
+        -:  410:      case '*' : /* multiply */
+    #####:  411:	if (check_stack(2))
+branch  0 never executed
+branch  1 never executed
+        -:  412:	  {
+    #####:  413:	    bc_multiply (ex_stack->s_next->s_num, ex_stack->s_num,
+    #####:  414:			 &temp_num, scale);
+    #####:  415:	    pop();
+    #####:  416:	    pop();
+    #####:  417:	    push_num (temp_num);
+    #####:  418:	    bc_init_num (&temp_num);
+    #####:  419:	  }
+        -:  420:	break;
+        -:  421:
+        -:  422:      case '/' : /* divide */
+    #####:  423:	if (check_stack(2))
+branch  0 never executed
+branch  1 never executed
+        -:  424:	  {
+    #####:  425:	    if (bc_divide (ex_stack->s_next->s_num,
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+    #####:  426:			   ex_stack->s_num, &temp_num, scale) == 0)
+        -:  427:	      {
+    #####:  428:		pop();
+    #####:  429:		pop();
+    #####:  430:		push_num (temp_num);
+    #####:  431:		bc_init_num (&temp_num);
+    #####:  432:	      }
+        -:  433:	    else
+    #####:  434:	      rt_error ("Divide by zero");
+        -:  435:	  }
+        -:  436:	break;
+        -:  437:
+        -:  438:      case '%' : /* remainder */
+    #####:  439:	if (check_stack(2))
+branch  0 never executed
+branch  1 never executed
+        -:  440:	  {
+    #####:  441:	    if (bc_is_zero (ex_stack->s_num))
+branch  0 never executed
+branch  1 never executed
+    #####:  442:	      rt_error ("Modulo by zero");
+        -:  443:	    else
+        -:  444:	      {
+    #####:  445:		bc_modulo (ex_stack->s_next->s_num,
+    #####:  446:			   ex_stack->s_num, &temp_num, scale);
+    #####:  447:		pop();
+    #####:  448:		pop();
+    #####:  449:		push_num (temp_num);
+    #####:  450:		bc_init_num (&temp_num);
+        -:  451:	      }
+        -:  452:	  }
+        -:  453:	break;
+        -:  454:
+        -:  455:      case '^' : /* raise */
+    #####:  456:	if (check_stack(2))
+branch  0 never executed
+branch  1 never executed
+        -:  457:	  {
+    #####:  458:	    bc_raise (ex_stack->s_next->s_num,
+    #####:  459:		      ex_stack->s_num, &temp_num, scale);
+    #####:  460:	    if (bc_is_zero (ex_stack->s_next->s_num) && bc_is_neg (ex_stack->s_num))
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  461:	      rt_error ("divide by zero");
+    #####:  462:	    pop();
+    #####:  463:	    pop();
+    #####:  464:	    push_num (temp_num);
+    #####:  465:	    bc_init_num (&temp_num);
+    #####:  466:	  }
+        -:  467:	break;
+        -:  468:
+        -:  469:      case '=' : /* compare equal */
+    #####:  470:	if (check_stack(2))
+branch  0 never executed
+branch  1 never executed
+        -:  471:	  {
+    #####:  472:	    c_code = bc_compare (ex_stack->s_next->s_num,
+    #####:  473:				 ex_stack->s_num) == 0;
+    #####:  474:	    pop ();
+    #####:  475:	    assign (c_code);
+    #####:  476:	  }
+        -:  477:	break;
+        -:  478:
+        -:  479:      case '#' : /* compare not equal */
+    #####:  480:	if (check_stack(2))
+branch  0 never executed
+branch  1 never executed
+        -:  481:	  {
+    #####:  482:	    c_code = bc_compare (ex_stack->s_next->s_num,
+    #####:  483:				 ex_stack->s_num) != 0;
+    #####:  484:	    pop ();
+    #####:  485:	    assign (c_code);
+    #####:  486:	  }
+        -:  487:	break;
+        -:  488:
+        -:  489:      case '<' : /* compare less than */
+    #####:  490:	if (check_stack(2))
+branch  0 never executed
+branch  1 never executed
+        -:  491:	  {
+    #####:  492:	    c_code = bc_compare (ex_stack->s_next->s_num,
+    #####:  493:				 ex_stack->s_num) == -1;
+    #####:  494:	    pop ();
+    #####:  495:	    assign (c_code);
+    #####:  496:	  }
+        -:  497:	break;
+        -:  498:
+        -:  499:      case '{' : /* compare less than or equal */
+    #####:  500:	if (check_stack(2))
+branch  0 never executed
+branch  1 never executed
+        -:  501:	  {
+    #####:  502:	    c_code = bc_compare (ex_stack->s_next->s_num,
+    #####:  503:				 ex_stack->s_num) <= 0;
+    #####:  504:	    pop ();
+    #####:  505:	    assign (c_code);
+    #####:  506:	  }
+        -:  507:	break;
+        -:  508:
+        -:  509:      case '>' : /* compare greater than */
+    #####:  510:	if (check_stack(2))
+branch  0 never executed
+branch  1 never executed
+        -:  511:	  {
+    #####:  512:	    c_code = bc_compare (ex_stack->s_next->s_num,
+    #####:  513:				 ex_stack->s_num) == 1;
+    #####:  514:	    pop ();
+    #####:  515:	    assign (c_code);
+    #####:  516:	  }
+        -:  517:	break;
+        -:  518:
+        -:  519:      case '}' : /* compare greater than or equal */
+    #####:  520:	if (check_stack(2))
+branch  0 never executed
+branch  1 never executed
+        -:  521:	  {
+    #####:  522:	    c_code = bc_compare (ex_stack->s_next->s_num,
+    #####:  523:				 ex_stack->s_num) >= 0;
+    #####:  524:	    pop ();
+    #####:  525:	    assign (c_code);
+    #####:  526:	  }
+        -:  527:	break;
+        -:  528:
+        -:  529:	default  : /* error! */
+    #####:  530:	  rt_error ("bad instruction: inst=%c", inst);
+    #####:  531:      }
+        -:  532:    }
+        -:  533:
+        -:  534:  /* Clean up the function stack and pop all autos/parameters. */
+    #####:  535:  while (pc.pc_func != 0)
+branch  0 never executed
+branch  1 never executed
+        -:  536:    {
+    #####:  537:      pop_vars(functions[pc.pc_func].f_autos);
+    #####:  538:      pop_vars(functions[pc.pc_func].f_params);
+    #####:  539:      fpop ();
+    #####:  540:      pc.pc_addr = fpop ();
+    #####:  541:      pc.pc_func = fpop ();
+        -:  542:    }
+        -:  543:
+        -:  544:  /* Clean up the execution stack. */ 
+    #####:  545:  while (ex_stack != NULL) pop();
+branch  0 never executed
+branch  1 never executed
+        -:  546:
+        -:  547:  /* Clean up the interrupt stuff. */
+    #####:  548:  if (interactive)
+branch  0 never executed
+branch  1 never executed
+        -:  549:    {
+    #####:  550:      signal (SIGINT, use_quit);
+    #####:  551:      if (had_sigint)
+branch  0 never executed
+branch  1 never executed
+    #####:  552:	printf ("\ninterrupted execution.\n");
+        -:  553:    }
+    #####:  554:}
+        -:  555:
+        -:  556:
+        -:  557:/* Prog_char gets another byte from the program.  It is used for
+        -:  558:   conversion of text constants in the code to numbers. */
+        -:  559:
+        -:  560:int
+function prog_char called 0 returned 0% blocks executed 0%
+    #####:  561:prog_char (void)
+        -:  562:{
+    #####:  563:  return (int) byte(&pc);
+        -:  564:}
+        -:  565:
+        -:  566:
+        -:  567:/* Read a character from the standard input.  This function is used
+        -:  568:   by the "read" function. */
+        -:  569:
+        -:  570:int
+function input_char called 0 returned 0% blocks executed 0%
+    #####:  571:input_char (void)
+        -:  572:{
+        -:  573:  int in_ch;
+        -:  574:  
+        -:  575:  /* Get a character from the standard input for the read function. */
+    #####:  576:  in_ch = getchar();
+        -:  577:
+        -:  578:  /* Check for a \ quoted newline. */
+    #####:  579:  if (in_ch == '\\')
+branch  0 never executed
+branch  1 never executed
+        -:  580:    {
+    #####:  581:      in_ch = getchar();
+    #####:  582:      if (in_ch == '\n') {
+branch  0 never executed
+branch  1 never executed
+    #####:  583:	  in_ch = getchar();
+    #####:  584:	  out_col = 0;  /* Saw a new line */
+    #####:  585:	}
+        -:  586:    }
+        -:  587:
+        -:  588:  /* Classify and preprocess the input character. */
+    #####:  589:  if (isdigit(in_ch))
+branch  0 never executed
+branch  1 never executed
+    #####:  590:    return (in_ch - '0');
+    #####:  591:  if (in_ch >= 'A' && in_ch <= 'Z')
+branch  0 never executed
+branch  1 never executed
+    #####:  592:    return (in_ch + 10 - 'A');
+    #####:  593:  if (in_ch >= 'a' && in_ch <= 'z')
+branch  0 never executed
+branch  1 never executed
+    #####:  594:    return (in_ch + 10 - 'a');
+    #####:  595:  if (in_ch == '.' || in_ch == '+' || in_ch == '-')
+branch  0 never executed
+branch  1 never executed
+    #####:  596:    return (in_ch);
+    #####:  597:  if (in_ch == '~')
+branch  0 never executed
+branch  1 never executed
+    #####:  598:    return (':');
+    #####:  599:  if (in_ch <= ' ')
+branch  0 never executed
+branch  1 never executed
+    #####:  600:    return ('~');
+        -:  601:  
+    #####:  602:  return (':');
+    #####:  603:}
+        -:  604:
+        -:  605:
+        -:  606:/* Push_constant converts a sequence of input characters as returned
+        -:  607:   by IN_CHAR into a number.  The number is pushed onto the execution
+        -:  608:   stack.  The number is converted as a number in base CONV_BASE. */
+        -:  609:
+        -:  610:void
+function push_constant called 0 returned 0% blocks executed 0%
+    #####:  611:push_constant (int (*in_char)(VOID), int conv_base)
+        -:  612:{
+        -:  613:  int digits;
+    #####:  614:  bc_num build, temp, result, mult, divisor;
+        -:  615:  int   in_ch, first_ch;
+        -:  616:  char  negative;
+        -:  617:
+        -:  618:  /* Initialize all bc numbers */
+    #####:  619:  bc_init_num (&temp);
+    #####:  620:  bc_init_num (&result);
+    #####:  621:  bc_init_num (&mult);
+    #####:  622:  build = bc_copy_num (_zero_);
+        -:  623:  negative = FALSE;
+        -:  624:
+        -:  625:  /* The conversion base. */
+    #####:  626:  bc_int2num (&mult, conv_base);
+        -:  627:  
+        -:  628:  /* Get things ready. */
+    #####:  629:  in_ch = in_char();
+        -:  630:  /* ~ is space returned by input_char(), prog_char does not return spaces. */
+    #####:  631:  while (in_ch == '~')
+branch  0 never executed
+branch  1 never executed
+    #####:  632:    in_ch = in_char();
+        -:  633:
+    #####:  634:  if (in_ch == '+')
+branch  0 never executed
+branch  1 never executed
+    #####:  635:    in_ch = in_char();
+        -:  636:  else
+    #####:  637:    if (in_ch == '-')
+branch  0 never executed
+branch  1 never executed
+        -:  638:      {
+        -:  639:	negative = TRUE;
+    #####:  640:	in_ch = in_char();
+    #####:  641:      }
+        -:  642:
+        -:  643:  /* Check for the special case of a single digit. */
+    #####:  644:  if (in_ch < 36)
+branch  0 never executed
+branch  1 never executed
+        -:  645:    {
+        -:  646:      first_ch = in_ch;
+    #####:  647:      in_ch = in_char();
+    #####:  648:      if (in_ch < 36 && first_ch >= conv_base)
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  649:	first_ch = conv_base - 1;
+    #####:  650:      bc_int2num (&build, (int) first_ch);
+    #####:  651:    }
+        -:  652:
+        -:  653:  /* Convert the integer part. */
+    #####:  654:  while (in_ch < 36)
+branch  0 never executed
+branch  1 never executed
+        -:  655:    {
+    #####:  656:      if (in_ch < 36 && in_ch >= conv_base) in_ch = conv_base-1;
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  657:      bc_multiply (build, mult, &result, 0);
+    #####:  658:      bc_int2num (&temp, (int) in_ch);
+    #####:  659:      bc_add (result, temp, &build, 0);
+    #####:  660:      in_ch = in_char();
+        -:  661:    }
+    #####:  662:  if (in_ch == '.')
+branch  0 never executed
+branch  1 never executed
+        -:  663:    {
+    #####:  664:      in_ch = in_char();
+    #####:  665:      if (in_ch >= conv_base) in_ch = conv_base-1;
+branch  0 never executed
+branch  1 never executed
+    #####:  666:      bc_free_num (&result);
+    #####:  667:      bc_free_num (&temp);
+    #####:  668:      divisor = bc_copy_num (_one_);
+    #####:  669:      result = bc_copy_num (_zero_);
+        -:  670:      digits = 0;
+    #####:  671:      while (in_ch < 36)
+branch  0 never executed
+branch  1 never executed
+        -:  672:	{
+    #####:  673:	  bc_multiply (result, mult, &result, 0);
+    #####:  674:	  bc_int2num (&temp, (int) in_ch);
+    #####:  675:	  bc_add (result, temp, &result, 0);
+    #####:  676:	  bc_multiply (divisor, mult, &divisor, 0);
+    #####:  677:	  digits++;
+    #####:  678:	  in_ch = in_char();
+    #####:  679:	  if (in_ch < 36 && in_ch >= conv_base) in_ch = conv_base-1;
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  680:	}
+    #####:  681:      bc_divide (result, divisor, &result, digits);
+    #####:  682:      bc_add (build, result, &build, 0);
+    #####:  683:    }
+        -:  684:  
+        -:  685:  /* Final work.  */
+    #####:  686:  if (negative)
+branch  0 never executed
+branch  1 never executed
+    #####:  687:    bc_sub (_zero_, build, &build, 0);
+        -:  688:
+    #####:  689:  push_num (build);
+    #####:  690:  bc_free_num (&temp);
+    #####:  691:  bc_free_num (&result);
+    #####:  692:  bc_free_num (&mult);
+    #####:  693:}
+        -:  694:
+        -:  695:
+        -:  696:/* When converting base 10 constants from the program, we use this
+        -:  697:   more efficient way to convert them to numbers.  PC tells where
+        -:  698:   the constant starts and is expected to be advanced to after
+        -:  699:   the constant. */
+        -:  700:
+        -:  701:void
+function push_b10_const called 0 returned 0% blocks executed 0%
+    #####:  702:push_b10_const (program_counter *progctr)
+        -:  703:{
+    #####:  704:  bc_num build;
+    #####:  705:  program_counter look_pc;
+        -:  706:  int kdigits, kscale;
+        -:  707:  unsigned char inchar;
+        -:  708:  char *ptr;
+        -:  709:  
+        -:  710:  /* Count the digits and get things ready. */
+    #####:  711:  look_pc = *progctr;
+        -:  712:  kdigits = 0;
+    #####:  713:  kscale  = 0;
+    #####:  714:  inchar = byte (&look_pc);
+    #####:  715:  while (inchar != '.' && inchar != ':')
+branch  0 never executed
+branch  1 never executed
+        -:  716:    {
+    #####:  717:      kdigits++;
+    #####:  718:      inchar = byte(&look_pc);
+        -:  719:    }
+    #####:  720:  if (inchar == '.' )
+branch  0 never executed
+branch  1 never executed
+        -:  721:    {
+    #####:  722:      inchar = byte(&look_pc);
+    #####:  723:      while (inchar != ':')
+branch  0 never executed
+branch  1 never executed
+        -:  724:	{
+    #####:  725:	  kscale++;
+    #####:  726:	  inchar = byte(&look_pc);
+        -:  727:	}
+        -:  728:    }
+        -:  729:
+        -:  730:  /* Get the first character again and move the progctr. */
+    #####:  731:  inchar = byte(progctr);
+        -:  732:  
+        -:  733:  /* Secial cases of 0, 1, and A-F single inputs. */
+    #####:  734:  if (kdigits == 1 && kscale == 0)
+branch  0 never executed
+branch  1 never executed
+        -:  735:    {
+    #####:  736:      if (inchar == 0)
+branch  0 never executed
+branch  1 never executed
+        -:  737:	{
+    #####:  738:	  push_copy (_zero_);
+    #####:  739:	  inchar = byte(progctr);
+    #####:  740:	  return;
+        -:  741:	}
+    #####:  742:      if (inchar == 1) {
+branch  0 never executed
+branch  1 never executed
+    #####:  743:      push_copy (_one_);
+    #####:  744:      inchar = byte(progctr);
+    #####:  745:      return;
+        -:  746:    }
+    #####:  747:    if (inchar > 9)
+branch  0 never executed
+branch  1 never executed
+        -:  748:      {
+    #####:  749:	bc_init_num (&build);
+    #####:  750:	bc_int2num (&build, inchar);
+    #####:  751:	push_num (build);
+    #####:  752:	inchar = byte(progctr);
+    #####:  753:	return;
+        -:  754:      }
+        -:  755:    }
+        -:  756:
+        -:  757:  /* Build the new number. */
+    #####:  758:  if (kdigits == 0)
+branch  0 never executed
+branch  1 never executed
+        -:  759:    {
+    #####:  760:      build = bc_new_num (1,kscale);
+    #####:  761:      ptr = build->n_value;
+    #####:  762:      *ptr++ = 0;
+    #####:  763:    }
+        -:  764:  else
+        -:  765:    {
+    #####:  766:      build = bc_new_num (kdigits,kscale);
+    #####:  767:      ptr = build->n_value;
+        -:  768:    }
+        -:  769:
+    #####:  770:  while (inchar != ':')
+branch  0 never executed
+branch  1 never executed
+        -:  771:    {
+    #####:  772:      if (inchar != '.')
+branch  0 never executed
+branch  1 never executed
+        -:  773:	{
+    #####:  774:	  if (inchar > 9)
+branch  0 never executed
+branch  1 never executed
+    #####:  775:	    *ptr++ = 9;
+        -:  776:	  else
+    #####:  777:	    *ptr++ = inchar;
+        -:  778:	}
+    #####:  779:      inchar = byte(progctr);
+        -:  780:    }
+    #####:  781:  push_num (build);
+    #####:  782:}
+        -:  783:
+        -:  784:
+        -:  785:/* Put the correct value on the stack for C_CODE.  Frees TOS num. */
+        -:  786:
+        -:  787:void
+function assign called 0 returned 0% blocks executed 0%
+    #####:  788:assign (char code)
+        -:  789:{
+    #####:  790:  bc_free_num (&ex_stack->s_num);
+    #####:  791:  if (code)
+branch  0 never executed
+branch  1 never executed
+    #####:  792:    ex_stack->s_num = bc_copy_num (_one_);
+        -:  793:  else
+    #####:  794:    ex_stack->s_num = bc_copy_num (_zero_);
+    #####:  795:}

@@ -437,7 +437,7 @@ Copyright (C) 2012 Free Software Foundation, Inc.
 This config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
-ac_pwd='/Users/kimseoye/Developer/git/TheFuzzingBook/2_lexical_fuzzing/3_mutation_based_fuzzing/fuzzing_architecture/lib/bc-1.07.1'
+ac_pwd='/Users/kimseoye/Developer/git/TheFuzzingBook/2_lexical_fuzzing/4_greybox_fuzzing/fuzzing_architecture/lib/bc-1.07.1'
 srcdir='.'
 INSTALL='/usr/local/bin/ginstall -c'
 MKDIR_P='/usr/local/bin/gmkdir -p'
@@ -668,15 +668,12 @@ S["mkdir_p"]="$(MKDIR_P)"
 S["MKDIR_P"]="/usr/local/bin/gmkdir -p"
 S["INSTALL_STRIP_PROGRAM"]="$(install_sh) -c -s"
 S["STRIP"]=""
-S["install_sh"]="${SHELL} /Users/kimseoye/Developer/git/TheFuzzingBook/2_lexical_fuzzing/3_mutation_based_fuzzing/fuzzing_architecture/lib/bc-1.07.1/install-sh"
-S["MAKEINFO"]="${SHELL} /Users/kimseoye/Developer/git/TheFuzzingBook/2_lexical_fuzzing/3_mutation_based_fuzzing/fuzzing_architecture/lib/bc-1.07.1/missing makeinfo"
-S["AUTOHEADER"]="${SHELL} /Users/kimseoye/Developer/git/TheFuzzingBook/2_lexical_fuzzing/3_mutation_based_fuzzing/fuzzing_architecture/lib/bc-1.07.1/missing autohead"\
-"er"
-S["AUTOMAKE"]="${SHELL} /Users/kimseoye/Developer/git/TheFuzzingBook/2_lexical_fuzzing/3_mutation_based_fuzzing/fuzzing_architecture/lib/bc-1.07.1/missing automake"\
-"-1.14"
-S["AUTOCONF"]="${SHELL} /Users/kimseoye/Developer/git/TheFuzzingBook/2_lexical_fuzzing/3_mutation_based_fuzzing/fuzzing_architecture/lib/bc-1.07.1/missing autoconf"
-S["ACLOCAL"]="${SHELL} /Users/kimseoye/Developer/git/TheFuzzingBook/2_lexical_fuzzing/3_mutation_based_fuzzing/fuzzing_architecture/lib/bc-1.07.1/missing aclocal-"\
-"1.14"
+S["install_sh"]="${SHELL} /Users/kimseoye/Developer/git/TheFuzzingBook/2_lexical_fuzzing/4_greybox_fuzzing/fuzzing_architecture/lib/bc-1.07.1/install-sh"
+S["MAKEINFO"]="${SHELL} /Users/kimseoye/Developer/git/TheFuzzingBook/2_lexical_fuzzing/4_greybox_fuzzing/fuzzing_architecture/lib/bc-1.07.1/missing makeinfo"
+S["AUTOHEADER"]="${SHELL} /Users/kimseoye/Developer/git/TheFuzzingBook/2_lexical_fuzzing/4_greybox_fuzzing/fuzzing_architecture/lib/bc-1.07.1/missing autoheader"
+S["AUTOMAKE"]="${SHELL} /Users/kimseoye/Developer/git/TheFuzzingBook/2_lexical_fuzzing/4_greybox_fuzzing/fuzzing_architecture/lib/bc-1.07.1/missing automake-1.14"
+S["AUTOCONF"]="${SHELL} /Users/kimseoye/Developer/git/TheFuzzingBook/2_lexical_fuzzing/4_greybox_fuzzing/fuzzing_architecture/lib/bc-1.07.1/missing autoconf"
+S["ACLOCAL"]="${SHELL} /Users/kimseoye/Developer/git/TheFuzzingBook/2_lexical_fuzzing/4_greybox_fuzzing/fuzzing_architecture/lib/bc-1.07.1/missing aclocal-1.14"
 S["VERSION"]="1.07.1"
 S["PACKAGE"]="bc"
 S["CYGPATH_W"]="echo"

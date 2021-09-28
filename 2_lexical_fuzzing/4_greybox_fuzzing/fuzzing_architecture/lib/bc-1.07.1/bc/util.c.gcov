@@ -1,0 +1,1019 @@
+        -:    0:Source:util.c
+        -:    0:Graph:/Users/kimseoye/Developer/git/TheFuzzingBook/2_lexical_fuzzing/4_greybox_fuzzing/fuzzing_architecture/lib/bc-1.07.1/bc/util.gcno
+        -:    0:Data:-
+        -:    0:Runs:0
+        -:    0:Programs:0
+        -:    1:/*  This file is part of GNU bc.
+        -:    2:
+        -:    3:    Copyright (C) 1991-1994, 1997, 2006, 2008, 2012-2017 Free Software Foundation, Inc.
+        -:    4:
+        -:    5:    This program is free software; you can redistribute it and/or modify
+        -:    6:    it under the terms of the GNU General Public License as published by
+        -:    7:    the Free Software Foundation; either version 3 of the License , or
+        -:    8:    (at your option) any later version.
+        -:    9:
+        -:   10:    This program is distributed in the hope that it will be useful,
+        -:   11:    but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   12:    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   13:    GNU General Public License for more details.
+        -:   14:
+        -:   15:    You should have received a copy of the GNU General Public License
+        -:   16:    along with this program; see the file COPYING.  If not, see
+        -:   17:    <http://www.gnu.org/licenses>.
+        -:   18:
+        -:   19:    You may contact the author by:
+        -:   20:       e-mail:  philnelson@acm.org
+        -:   21:      us-mail:  Philip A. Nelson
+        -:   22:                Computer Science Department, 9062
+        -:   23:                Western Washington University
+        -:   24:                Bellingham, WA 98226-9062
+        -:   25:       
+        -:   26:*************************************************************************/
+        -:   27:
+        -:   28:/* util.c: Utility routines for bc. */
+        -:   29:
+        -:   30:#include "bcdefs.h"
+        -:   31:#ifndef VARARGS
+        -:   32:#include <stdarg.h>
+        -:   33:#else
+        -:   34:#include <varargs.h>
+        -:   35:#endif
+        -:   36:#include "proto.h"
+        -:   37:
+        -:   38:
+        -:   39:/* strcopyof mallocs new memory and copies a string to to the new
+        -:   40:   memory. */
+        -:   41:
+        -:   42:char *
+function strcopyof called 0 returned 0% blocks executed 0%
+    #####:   43:strcopyof (const char *str)
+        -:   44:{
+        -:   45:  char *temp;
+        -:   46:
+    #####:   47:  temp = bc_malloc (strlen (str)+1);
+    #####:   48:  return (strcpy (temp,str));
+        -:   49:}
+        -:   50:
+        -:   51:
+        -:   52:/* nextarg adds another value to the list of arguments. */
+        -:   53:
+        -:   54:arg_list *
+function nextarg called 0 returned 0% blocks executed 0%
+    #####:   55:nextarg (arg_list *args, int val, int is_var)
+        -:   56:{ arg_list *temp;
+        -:   57:
+    #####:   58:  temp = bc_malloc (sizeof (arg_list));
+    #####:   59:  temp->av_name = val;
+    #####:   60:  temp->arg_is_var = is_var;
+    #####:   61:  temp->next = args;
+        -:   62: 
+    #####:   63:  return (temp);
+        -:   64:}
+        -:   65:
+        -:   66:
+        -:   67:/* For generate, we must produce a string in the form
+        -:   68:    "val,val,...,val".  We also need a couple of static variables
+        -:   69:   for retaining old generated strings.  It also uses a recursive
+        -:   70:   function that builds the string. */
+        -:   71:
+        -:   72:static char *arglist1 = NULL, *arglist2 = NULL;
+        -:   73:
+        -:   74:
+        -:   75:/* make_arg_str does the actual construction of the argument string.
+        -:   76:   ARGS is the pointer to the list and LEN is the maximum number of
+        -:   77:   characters needed.  1 char is the minimum needed. 
+        -:   78: */
+        -:   79:
+        -:   80:static char *make_arg_str (arg_list *args, int len);
+        -:   81:
+        -:   82:static char *
+function make_arg_str called 0 returned 0% blocks executed 0%
+    #####:   83:make_arg_str (arg_list *args, int len)
+        -:   84:{
+        -:   85:  char *temp;
+    #####:   86:  char sval[30];
+        -:   87:
+        -:   88:  /* Recursive call. */
+    #####:   89:  if (args != NULL)
+branch  0 never executed
+branch  1 never executed
+    #####:   90:    temp = make_arg_str (args->next, len+12);
+        -:   91:  else
+        -:   92:    {
+    #####:   93:      temp = bc_malloc (len);
+    #####:   94:      *temp = 0;
+    #####:   95:      return temp;
+        -:   96:    }
+        -:   97:
+        -:   98:  /* Add the current number to the end of the string. */
+    #####:   99:  if (args->arg_is_var)
+branch  0 never executed
+branch  1 never executed
+    #####:  100:    if (len != 1) 
+branch  0 never executed
+branch  1 never executed
+    #####:  101:      snprintf (sval, sizeof(sval), "*%d,", args->av_name);
+        -:  102:    else
+    #####:  103:      snprintf (sval, sizeof(sval), "*%d", args->av_name);
+        -:  104:  else
+    #####:  105:    if (len != 1) 
+branch  0 never executed
+branch  1 never executed
+    #####:  106:      snprintf (sval, sizeof(sval), "%d,", args->av_name);
+        -:  107:    else
+    #####:  108:      snprintf (sval, sizeof(sval), "%d", args->av_name);
+    #####:  109:  temp = strcat (temp, sval);
+    #####:  110:  return (temp);
+    #####:  111:}
+        -:  112:
+        -:  113:char *
+function arg_str called 0 returned 0% blocks executed 0%
+    #####:  114:arg_str (arg_list *args)
+        -:  115:{
+    #####:  116:  if (arglist2 != NULL) 
+branch  0 never executed
+branch  1 never executed
+    #####:  117:    free (arglist2);
+    #####:  118:  arglist2 = arglist1;
+    #####:  119:  arglist1 = make_arg_str (args, 1);
+    #####:  120:  return (arglist1);
+        -:  121:}
+        -:  122:
+        -:  123:char *
+function call_str called 0 returned 0% blocks executed 0%
+    #####:  124:call_str (arg_list *args)
+        -:  125:{
+        -:  126:  arg_list *temp;
+        -:  127:  int       arg_count;
+        -:  128:  int       ix;
+        -:  129:  
+    #####:  130:  if (arglist2 != NULL) 
+branch  0 never executed
+branch  1 never executed
+    #####:  131:    free (arglist2);
+    #####:  132:  arglist2 = arglist1;
+        -:  133:
+        -:  134:  /* Count the number of args and add the 0's and 1's. */
+    #####:  135:  for (temp = args, arg_count = 0; temp != NULL; temp = temp->next)
+branch  0 never executed
+branch  1 never executed
+        -:  136:    arg_count++;
+    #####:  137:  arglist1 = bc_malloc(arg_count+1);
+    #####:  138:  for (temp = args, ix=0; temp != NULL; temp = temp->next)
+branch  0 never executed
+branch  1 never executed
+    #####:  139:    arglist1[ix++] = ( temp->av_name ? '1' : '0');
+    #####:  140:  arglist1[ix] = 0;
+        -:  141:      
+    #####:  142:  return (arglist1);
+        -:  143:}
+        -:  144:
+        -:  145:/* free_args frees an argument list ARGS. */
+        -:  146:
+        -:  147:void
+function free_args called 0 returned 0% blocks executed 0%
+    #####:  148:free_args (arg_list *args)
+        -:  149:{ 
+        -:  150:  arg_list *temp;
+        -:  151: 
+        -:  152:  temp = args;
+    #####:  153:  while (temp != NULL)
+branch  0 never executed
+branch  1 never executed
+        -:  154:    {
+    #####:  155:      args = args->next;
+    #####:  156:      free (temp);
+        -:  157:      temp = args;
+        -:  158:    }
+    #####:  159:}
+        -:  160:
+        -:  161:
+        -:  162:/* Check for valid parameter (PARAMS) and auto (AUTOS) lists.
+        -:  163:   There must be no duplicates any where.  Also, this is where
+        -:  164:   warnings are generated for array parameters. */
+        -:  165:
+        -:  166:void
+function check_params called 0 returned 0% blocks executed 0%
+    #####:  167:check_params (arg_list *params, arg_list *autos)
+        -:  168:{
+        -:  169:  arg_list *tmp1, *tmp2;
+        -:  170:
+        -:  171:  /* Check for duplicate parameters. */
+    #####:  172:  if (params != NULL)
+branch  0 never executed
+branch  1 never executed
+        -:  173:    {
+        -:  174:      tmp1 = params;
+    #####:  175:      while (tmp1 != NULL)
+branch  0 never executed
+branch  1 never executed
+        -:  176:	{
+    #####:  177:	  tmp2 = tmp1->next;
+    #####:  178:	  while (tmp2 != NULL)
+branch  0 never executed
+branch  1 never executed
+        -:  179:	    {
+    #####:  180:	      if (tmp2->av_name == tmp1->av_name) 
+branch  0 never executed
+branch  1 never executed
+    #####:  181:		yyerror ("duplicate parameter names");
+    #####:  182:	      tmp2 = tmp2->next;
+        -:  183:	    }
+    #####:  184:	  if (tmp1->arg_is_var)
+branch  0 never executed
+branch  1 never executed
+    #####:  185:	    ct_warn ("Variable array parameter");
+    #####:  186:	  tmp1 = tmp1->next;
+        -:  187:	}
+        -:  188:    }
+        -:  189:
+        -:  190:  /* Check for duplicate autos. */
+    #####:  191:  if (autos != NULL)
+branch  0 never executed
+branch  1 never executed
+        -:  192:    {
+        -:  193:      tmp1 = autos;
+    #####:  194:      while (tmp1 != NULL)
+branch  0 never executed
+branch  1 never executed
+        -:  195:	{
+    #####:  196:	  tmp2 = tmp1->next;
+    #####:  197:	  while (tmp2 != NULL)
+branch  0 never executed
+branch  1 never executed
+        -:  198:	    {
+    #####:  199:	      if (tmp2->av_name == tmp1->av_name) 
+branch  0 never executed
+branch  1 never executed
+    #####:  200:		yyerror ("duplicate auto variable names");
+    #####:  201:	      tmp2 = tmp2->next;
+        -:  202:	    }
+    #####:  203:	  if (tmp1->arg_is_var)
+branch  0 never executed
+branch  1 never executed
+    #####:  204:	    yyerror ("* not allowed here");
+    #####:  205:	  tmp1 = tmp1->next;
+        -:  206:	}
+        -:  207:    }
+        -:  208:
+        -:  209:  /* Check for duplicate between parameters and autos. */
+    #####:  210:  if ((params != NULL) && (autos != NULL))
+branch  0 never executed
+branch  1 never executed
+        -:  211:    {
+        -:  212:      tmp1 = params;
+    #####:  213:      while (tmp1 != NULL)
+branch  0 never executed
+branch  1 never executed
+        -:  214:	{
+        -:  215:	  tmp2 = autos;
+    #####:  216:	  while (tmp2 != NULL)
+branch  0 never executed
+branch  1 never executed
+        -:  217:	    {
+    #####:  218:	      if (tmp2->av_name == tmp1->av_name) 
+branch  0 never executed
+branch  1 never executed
+    #####:  219:		yyerror ("variable in both parameter and auto lists");
+    #####:  220:	      tmp2 = tmp2->next;
+        -:  221:	    }
+    #####:  222:	  tmp1 = tmp1->next;
+        -:  223:	}
+        -:  224:    }
+    #####:  225:}
+        -:  226:
+        -:  227:/* genstr management to avoid buffer overflow. */
+        -:  228:void
+function set_genstr_size called 0 returned 0% blocks executed 0%
+    #####:  229:set_genstr_size (int size)
+        -:  230:{
+    #####:  231:  if (size > genlen) {
+branch  0 never executed
+branch  1 never executed
+    #####:  232:    if (genstr != NULL)
+branch  0 never executed
+branch  1 never executed
+    #####:  233:      free(genstr);
+    #####:  234:    genstr = bc_malloc (size);
+    #####:  235:    genlen = size;
+    #####:  236:  }
+    #####:  237:}
+        -:  238:
+        -:  239:
+        -:  240:/* Initialize the code generator the parser. */
+        -:  241:
+        -:  242:void
+function init_gen called 0 returned 0% blocks executed 0%
+    #####:  243:init_gen (void)
+        -:  244:{
+        -:  245:  /* Get things ready. */
+    #####:  246:  break_label = 0;
+    #####:  247:  continue_label = 0;
+    #####:  248:  next_label  = 1;
+    #####:  249:  out_count = 2;
+    #####:  250:  if (compile_only) 
+branch  0 never executed
+branch  1 never executed
+    #####:  251:    printf ("@i");
+        -:  252:  else
+    #####:  253:    init_load ();
+    #####:  254:  had_error = FALSE;
+    #####:  255:  did_gen = FALSE;
+    #####:  256:  set_genstr_size (64);
+    #####:  257:}
+        -:  258:
+        -:  259:
+        -:  260:/* generate code STR for the machine. */
+        -:  261:
+        -:  262:void
+function generate called 0 returned 0% blocks executed 0%
+    #####:  263:generate (const char *str)
+        -:  264:{
+    #####:  265:  did_gen = TRUE;
+    #####:  266:  if (compile_only)
+branch  0 never executed
+branch  1 never executed
+        -:  267:    {
+    #####:  268:      printf ("%s",str);
+    #####:  269:      out_count += strlen(str);
+    #####:  270:      if (out_count > 60)
+branch  0 never executed
+branch  1 never executed
+        -:  271:	{
+    #####:  272:	  printf ("\n");
+    #####:  273:	  out_count = 0;
+    #####:  274:	}
+        -:  275:    }
+        -:  276:  else
+    #####:  277:    load_code (str);
+    #####:  278:}
+        -:  279:
+        -:  280:
+        -:  281:/* Execute the current code as loaded. */
+        -:  282:
+        -:  283:void
+function run_code called 0 returned 0% blocks executed 0%
+    #####:  284:run_code(void)
+        -:  285:{
+        -:  286:  /* If no compile errors run the current code. */
+    #####:  287:  if (!had_error && did_gen)
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  288:    {
+    #####:  289:      if (compile_only)
+branch  0 never executed
+branch  1 never executed
+        -:  290:	{
+    #####:  291:	  printf ("@r\n"); 
+    #####:  292:	  out_count = 0;
+    #####:  293:	}
+        -:  294:      else
+    #####:  295:	execute ();
+        -:  296:    }
+        -:  297:
+        -:  298:  /* Reinitialize the code generation and machine. */
+    #####:  299:  if (did_gen)
+branch  0 never executed
+branch  1 never executed
+    #####:  300:    init_gen();
+        -:  301:  else
+    #####:  302:    had_error = FALSE;
+    #####:  303:}
+        -:  304:
+        -:  305:
+        -:  306:/* Output routines: Write a character CH to the standard output.
+        -:  307:   It keeps track of the number of characters output and may
+        -:  308:   break the output with a "\<cr>".  Always used for numbers. */
+        -:  309:
+        -:  310:void
+function out_char called 0 returned 0% blocks executed 0%
+    #####:  311:out_char (int ch)
+        -:  312:{
+    #####:  313:  if (ch == '\n')
+branch  0 never executed
+branch  1 never executed
+        -:  314:    {
+    #####:  315:      out_col = 0;
+    #####:  316:      putchar ('\n');
+    #####:  317:    }
+        -:  318:  else
+        -:  319:    {
+    #####:  320:      out_col++;
+    #####:  321:      if (out_col == line_size-1 && line_size != 0)
+branch  0 never executed
+branch  1 never executed
+        -:  322:	{
+    #####:  323:	  putchar ('\\');
+    #####:  324:	  putchar ('\n');
+    #####:  325:	  out_col = 1;
+    #####:  326:	}
+    #####:  327:      putchar (ch);
+        -:  328:    }
+    #####:  329:}
+        -:  330:
+        -:  331:/* Output routines: Write a character CH to the standard output.
+        -:  332:   It keeps track of the number of characters output and may
+        -:  333:   break the output with a "\<cr>".  This one is for strings.
+        -:  334:   In POSIX bc, strings are not broken across lines. */
+        -:  335:
+        -:  336:void
+function out_schar called 0 returned 0% blocks executed 0%
+    #####:  337:out_schar (int ch)
+        -:  338:{
+    #####:  339:  if (ch == '\n')
+branch  0 never executed
+branch  1 never executed
+        -:  340:    {
+    #####:  341:      out_col = 0;
+    #####:  342:      putchar ('\n');
+    #####:  343:    }
+        -:  344:  else
+        -:  345:    {
+    #####:  346:      if (!std_only)
+branch  0 never executed
+branch  1 never executed
+        -:  347:	{
+    #####:  348:	  out_col++;
+    #####:  349:	  if (out_col == line_size-1 && line_size != 0)
+branch  0 never executed
+branch  1 never executed
+        -:  350:	    {
+    #####:  351:	      putchar ('\\');
+    #####:  352:	      putchar ('\n');
+    #####:  353:	      out_col = 1;
+    #####:  354:	    }
+        -:  355:	}
+    #####:  356:      putchar (ch);
+        -:  357:    }
+    #####:  358:}
+        -:  359:
+        -:  360:
+        -:  361:/* The following are "Symbol Table" routines for the parser. */
+        -:  362:
+        -:  363:/*  find_id returns a pointer to node in TREE that has the correct
+        -:  364:    ID.  If there is no node in TREE with ID, NULL is returned. */
+        -:  365:
+        -:  366:id_rec *
+function find_id called 0 returned 0% blocks executed 0%
+    #####:  367:find_id (id_rec *tree, const char *id)
+        -:  368:{
+        -:  369:  int cmp_result;
+        -:  370:  
+        -:  371:  /* Check for an empty tree. */
+    #####:  372:  if (tree == NULL)
+branch  0 never executed
+branch  1 never executed
+    #####:  373:    return NULL;
+        -:  374:
+        -:  375:  /* Recursively search the tree. */
+    #####:  376:  cmp_result = strcmp (id, tree->id);
+    #####:  377:  if (cmp_result == 0)
+branch  0 never executed
+branch  1 never executed
+    #####:  378:    return tree;  /* This is the item. */
+    #####:  379:  else if (cmp_result < 0)
+branch  0 never executed
+branch  1 never executed
+    #####:  380:    return find_id (tree->left, id);
+        -:  381:  else
+    #####:  382:    return find_id (tree->right, id);  
+    #####:  383:}
+        -:  384:
+        -:  385:
+        -:  386:/* insert_id_rec inserts a NEW_ID rec into the tree whose ROOT is
+        -:  387:   provided.  insert_id_rec returns TRUE if the tree height from
+        -:  388:   ROOT down is increased otherwise it returns FALSE.  This is a
+        -:  389:   recursive balanced binary tree insertion algorithm. */
+        -:  390:
+function insert_id_rec called 0 returned 0% blocks executed 0%
+    #####:  391:int insert_id_rec (id_rec **root, id_rec *new_id)
+        -:  392:{
+        -:  393:  id_rec *A, *B;
+        -:  394:
+        -:  395:  /* If root is NULL, this where it is to be inserted. */
+    #####:  396:  if (*root == NULL)
+branch  0 never executed
+branch  1 never executed
+        -:  397:    {
+    #####:  398:      *root = new_id;
+    #####:  399:      new_id->left = NULL;
+    #####:  400:      new_id->right = NULL;
+    #####:  401:      new_id->balance = 0;
+    #####:  402:      return (TRUE);
+        -:  403:    }
+        -:  404:
+        -:  405:  /* We need to search for a leaf. */
+    #####:  406:  if (strcmp (new_id->id, (*root)->id) < 0)
+branch  0 never executed
+branch  1 never executed
+        -:  407:    {
+        -:  408:      /* Insert it on the left. */
+    #####:  409:      if (insert_id_rec (&((*root)->left), new_id))
+branch  0 never executed
+branch  1 never executed
+        -:  410:	{
+        -:  411:	  /* The height increased. */
+    #####:  412:	  (*root)->balance --;
+        -:  413:	  
+    #####:  414:	  switch ((*root)->balance)
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  415:	    {
+        -:  416:	    case  0:  /* no height increase. */
+    #####:  417:	      return (FALSE);
+        -:  418:	    case -1:  /* height increase. */
+    #####:  419:	      return (TRUE);
+        -:  420:	    case -2:  /* we need to do a rebalancing act. */
+        -:  421:	      A = *root;
+    #####:  422:	      B = (*root)->left;
+    #####:  423:	      if (B->balance <= 0)
+branch  0 never executed
+branch  1 never executed
+        -:  424:		{
+        -:  425:		  /* Single Rotate. */
+    #####:  426:		  A->left = B->right;
+    #####:  427:		  B->right = A;
+    #####:  428:		  *root = B;
+    #####:  429:		  A->balance = 0;
+    #####:  430:		  B->balance = 0;
+    #####:  431:		}
+        -:  432:	      else
+        -:  433:		{
+        -:  434:		  /* Double Rotate. */
+    #####:  435:		  *root = B->right;
+    #####:  436:		  B->right = (*root)->left;
+    #####:  437:		  A->left = (*root)->right;
+    #####:  438:		  (*root)->left = B;
+    #####:  439:		  (*root)->right = A;
+    #####:  440:		  switch ((*root)->balance)
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  441:		    {
+        -:  442:		    case -1:
+    #####:  443:		      A->balance = 1;
+    #####:  444:		      B->balance = 0;
+    #####:  445:		      break;
+        -:  446:		    case  0:
+    #####:  447:		      A->balance = 0;
+    #####:  448:		      B->balance = 0;
+    #####:  449:		      break;
+        -:  450:		    case  1:
+    #####:  451:		      A->balance = 0;
+    #####:  452:		      B->balance = -1;
+    #####:  453:		      break;
+        -:  454:		    }
+    #####:  455:		  (*root)->balance = 0;
+        -:  456:		}
+        -:  457:	    }     
+        -:  458:	} 
+        -:  459:    }
+        -:  460:  else
+        -:  461:    {
+        -:  462:      /* Insert it on the right. */
+    #####:  463:      if (insert_id_rec (&((*root)->right), new_id))
+branch  0 never executed
+branch  1 never executed
+        -:  464:	{
+        -:  465:	  /* The height increased. */
+    #####:  466:	  (*root)->balance ++;
+        -:  467:
+    #####:  468:	  switch ((*root)->balance)
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  469:	    {
+        -:  470:	    case 0:  /* no height increase. */
+    #####:  471:	      return (FALSE);
+        -:  472:	    case 1:  /* height increase. */
+    #####:  473:	      return (TRUE);
+        -:  474:	    case 2:  /* we need to do a rebalancing act. */
+        -:  475:	      A = *root;
+    #####:  476:	      B = (*root)->right;
+    #####:  477:	      if (B->balance >= 0)
+branch  0 never executed
+branch  1 never executed
+        -:  478:		{
+        -:  479:		  /* Single Rotate. */
+    #####:  480:		  A->right = B->left;
+    #####:  481:		  B->left = A;
+    #####:  482:		  *root = B;
+    #####:  483:		  A->balance = 0;
+    #####:  484:		  B->balance = 0;
+    #####:  485:		}
+        -:  486:	      else
+        -:  487:		{
+        -:  488:		  /* Double Rotate. */
+    #####:  489:		  *root = B->left;
+    #####:  490:		  B->left = (*root)->right;
+    #####:  491:		  A->right = (*root)->left;
+    #####:  492:		  (*root)->left = A;
+    #####:  493:		  (*root)->right = B;
+    #####:  494:		  switch ((*root)->balance)
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  495:		    {
+        -:  496:		    case -1:
+    #####:  497:		      A->balance = 0;
+    #####:  498:		      B->balance = 1;
+    #####:  499:		      break;
+        -:  500:		    case  0:
+    #####:  501:		      A->balance = 0;
+    #####:  502:		      B->balance = 0;
+    #####:  503:		      break;
+        -:  504:		    case  1:
+    #####:  505:		      A->balance = -1;
+    #####:  506:		      B->balance = 0;
+    #####:  507:		      break;
+        -:  508:		    }
+    #####:  509:		  (*root)->balance = 0;
+        -:  510:		}
+        -:  511:	    }     
+        -:  512:	} 
+        -:  513:    }
+        -:  514:  
+        -:  515:  /* If we fall through to here, the tree did not grow in height. */
+    #####:  516:  return (FALSE);
+    #####:  517:}
+        -:  518:
+        -:  519:
+        -:  520:/* Initialize variables for the symbol table tree. */
+        -:  521:
+        -:  522:void
+function init_tree called 0 returned 0% blocks executed 0%
+    #####:  523:init_tree(void)
+        -:  524:{
+    #####:  525:  name_tree  = NULL;
+    #####:  526:  next_array = 1;
+    #####:  527:  next_func  = 1;
+        -:  528:  /* 0 => ibase, 1 => obase, 2 => scale, 3 => history, 4 => last. */
+    #####:  529:  next_var   = 5;
+    #####:  530:}
+        -:  531:
+        -:  532:
+        -:  533:/* Lookup routines for symbol table names. */
+        -:  534:
+        -:  535:int
+function lookup called 0 returned 0% blocks executed 0%
+    #####:  536:lookup (char *name, int  namekind)
+        -:  537:{
+        -:  538:  id_rec *id;
+        -:  539:
+        -:  540:  /* Warn about non-standard name. */
+    #####:  541:  if (strlen(name) != 1)
+branch  0 never executed
+branch  1 never executed
+    #####:  542:    ct_warn ("multiple letter name - %s", name);
+        -:  543:
+        -:  544:  /* Look for the id. */
+    #####:  545:  id = find_id (name_tree, name);
+    #####:  546:  if (id == NULL)
+branch  0 never executed
+branch  1 never executed
+        -:  547:    {
+        -:  548:      /* We need to make a new item. */
+    #####:  549:      id = bc_malloc (sizeof (id_rec));
+    #####:  550:      id->id = strcopyof (name);
+    #####:  551:      id->a_name = 0;
+    #####:  552:      id->f_name = 0;
+    #####:  553:      id->v_name = 0;
+    #####:  554:      insert_id_rec (&name_tree, id);
+    #####:  555:    }
+        -:  556:
+        -:  557:  /* Return the correct value. */
+    #####:  558:  switch (namekind)
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+        -:  559:    {
+        -:  560:      
+        -:  561:    case ARRAY:
+        -:  562:      /* ARRAY variable numbers are returned as negative numbers. */
+    #####:  563:      if (id->a_name != 0)
+branch  0 never executed
+branch  1 never executed
+        -:  564:	{
+    #####:  565:	  free (name);
+    #####:  566:	  return (-id->a_name);
+        -:  567:	}
+    #####:  568:      id->a_name = next_array++;
+    #####:  569:      if (id->a_name < MAX_STORE)
+branch  0 never executed
+branch  1 never executed
+        -:  570:	{
+    #####:  571:	  if (id->a_name >= a_count)
+branch  0 never executed
+branch  1 never executed
+    #####:  572:	    more_arrays ();
+    #####:  573:	  a_names[id->a_name] = name;
+    #####:  574:	  return (-id->a_name);
+        -:  575:	}
+    #####:  576:      yyerror ("Too many array variables");
+    #####:  577:      bc_exit (1);
+        -:  578:      /*NOTREACHED*/
+        -:  579:
+        -:  580:    case FUNCT:
+        -:  581:    case FUNCTDEF:
+    #####:  582:      if (id->f_name != 0)
+branch  0 never executed
+branch  1 never executed
+        -:  583:	{
+    #####:  584:          free(name);
+        -:  585:	  /* Check to see if we are redefining a math lib function. */ 
+    #####:  586:	  if (use_math && namekind == FUNCTDEF && id->f_name <= 6)
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  587:	    id->f_name = next_func++;
+    #####:  588:	  return (id->f_name);
+        -:  589:	}
+    #####:  590:      id->f_name = next_func++;
+    #####:  591:      if (id->f_name < MAX_STORE)
+branch  0 never executed
+branch  1 never executed
+        -:  592:	{
+    #####:  593:	  if (id->f_name >= f_count)
+branch  0 never executed
+branch  1 never executed
+    #####:  594:	    more_functions ();
+    #####:  595:          f_names[id->f_name] = name;
+    #####:  596:	  return (id->f_name);
+        -:  597:	}
+    #####:  598:      yyerror ("Too many functions");
+    #####:  599:      bc_exit (1);
+        -:  600:      /*NOTREACHED*/
+        -:  601:
+        -:  602:    case SIMPLE:
+    #####:  603:      if (id->v_name != 0)
+branch  0 never executed
+branch  1 never executed
+        -:  604:	{
+    #####:  605:	  free(name);
+    #####:  606:	  return (id->v_name);
+        -:  607:	}
+    #####:  608:      id->v_name = next_var++;
+    #####:  609:      if (id->v_name <= MAX_STORE)
+branch  0 never executed
+branch  1 never executed
+        -:  610:	{
+    #####:  611:	  if (id->v_name >= v_count)
+branch  0 never executed
+branch  1 never executed
+    #####:  612:	    more_variables ();
+    #####:  613:          v_names[id->v_name - 1] = name;
+    #####:  614:	  return (id->v_name);
+        -:  615:	}
+    #####:  616:      yyerror ("Too many variables");
+    #####:  617:      bc_exit (1);
+        -:  618:      /*NOTREACHED*/
+        -:  619:
+    #####:  620:    }
+        -:  621:
+    #####:  622:  yyerror ("End of util.c/lookup() reached.  Please report this bug.");
+    #####:  623:  bc_exit (1);
+        -:  624:  /*NOTREACHED*/
+    #####:  625:  return 0;
+    #####:  626:}
+        -:  627:
+        -:  628:/* Print out the limits of this program. */
+        -:  629:
+        -:  630:void
+function limits called 0 returned 0% blocks executed 0%
+    #####:  631:limits(void)
+        -:  632:{
+    #####:  633:  printf ("BC_BASE_MAX     = %d\n",  BC_BASE_MAX);
+    #####:  634:  printf ("BC_DIM_MAX      = %ld\n", (long) BC_DIM_MAX);
+    #####:  635:  printf ("BC_SCALE_MAX    = %d\n",  BC_SCALE_MAX);
+    #####:  636:  printf ("BC_STRING_MAX   = %d\n",  BC_STRING_MAX);
+    #####:  637:  printf ("MAX Exponent    = %ld\n", (long) LONG_MAX);
+    #####:  638:  printf ("Number of vars  = %ld\n", (long) MAX_STORE);
+        -:  639:#ifdef OLD_EQ_OP
+        -:  640:  printf ("Old assignment operatiors are valid. (=-, =+, ...)\n");
+        -:  641:#endif 
+    #####:  642:}
+        -:  643:
+        -:  644:/* bc_malloc will check the return value so all other places do not
+        -:  645:   have to do it!  SIZE is the number of bytes to allocate. */
+        -:  646:
+        -:  647:void *
+function bc_malloc called 0 returned 0% blocks executed 0%
+    #####:  648:bc_malloc (size_t size)
+        -:  649:{
+        -:  650:  void *ptr;
+        -:  651:
+    #####:  652:  ptr = (void *) malloc (size);
+    #####:  653:  if (ptr == NULL)
+branch  0 never executed
+branch  1 never executed
+    #####:  654:    out_of_memory ();
+        -:  655:
+    #####:  656:  return ptr;
+        -:  657:}
+        -:  658:
+        -:  659:
+        -:  660:/* The following routines are error routines for various problems. */
+        -:  661:
+        -:  662:/* Malloc could not get enought memory. */
+        -:  663:
+        -:  664:void
+function out_of_memory called 0 returned 0% blocks executed 0%
+    #####:  665:out_of_memory(void)
+        -:  666:{
+    #####:  667:  fprintf (stderr, "Fatal error: Out of memory for malloc.\n");
+    #####:  668:  bc_exit (1);
+        -:  669:  /*NOTREACHED*/
+    #####:  670:}
+        -:  671:
+        -:  672:
+        -:  673:
+        -:  674:/* The standard yyerror routine.  Built with variable number of argumnets. */
+        -:  675:
+        -:  676:#ifndef VARARGS
+        -:  677:#ifdef __STDC__
+        -:  678:void
+function yyerror called 0 returned 0% blocks executed 0%
+    #####:  679:yyerror (const char *str, ...)
+        -:  680:#else
+        -:  681:void
+        -:  682:yyerror (str)
+        -:  683:     const char *str;
+        -:  684:#endif
+        -:  685:#else
+        -:  686:void
+        -:  687:yyerror (str, va_alist)
+        -:  688:     const char *str;
+        -:  689:#endif
+        -:  690:{
+        -:  691:  const char *name;
+    #####:  692:  va_list args;
+        -:  693:
+        -:  694:#ifndef VARARGS   
+    #####:  695:   va_start (args, str);
+        -:  696:#else
+        -:  697:   va_start (args);
+        -:  698:#endif
+    #####:  699:  if (is_std_in)
+branch  0 never executed
+branch  1 never executed
+    #####:  700:    name = "(standard_in)";
+        -:  701:  else
+    #####:  702:    name = file_name;
+    #####:  703:  fprintf (stderr,"%s %d: ",name,line_no);
+    #####:  704:  vfprintf (stderr, str, args);
+    #####:  705:  fprintf (stderr, "\n");
+    #####:  706:  had_error = TRUE;
+    #####:  707:  va_end (args);
+    #####:  708:}
+        -:  709:
+        -:  710:
+        -:  711:/* The routine to produce warnings about non-standard features
+        -:  712:   found during parsing. */
+        -:  713:
+        -:  714:#ifndef VARARGS
+        -:  715:#ifdef __STDC__
+        -:  716:void 
+function ct_warn called 0 returned 0% blocks executed 0%
+    #####:  717:ct_warn (const char *mesg, ...)
+        -:  718:#else
+        -:  719:void
+        -:  720:ct_warn (mesg)
+        -:  721:     const char *mesg;
+        -:  722:#endif
+        -:  723:#else
+        -:  724:void
+        -:  725:ct_warn (mesg, va_alist)
+        -:  726:     const char *mesg;
+        -:  727:#endif
+        -:  728:{
+        -:  729:  const char *name;
+    #####:  730:  va_list args;
+        -:  731:
+        -:  732:#ifndef VARARGS   
+    #####:  733:  va_start (args, mesg);
+        -:  734:#else
+        -:  735:  va_start (args);
+        -:  736:#endif
+    #####:  737:  if (std_only)
+branch  0 never executed
+branch  1 never executed
+        -:  738:    {
+    #####:  739:      if (is_std_in)
+branch  0 never executed
+branch  1 never executed
+    #####:  740:	name = "(standard_in)";
+        -:  741:      else
+    #####:  742:	name = file_name;
+    #####:  743:      fprintf (stderr,"%s %d: Error: ",name,line_no);
+    #####:  744:      vfprintf (stderr, mesg, args);
+    #####:  745:      fprintf (stderr, "\n");
+    #####:  746:      had_error = TRUE;
+    #####:  747:    }
+        -:  748:  else
+    #####:  749:    if (warn_not_std)
+branch  0 never executed
+branch  1 never executed
+        -:  750:      {
+    #####:  751:	if (is_std_in)
+branch  0 never executed
+branch  1 never executed
+    #####:  752:	  name = "(standard_in)";
+        -:  753:	else
+    #####:  754:	  name = file_name;
+    #####:  755:	fprintf (stderr,"%s %d: (Warning) ",name,line_no);
+    #####:  756:	vfprintf (stderr, mesg, args);
+    #####:  757:	fprintf (stderr, "\n");
+    #####:  758:      }
+    #####:  759:  va_end (args);
+    #####:  760:}
+        -:  761:
+        -:  762:/* Runtime error will  print a message and stop the machine. */
+        -:  763:
+        -:  764:#ifndef VARARGS
+        -:  765:#ifdef __STDC__
+        -:  766:void
+function rt_error called 0 returned 0% blocks executed 0%
+    #####:  767:rt_error (const char *mesg, ...)
+        -:  768:#else
+        -:  769:void
+        -:  770:rt_error (mesg)
+        -:  771:     const char *mesg;
+        -:  772:#endif
+        -:  773:#else
+        -:  774:void
+        -:  775:rt_error (mesg, va_alist)
+        -:  776:     const char *mesg;
+        -:  777:#endif
+        -:  778:{
+    #####:  779:  va_list args;
+        -:  780:
+    #####:  781:  fprintf (stderr, "Runtime error (func=%s, adr=%d): ",
+    #####:  782:	   f_names[pc.pc_func], pc.pc_addr);
+        -:  783:#ifndef VARARGS   
+    #####:  784:  va_start (args, mesg);
+        -:  785:#else
+        -:  786:  va_start (args);
+        -:  787:#endif
+    #####:  788:  vfprintf (stderr, mesg, args);
+    #####:  789:  va_end (args);
+        -:  790:  
+    #####:  791:  fprintf (stderr, "\n");
+    #####:  792:  runtime_error = TRUE;
+    #####:  793:}
+        -:  794:
+        -:  795:
+        -:  796:/* A runtime warning tells of some action taken by the processor that
+        -:  797:   may change the program execution but was not enough of a problem
+        -:  798:   to stop the execution. */
+        -:  799:
+        -:  800:#ifndef VARARGS
+        -:  801:#ifdef __STDC__
+        -:  802:void
+function rt_warn called 0 returned 0% blocks executed 0%
+    #####:  803:rt_warn (const char *mesg, ...)
+        -:  804:#else
+        -:  805:void
+        -:  806:rt_warn (const char *mesg)
+        -:  807:#endif
+        -:  808:#else
+        -:  809:void
+        -:  810:rt_warn (const char *mesg)
+        -:  811:#endif
+        -:  812:{
+    #####:  813:  va_list args;
+        -:  814:
+    #####:  815:  fprintf (stderr, "Runtime warning (func=%s, adr=%d): ",
+    #####:  816:	   f_names[pc.pc_func], pc.pc_addr);
+        -:  817:#ifndef VARARGS   
+    #####:  818:  va_start (args, mesg);
+        -:  819:#else
+        -:  820:  va_start (args);
+        -:  821:#endif
+    #####:  822:  vfprintf (stderr, mesg, args);
+    #####:  823:  va_end (args);
+        -:  824:
+    #####:  825:  fprintf (stderr, "\n");
+    #####:  826:}
+        -:  827:
+        -:  828:/* bc_exit: Make sure to reset the edit state. */
+        -:  829:
+function bc_exit called 0 returned 0% blocks executed 0%
+    #####:  830:void bc_exit(int val)
+        -:  831:{
+        -:  832:#if defined(LIBEDIT)
+        -:  833:  if (edit != NULL)
+        -:  834:    el_end(edit);
+        -:  835:#endif
+    #####:  836:  exit(val);
+        -:  837:  /*NOTREACHED*/
+        -:  838:}
