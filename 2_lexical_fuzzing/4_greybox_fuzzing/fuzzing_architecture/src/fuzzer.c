@@ -31,14 +31,15 @@ static int (* oracle) (int return_code, int trial) ;
 
 static char dir_name[RESULT_PATH_MAX] ;  
 
-static char ** parsed_args ; // Q. local var ?
-static int * parsed_args_lengths ;
+static char ** parsed_args = 0x0 ; // Q. local var ?
+static int * parsed_args_lengths = 0x0 ;
 static int cmd_args_num = 2 ;
 
 static char ** seed_filenames ;
 static int seed_files_num ;
 
-static int accumulated_coverage = 0 ;
+static coverage_t accumulated_cov = { 0, } ;
+static coverage_t * accumulated_cov_list = 0x0 ;
 
 ///////////////////////////////////// Fuzzer Init /////////////////////////////////////
 
@@ -573,6 +574,23 @@ fuzz_argument (content_t contents, fuzarg_t * fuzargs, int trial)
     write_input_args_file (contents, trial) ;
 }
 
+void
+get_accumulated_covs (covset_t * cov_sets, int trial)
+{
+    int total_line_coverage = 0 ;
+    int total_branch_coverage = 0 ;
+
+    for (int i = 0; i < covargs.source_num; i++) {
+        for (int t = 0; t < cov_sets[i].len; t++) {
+            total_line_coverage += cov_sets[i].set[t].line ;
+            total_branch_coverage += cov_sets[i].set[t].branch ;
+        }
+    }
+
+    accumulated_cov_list[trial].line = total_line_coverage ;
+    accumulated_cov_list[trial].branch = total_branch_coverage ;
+}
+
 
 void
 update_corpus (char * input, int input_len)
@@ -615,7 +633,7 @@ update_corpus (char * input, int input_len)
 }
 
 double
-fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverage_t * coverages, covset_t * cov_sets) 
+fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_t * cov_sets) 
 {
     int input_size = fuzargs.f_char_start + 1 ; // TODO -> mutation ?
     char * input = (char *) malloc(sizeof(char) * input_size) ;    
@@ -643,8 +661,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
             coverage_t cov ;
             is_cov_grow = get_coverage(&cov, cov_sets, covargs) ; // TODO. covargs to pointer
 
-            coverages[i].line = cov.line ;
-            coverages[i].branch = cov.branch ;
+            get_accumulated_covs(cov_sets, i) ;
 
             if (is_cov_grow && fuzz_type == MUTATION) { // TODO. if not mutation
                 update_corpus(input, input_len) ;
@@ -665,7 +682,38 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
 ///////////////////////////////////// Fuzzer Summary /////////////////////////////////////
 
 void
-fuzzer_summary (int * return_codes, result_t * results, content_t contents, coverage_t * coverages, covset_t * cov_sets, double exec_time)
+write_csv_file ()
+{
+#ifdef DEBUG
+    printf("\n\nACCUMULATED RESULT : LINE\n") ;
+    for (int i = 0; i < trials; i++) {
+        printf("%d ", accumulated_cov_list[i].line) ;
+    }
+    printf("\n\nACCUMULATED RESULT : BRANCH\n") ;
+    for (int i = 0; i < trials; i++) {
+        printf("%d ", accumulated_cov_list[i].branch) ;
+    }
+#endif
+
+    FILE * fp = fopen(covargs.csv_filename, "wb") ;
+
+    for (int i = 1; i <= trials; i++) {
+        fprintf(fp, ",%d", i) ;
+    }
+    fprintf(fp, "\nline_cov") ;
+    for (int i = 0; i < trials; i++) {
+        fprintf(fp, ",%d", accumulated_cov_list[i].line) ;
+    }
+    fprintf(fp, "\nbranch_cov") ;
+    for (int i = 0; i < trials; i++) {
+        fprintf(fp, ",%d", accumulated_cov_list[i].branch) ;
+    }
+
+    fclose(fp) ;
+}
+
+void
+fuzzer_summary (int * return_codes, result_t * results, content_t contents, covset_t * cov_sets, double exec_time)
 {
     int pass_cnt = 0 ;
     int fail_cnt = 0 ;
@@ -685,7 +733,6 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
 
     for (int i = 0; i < trials; i++) {
         printf("(CompletedProcess(target='%s', args='%s', ", runargs.binary_path, runargs.cmd_args) ;
-        if (covargs.coverage_on) printf("line_coverage='%d', branch_coverage='%d', ", coverages[i].line, coverages[i].branch) ;
         printf("returncode='%d', input='%s', stdout='%s', stderr='%s', result='%s'))\n", return_codes[i], contents.input_contents[i], contents.stdout_contents[i], contents.stderr_contents[i], result_strings[results[i]]) ;
         
         switch(results[i]) {
@@ -725,6 +772,10 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, cove
     printf("# FAIL : %d\n", fail_cnt) ;
     printf("# UNRESOLVED : %d\n", unresolved_cnt) ;
     printf("=======================================================\n") ;
+
+    if (covargs.coverage_on) {
+        write_csv_file() ;
+    }
 }
 
 
@@ -818,11 +869,11 @@ fuzzer_main (test_config_t * config)
     content_t contents ;
     allocate_contents(&contents) ;
 
-    coverage_t * coverages_per_trial ;
     covset_t * cov_sets ;
 
     if (covargs.coverage_on) {
-        coverages_per_trial = (coverage_t *) malloc(sizeof(coverage_t) * trials) ;
+        accumulated_cov_list = (coverage_t *) malloc(sizeof(coverage_t) * trials) ;
+
         cov_sets = (covset_t *) malloc(sizeof(covset_t) * covargs.source_num) ;
 
         for (int i = 0; i < covargs.source_num; i++) {
@@ -835,11 +886,10 @@ fuzzer_main (test_config_t * config)
         }        
     }
 
-    double exec_time = fuzzer_loop (return_codes, results, contents, coverages_per_trial, cov_sets) ;
-    fuzzer_summary(return_codes, results, contents, coverages_per_trial, cov_sets, exec_time) ;
+    double exec_time = fuzzer_loop (return_codes, results, contents, cov_sets) ;
+    fuzzer_summary(return_codes, results, contents, cov_sets, exec_time) ;
 
     if (covargs.coverage_on) {  
-        free(coverages_per_trial) ;
         for (int i = 0; i < covargs.source_num; i++) {
             remove_gcov_file(runargs.binary_path, covargs.source_paths[i]) ;
             free(cov_sets[i].set) ;
