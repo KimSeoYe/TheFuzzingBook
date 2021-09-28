@@ -38,6 +38,8 @@ set_configs (test_config_t * config)
 {
     // strcpy(config->source_path, "../lib/urlparse/urlparse.c") ;
     strcpy(config->runargs.binary_path, "../lib/urlparse/urlparse") ;
+
+    strcpy(config->covargs.source_dir, "../lib/urlparse/") ;
     char sources[1][PATH_MAX] = { "../lib/urlparse/urlparse.c"} ;
     config->covargs.source_num = 1 ;
     config->covargs.source_paths = (char **) malloc(sizeof(char *) * config->covargs.source_num) ;

@@ -66,6 +66,7 @@ print_status ()
     printf("# COVARGS\n") ;
     printf("\t- coverage_on: %d\n", covargs.coverage_on) ;
     printf("\t- csv_filename: %s\n", covargs.csv_filename) ;
+    printf("\t- source_dir: %s\n", covargs.source_dir) ;
     printf("\t- source_num: %d\n", covargs.source_num) ;
     for (int i = 0; i < covargs.source_num; i++) {
         printf("\t---> [%d] %s\n", i, covargs.source_paths[i]) ;
@@ -121,6 +122,12 @@ copy_status (test_config_t * config)
 
     covargs.coverage_on = config->covargs.coverage_on ;
     covargs.source_num = config->covargs.source_num ;
+
+    if (realpath(config->covargs.source_dir, covargs.source_dir) == 0x0) {
+        perror("copy_status: realpath: covargs.source_dir") ;
+        exit(1) ;
+    }  
+
     covargs.source_paths = (char **) malloc(sizeof(char *) * covargs.source_num) ;
     for (int i = 0; i < covargs.source_num; i++) {
         covargs.source_paths[i] = (char *) malloc(sizeof(char) * PATH_MAX) ;
@@ -659,7 +666,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_
         int is_cov_grow = 0 ;
         if (covargs.coverage_on) {
             coverage_t cov ;
-            is_cov_grow = get_coverage(&cov, cov_sets, covargs) ; // TODO. covargs to pointer
+            is_cov_grow = get_coverage(&cov, cov_sets, &covargs) ; // TODO. covargs to pointer
 
             get_accumulated_covs(cov_sets, i) ;
 
@@ -725,7 +732,7 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, covs
 
     if (covargs.coverage_on) {
         for (int i = 0; i < covargs.source_num; i++) {
-            coverage_t src_cnts = get_src_cnts(covargs.source_paths[i]) ;
+            coverage_t src_cnts = get_src_cnts(covargs.source_paths[i], &covargs) ;
             total_src_cnts.line += src_cnts.line ;
             total_src_cnts.branch += src_cnts.branch ;
         }

@@ -68,11 +68,13 @@ get_executable_real_path (char * executable_path, char * source_path)
 }
 
 int
-exec_program (char * program, char ** arguments)
+exec_program (char * program, char ** arguments, covarg_t * covargs)
 {
     pid_t child_pid = fork() ;
 
     if (child_pid == 0) {
+        chdir(covargs->source_dir) ;
+
         if (execv(program, arguments) == -1) {
             perror("exec_program: execv") ;
             exit(1) ;
@@ -90,22 +92,11 @@ exec_program (char * program, char ** arguments)
 }
 
 void
-compile_with_coverage (char * target_path, char * target_path_c)
-{
-    char * compile_args[] = { "/usr/bin/gcc", "--coverage", "-o", target_path, target_path_c, 0x0 } ;
-    
-    if (exec_program("/usr/bin/gcc", compile_args) != 0) {
-        perror("compile_with_coverage: exec_program") ;
-        exit(1) ;
-    }
-}
-
-void
-run_gcov (char * source_path)
+run_gcov (char * source_path, covarg_t * covargs)
 {
     char * gcov_args[] = { "/usr/bin/gcov", "-b", source_path, 0x0 } ;
 
-    if (exec_program("/usr/bin/gcov", gcov_args) != 0) {
+    if (exec_program("/usr/bin/gcov", gcov_args, covargs) != 0) {
         perror("run_gcov: exec_program") ;
         exit(1) ;
     }
@@ -132,15 +123,13 @@ remove_gcda (char * source_path)
 }
 
 coverage_t
-get_src_cnts (char * source_path)
+get_src_cnts (char * source_path, covarg_t * covargs)
 {
 
-    run_gcov(source_path) ;
-    char source_filename[PATH_MAX] ;
-    get_source_filename(source_filename, source_path) ;
+    run_gcov(source_path, covargs) ;
     
     char gcov_file[PATH_MAX] ;
-    sprintf(gcov_file, "%s.gcov", source_filename) ;
+    sprintf(gcov_file, "%s.gcov", source_path) ;
 
     coverage_t cnt ;
     cnt.line = 0 ;
@@ -161,11 +150,8 @@ get_src_cnts (char * source_path)
 int
 read_gcov_file (coverage_t * cov, covset_t * cov_set, char * source_path) 
 {
-    char source_filename[PATH_MAX] ;
-    get_source_filename(source_filename, source_path) ;
-
     char gcov_file[PATH_MAX] ;
-    sprintf(gcov_file, "%s.gcov", source_filename) ;
+    sprintf(gcov_file, "%s.gcov", source_path) ;
     
     FILE * fp = fopen(gcov_file, "r") ;
     if (fp == 0x0) {
@@ -221,31 +207,30 @@ read_gcov_file (coverage_t * cov, covset_t * cov_set, char * source_path)
         cov_set->set[branch_result[i]].branch = 1 ;
     }
 
-    // free(line_result) ;
-    // free(branch_result) ;
-
+    // free(line_rresuesult) ;
+    // free(branch_lt) ;
     return is_cov_grow ;
 }
 
 int
-get_coverage (coverage_t * coverage, covset_t * cov_sets, covarg_t covargs)
+get_coverage (coverage_t * coverage, covset_t * cov_sets, covarg_t * covargs)
 {
     int is_total_cov_grow = 0 ;
 
     coverage->line = 0 ;
     coverage->branch = 0 ;
 
-    for (int i = 0; i < covargs.source_num; i++) {
-        run_gcov(covargs.source_paths[i]) ;
+    for (int i = 0; i < covargs->source_num; i++) {
+        run_gcov(covargs->source_paths[i], covargs) ;
 
         coverage_t coverage_per_src ;
-        int is_cov_grow = read_gcov_file(&coverage_per_src, &cov_sets[i], covargs.source_paths[i]) ;
+        int is_cov_grow = read_gcov_file(&coverage_per_src, &cov_sets[i], covargs->source_paths[i]) ;
         if (!is_total_cov_grow && is_cov_grow) is_total_cov_grow = 1 ;
         
         coverage->line += coverage_per_src.line ;
         coverage->branch += coverage_per_src.branch ;
         
-        remove_gcda(covargs.source_paths[i]) ;
+        remove_gcda(covargs->source_paths[i]) ;
     }
     
     return is_total_cov_grow ;

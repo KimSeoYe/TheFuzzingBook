@@ -26,6 +26,7 @@ init_config (test_config_t * config)
     config->covargs.coverage_on = 0 ;
     config->covargs.source_num = 0 ;
     config->covargs.source_paths = 0x0 ;
+    strcpy(config->covargs.source_dir, "") ;
     strcpy(config->covargs.csv_filename, "result.csv") ;
 
     strcpy(config->runargs.binary_path, "") ;
