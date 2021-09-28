@@ -893,7 +893,7 @@ fuzzer_main (test_config_t * config)
         }        
     }
 
-    double exec_time = fuzzer_loop (return_codes, results, contents, cov_sets) ;
+    double exec_time = fuzzer_loop(return_codes, results, contents, cov_sets) ;
     fuzzer_summary(return_codes, results, contents, cov_sets, exec_time) ;
 
     if (covargs.coverage_on) {  

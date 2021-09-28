@@ -239,11 +239,8 @@ get_coverage (coverage_t * coverage, covset_t * cov_sets, covarg_t * covargs)
 void 
 remove_gcov_file (char * executable, char * source_path) 
 {  
-    char source_filename[PATH_MAX] ;
-    get_source_filename(source_filename, source_path) ;
-
     char gcov_file[PATH_MAX] ;
-    sprintf(gcov_file, "%s.gcov", source_filename) ;
+    sprintf(gcov_file, "%s.gcov", source_path) ;
     if (remove(gcov_file) == -1) {
         perror("remove_gcov_file: remove: gcov") ;
     }
