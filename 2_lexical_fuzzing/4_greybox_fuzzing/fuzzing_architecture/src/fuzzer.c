@@ -602,9 +602,10 @@ get_accumulated_covs (covset_t * cov_sets, int trial)
 void
 update_corpus (char * input, int input_len)
 {
+    printf("########### UPDATE CORPUS ############\n") ;
     char new_seed_file[PATH_MAX] ;
     int rand_num = rand() % 1000000 ;
-    sprintf(new_seed_file, "mutated_seed_%d", rand_num) ;
+    sprintf(new_seed_file, "mutated_%d", rand_num) ;
 
     if (seed_files_num % SEED_CNT_MAX == 0 && seed_files_num / SEED_CNT_MAX > 0) {
         seed_filenames = realloc(seed_filenames, sizeof(char *) * (seed_files_num / SEED_CNT_MAX + 1)) ;
@@ -614,8 +615,10 @@ update_corpus (char * input, int input_len)
         }
     }
 
-    seed_filenames[seed_files_num] = (char *) malloc(sizeof(char) * strlen(new_seed_file)) ;
-    strcpy(seed_filenames[seed_files_num], new_seed_file) ;
+    printf("SEED FILES NUM: %d\n", seed_files_num) ;
+    printf("NEW SEED: %s\n", new_seed_file) ;
+    seed_filenames[seed_files_num] = (char *) malloc(sizeof(char) * (strlen(new_seed_file) + 1)) ;
+    strncpy(seed_filenames[seed_files_num], new_seed_file, strlen(new_seed_file)) ;
     seed_files_num++ ;
 
     char new_seed_path[PATH_MAX] ;
@@ -637,6 +640,11 @@ update_corpus (char * input, int input_len)
     }
 
     fclose(fp) ;
+
+    printf("################## SEEDS ################\n") ;
+    for (int i = 0; i < seed_files_num; i++) {
+        printf("[%d]%s\n", i, seed_filenames[i]) ;
+    }
 }
 
 double
@@ -671,7 +679,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_
             get_accumulated_covs(cov_sets, i) ;
 
             if (is_cov_grow && fuzz_type == MUTATION) { // TODO. if not mutation
-                update_corpus(input, input_len) ;
+                // update_corpus(input, input_len) ;
             }
         }
 
@@ -704,10 +712,7 @@ write_csv_file (coverage_t total_src_cnts)
 
     FILE * fp = fopen(covargs.csv_filename, "ab") ; // HERE. attatch
 
-    for (int i = 1; i <= trials; i++) {
-        fprintf(fp, ",%d", i) ;
-    }
-    fprintf(fp, "\nline_cov") ;
+    fprintf(fp, "line_cov") ;
     for (int i = 0; i < trials; i++) {
         fprintf(fp, ",%f", (double)accumulated_cov_list[i].line / total_src_cnts.line * 100) ;
     }
@@ -715,6 +720,7 @@ write_csv_file (coverage_t total_src_cnts)
     for (int i = 0; i < trials; i++) {
         fprintf(fp, ",%f", (double)accumulated_cov_list[i].branch / total_src_cnts.branch * 100) ;
     }
+    fprintf(fp, "\n") ;
 
     fclose(fp) ;
 }
