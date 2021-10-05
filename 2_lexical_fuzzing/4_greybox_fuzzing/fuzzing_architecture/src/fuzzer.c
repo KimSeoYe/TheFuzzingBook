@@ -603,7 +603,7 @@ void
 update_corpus (char * input, int input_len)
 {
     char new_seed_file[PATH_MAX] ;
-    int rand_num = rand() % 100000 ;
+    int rand_num = rand() % 1000000 ;
     sprintf(new_seed_file, "mutated_seed_%d", rand_num) ;
 
     if (seed_files_num % SEED_CNT_MAX == 0 && seed_files_num / SEED_CNT_MAX > 0) {
@@ -689,7 +689,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_
 ///////////////////////////////////// Fuzzer Summary /////////////////////////////////////
 
 void
-write_csv_file ()
+write_csv_file (coverage_t total_src_cnts)
 {
 #ifdef DEBUG
     printf("\n\nACCUMULATED RESULT : LINE\n") ;
@@ -702,18 +702,18 @@ write_csv_file ()
     }
 #endif
 
-    FILE * fp = fopen(covargs.csv_filename, "wb") ;
+    FILE * fp = fopen(covargs.csv_filename, "ab") ; // HERE. attatch
 
     for (int i = 1; i <= trials; i++) {
         fprintf(fp, ",%d", i) ;
     }
     fprintf(fp, "\nline_cov") ;
     for (int i = 0; i < trials; i++) {
-        fprintf(fp, ",%d", accumulated_cov_list[i].line) ;
+        fprintf(fp, ",%f", (double)accumulated_cov_list[i].line / total_src_cnts.line * 100) ;
     }
     fprintf(fp, "\nbranch_cov") ;
     for (int i = 0; i < trials; i++) {
-        fprintf(fp, ",%d", accumulated_cov_list[i].branch) ;
+        fprintf(fp, ",%f", (double)accumulated_cov_list[i].branch / total_src_cnts.branch * 100) ;
     }
 
     fclose(fp) ;
@@ -781,7 +781,7 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, covs
     printf("=======================================================\n") ;
 
     if (covargs.coverage_on) {
-        write_csv_file() ;
+        write_csv_file(total_src_cnts) ;
     }
 }
 
