@@ -21,17 +21,17 @@ int main(int argc, char * argv[]) {
     int idx = 0 ;
 
     strcpy(email, argv[1]) ;
-    printf("INPUT: %s\n", email) ;
 
     for (int i = 0 ; i < 8; i++) {
-        if (email[i] - '0' < 0  && email[i] - '0' > 9) {
+        if (email[i] - '0' < 0  || email[i] - '0' > 9) {
             check = 0 ; 
             break ;
         }
     }
 
-    if (check == 1) {
-        id = substring(email, 0, 3); 
+    id = substring(email, 0, 3); 
+
+    if (check == 1) {  
         int student_id = atoi(id); 
         
         if (student_id >= 195 && student_id <= 221) {
@@ -41,6 +41,7 @@ int main(int argc, char * argv[]) {
             return 1 ;
         }
     }
+
     free(id) ;
     return 0;
 }
