@@ -26,7 +26,8 @@ JSON STRUCTURE
 }
 */
 
-int get_code_info (const char * const code)
+int 
+get_code_info (const char * const code)
 {
     const cJSON * name = 0x0 ;
     const cJSON * line_number = 0x0 ;
