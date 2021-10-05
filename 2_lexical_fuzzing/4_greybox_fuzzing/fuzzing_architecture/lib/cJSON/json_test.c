@@ -96,7 +96,7 @@ parse_and_print_with_length_opt (char * input, int input_len)
     cJSON_Delete(parsed_input_w_null_terminated) ;
 
 
-    cJSON * parsed_input_wo_null_terminated = cJSON_ParseWithLengthOpts(input, input_len, 0x0, 1) ; 
+    cJSON * parsed_input_wo_null_terminated = cJSON_ParseWithLengthOpts(input, input_len, 0x0, 0) ; 
 
     printf("=========================================\n") ;
     printf("PARSE_LEN_W/O_NULL_TERM: FORMATTED\n") ;
