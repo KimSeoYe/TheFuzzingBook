@@ -21,6 +21,6 @@ int copy_another_offset (char * dst, int dst_len, char * seed, int seed_len, int
 
 int mutate (char * dst, int dst_len, char * seed, int seed_len) ;
 
-int mutate_input (char * dst, int dst_len, fuzarg_t * fuzargs, char * seed_filename) ;
+int mutate_input (char ** dst, int dst_len, fuzarg_t * fuzargs, char * seed_filename) ;
 
 #endif
