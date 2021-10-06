@@ -24,7 +24,6 @@ static int trials ;
 fuztype_t fuzz_type ;
 fuzopt_t fuzz_option ;
 static int fuzzed_args_num = 0 ;
-// static char source_filename[PATH_MAX] ;
 static fuzarg_t fuzargs ;
 static runarg_t runargs ;
 static covarg_t covargs ;
@@ -48,12 +47,15 @@ print_status ()
     printf("FUZZER STATUS\n") ;
     printf("=======================================================\n") ;
     printf("# TRIALS: %d\n", trials) ;
-    printf("# FUZZ TIPE (0: RANDOM, 1: MUTATION) : %d\n", fuzz_type) ;
+    printf("# FUZZ TYPE (0: RANDOM, 1: MUTATION) : %d\n", fuzz_type) ;
     printf("# FUZZ OPTION (0: STD_IN, 1: ARGUMENT, 2: FILE_CONTENTS): %d\n", fuzz_option) ;
     printf("# FUZZED ARGS NUM: %d\n", fuzzed_args_num) ;
     printf("# FUZARGS\n") ;
     printf("\t- f_min_len: %d / f_max_len: %d\n", fuzargs.f_min_len, fuzargs.f_max_len) ;
     printf("\t- f_char_start: %d / f_char_range: %d\n", fuzargs.f_char_start, fuzargs.f_char_range) ;
+    if (fuzz_type == 1) {
+        printf("\t- seed_dir: %s\n", fuzargs.seed_dir) ;
+    }
     printf("# RUNARGS\n") ;
     printf("\t- binary_path: %s\n", runargs.binary_path) ;
     printf("\t- cmd_args: %s\n", runargs.cmd_args) ;
@@ -632,7 +634,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, coverag
         int is_cov_grow = 0 ;
         if (covargs.coverage_on) {
             coverage_t cov ;
-            is_cov_grow = get_coverage(&cov, cov_sets, covargs) ; 
+            is_cov_grow = get_coverage(&cov, cov_sets, covargs) ; // TODO. covargs to pointer
 
             coverages[i].line = cov.line ;
             coverages[i].branch = cov.branch ;

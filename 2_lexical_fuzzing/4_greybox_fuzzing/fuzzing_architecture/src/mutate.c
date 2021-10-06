@@ -7,7 +7,7 @@
 #include "../include/mutate.h"
 #include "../include/fuzzer.h"
 
-#define DEBUG
+// #define DEBUG
 
 #define INTERESTING_8 \
   -128,          /* Overflow signed 8-bit when decremented  */ \

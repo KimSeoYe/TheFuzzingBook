@@ -649,7 +649,6 @@ double
 fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_t * cov_sets) 
 {
     char * input = (char *) malloc(sizeof(char) * BUF_PAGE_UNIT) ;    
-    printf("input: %p\n", input) ;
 
     clock_t start = clock() ;
     
@@ -708,7 +707,10 @@ write_csv_file (coverage_t total_src_cnts)
     }
 #endif
 
-    FILE * fp = fopen(covargs.csv_filename, "ab") ; // HERE. attatch
+    FILE * fp = fopen(covargs.csv_filename, "ab") ;
+    if (fp == 0x0) {
+        perror("write_csv_file: fopen") ;
+    }
 
     fprintf(fp, "line_cov") ;
     for (int i = 0; i < trials; i++) {
