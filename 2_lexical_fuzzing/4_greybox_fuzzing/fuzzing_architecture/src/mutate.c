@@ -361,10 +361,10 @@ get_seed_path (char * dst, char * dir_name, char * file_name)
 }
 
 int
-mutate_input (char * dst, int dst_len, fuzarg_t * fuzargs, char * seed_filename)
+mutate_input (char ** dst, int dst_len, fuzarg_t * fuzargs, char * seed_filename)
 { 
     char seed_path[PATH_MAX] ;
-    get_seed_path(seed_path, fuzargs->seed_dir, seed_filename) ;
+    get_seed_path(seed_path, fuzargs->seed_dir, seed_filename) ;    
 
     FILE * fp = fopen(seed_path, "rb") ;
     if (fp == 0x0) {
@@ -372,22 +372,34 @@ mutate_input (char * dst, int dst_len, fuzarg_t * fuzargs, char * seed_filename)
         exit(1) ;
     }
 
-    int input_max = 1024 ;
-    char * seed_input = (char *) malloc(sizeof(char) * input_max) ;
+    char * seed_input = (char *) malloc(sizeof(char) * BUF_PAGE_UNIT) ;
+    int buf_page_num = 1 ;
 
     int s, total_len = 0 ;
-    char buf[1024] ;
-    while ((s = fread(buf, 1, 1024, fp)) > 0) {
-        if (total_len + s > 1024) {
-            seed_input = realloc(seed_input, sizeof(char) * ((total_len + s) / 1024 + 1)) ;
+    char buf[BUF_PAGE_UNIT] ;
+    while ((s = fread(buf, 1, BUF_PAGE_UNIT - 1, fp)) > 0) {
+        if (total_len + s >= BUF_PAGE_UNIT * buf_page_num) {
+            buf_page_num++ ;
+
+            seed_input = realloc(seed_input, sizeof(char) * BUF_PAGE_UNIT * buf_page_num) ;
+            *dst = realloc(*dst, sizeof(char) * BUF_PAGE_UNIT * buf_page_num) ;
+            if (seed_input == 0x0 | *dst == 0x0) {
+                perror("mutate_input: realloc failed") ;
+                exit(1) ;
+            }
+
+            dst_len = BUF_PAGE_UNIT * buf_page_num ;
         }
 
         memcpy(seed_input + total_len, buf, s) ;
         total_len += s ;
     }
+    seed_input[total_len] = 0x0 ;
+    
     fclose(fp) ;
-
-    int mutate_len = mutate(dst, dst_len, seed_input, total_len) ;
+    
+    int mutate_len = mutate(*dst, dst_len, seed_input, total_len) ;
+    
     free(seed_input) ;
     
     return mutate_len ;

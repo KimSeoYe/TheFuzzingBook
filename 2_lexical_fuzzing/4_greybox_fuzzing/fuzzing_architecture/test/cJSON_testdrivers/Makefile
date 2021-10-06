@@ -15,4 +15,4 @@ cjson_testdriver: cjson_testdriver.c $(SRCS)
 	$(CC) -o cjson_testdriver cjson_testdriver.c $(SRCS)
 
 clean:
-	rm -rf $(EXECS) $(OBJS) *.csv
+	rm -rf $(EXECS) $(OBJS) *.csv tmp.*

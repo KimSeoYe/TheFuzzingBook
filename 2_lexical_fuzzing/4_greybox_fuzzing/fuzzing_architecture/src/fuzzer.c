@@ -29,7 +29,7 @@ static runarg_t runargs ;
 static covarg_t covargs ;
 static int (* oracle) (int return_code, int trial) ;
 
-static char dir_name[RESULT_PATH_MAX] ;  
+static char dir_name[RESULT_PATH_MAX] = "" ;  
 
 static char ** parsed_args = 0x0 ; // Q. local var ?
 static int * parsed_args_lengths = 0x0 ;
@@ -137,11 +137,6 @@ copy_status (test_config_t * config)
         }
     }
     strcpy(covargs.csv_filename, config->covargs.csv_filename) ;
-    // TODO.
-    // if (realpath(config->covargs.csv_filename, covargs.csv_filename) == 0x0) {
-    //     perror("copy_status: realpath: covargs.csv_filename") ;
-    //     exit(1) ;
-    // }
 
     strcpy(runargs.cmd_args, config->runargs.cmd_args) ;
     runargs.timeout = config->runargs.timeout ;
@@ -159,7 +154,8 @@ parse_args ()
 
     parsed_args[0] = (char *) malloc(sizeof(char) * (strlen(runargs.binary_path) + 1)) ;
     parsed_args_lengths[0] = strlen(runargs.binary_path) ;
-    strcpy(parsed_args[0], runargs.binary_path) ;
+    strncpy(parsed_args[0], runargs.binary_path, parsed_args_lengths[0]) ;
+    parsed_args[0][parsed_args_lengths[0]] = 0x0 ;
 
     int i ;
     char * tok_ptr = strtok(runargs.cmd_args, " ") ; 
@@ -168,6 +164,7 @@ parse_args ()
         parsed_args[i] = (char *) malloc(sizeof(char) * (strlen(tok_ptr) + 1)) ;
         parsed_args_lengths[i] = strlen(tok_ptr) ;
         strcpy(parsed_args[i], tok_ptr) ;
+        parsed_args[i][parsed_args_lengths[i]] = 0x0 ;
 
         tok_ptr = strtok(0x0, " ") ;
     }
@@ -193,7 +190,8 @@ create_temp_dir ()
         perror("mkdtemp") ;
         exit(1) ;
     }
-    strcpy(dir_name, temp_dir) ;
+    strncpy(dir_name, temp_dir, strlen(temp_dir)) ;
+    dir_name[strlen(temp_dir)] = 0x0 ;
 }
 
 void
@@ -213,16 +211,17 @@ read_seed_dir ()
 
     while ((entry = readdir(dir_ptr)) != 0x0) {
         if (num_files != 0 && num_files % SEED_CNT_MAX == 0) {
-            seed_filenames = realloc(seed_filenames, sizeof(char *) * (num_files / SEED_CNT_MAX + 1)) ;
+            seed_filenames = realloc(seed_filenames, sizeof(char *) * (num_files / SEED_CNT_MAX + 1) * SEED_CNT_MAX) ;
             if (seed_filenames == 0x0) {
                 perror("read_seed_dir: realloc") ;
                 break ;
             }
-        }
+        } 
 
         if (entry->d_name[0] != '.') {  // TODO. more condition ?
             seed_filenames[num_files] = (char *) malloc(sizeof(char) * (strlen(entry->d_name) + 1)) ;
-            strcpy(seed_filenames[num_files], entry->d_name) ;
+            strncpy(seed_filenames[num_files], entry->d_name, strlen(entry->d_name)) ;
+            seed_filenames[num_files][strlen(entry->d_name)] = 0x0 ;
             num_files++ ;
         }
     }
@@ -315,7 +314,7 @@ get_path (char * path, int trial, int fd)
 void
 write_input_files (content_t contents, char * input, int input_len, int trial)
 {
-    char in_path[RESULT_PATH_MAX] ;
+    char in_path[RESULT_PATH_MAX] = "" ;
     get_path(in_path, trial, 0) ;
 
     if (input_len >= CONTENTS_MAX - 1) {
@@ -334,7 +333,7 @@ write_input_files (content_t contents, char * input, int input_len, int trial)
     }
 
     if (fwrite(input, 1, input_len, in_fp) != input_len) {  
-        perror("fwrite: write_input_files") ; // TODO
+        perror("fwrite: write_input_files") ;
     }
 
     fclose(in_fp) ;
@@ -369,7 +368,7 @@ execute_target(content_t contents, char * input, int input_len, int trial)
 
 void
 write_output_files (content_t contents, int trial, int fd){
-    char path[RESULT_PATH_MAX] ;
+    char path[RESULT_PATH_MAX] = "" ;
     get_path(path, trial, fd) ;
 
     FILE * fp = fopen(path, "wb") ;
@@ -378,7 +377,7 @@ write_output_files (content_t contents, int trial, int fd){
         exit(1) ;
     }
 
-    char buf[1024] ;
+    char buf[1024] = "" ;
     int s = 0 ;
     int is_first = 1 ;
     
@@ -528,7 +527,7 @@ write_fuzzed_args_to_file (FILE * fp)
 void
 write_input_args_file (content_t contents, int trial)
 {
-    char in_path[RESULT_PATH_MAX] ;
+    char in_path[RESULT_PATH_MAX] = "" ;
     get_path(in_path, trial, 0) ;
 
     if (parsed_args_lengths[cmd_args_num - 1] >= CONTENTS_MAX - 1) { 
@@ -563,7 +562,7 @@ fuzz_argument (content_t contents, fuzarg_t * fuzargs, int trial)
                 parsed_args_lengths[i] = fuzz_input(fuzargs, parsed_args[i]) ;
                 break ;
             case MUTATION:
-                parsed_args_lengths[i] = mutate_input(parsed_args[i], args_size, fuzargs, seed_filenames[trial % seed_files_num]) ;   
+                parsed_args_lengths[i] = mutate_input(&parsed_args[i], args_size, fuzargs, seed_filenames[trial % seed_files_num]) ;   
                 break ;
         }
     }
@@ -602,27 +601,31 @@ get_accumulated_covs (covset_t * cov_sets, int trial)
 void
 update_corpus (char * input, int input_len)
 {
-    printf("########### UPDATE CORPUS ############\n") ;
-    char new_seed_file[PATH_MAX] ;
+    char new_seed_file[PATH_MAX] = "" ;
     int rand_num = rand() % 1000000 ;
     sprintf(new_seed_file, "mutated_%d", rand_num) ;
+    int new_filename_len = strlen(new_seed_file) ;
 
-    if (seed_files_num % SEED_CNT_MAX == 0 && seed_files_num / SEED_CNT_MAX > 0) {
-        seed_filenames = realloc(seed_filenames, sizeof(char *) * (seed_files_num / SEED_CNT_MAX + 1)) ;
+    if (seed_files_num != 0 && seed_files_num % SEED_CNT_MAX == 0) {
+        seed_filenames = realloc(seed_filenames, sizeof(char *) * (seed_files_num / SEED_CNT_MAX + 1) * SEED_CNT_MAX) ;
         if (seed_filenames == 0x0) {
             perror("update_corpus: realloc") ;
             exit(1) ;
         }
     }
 
-    printf("SEED FILES NUM: %d\n", seed_files_num) ;
-    printf("NEW SEED: %s\n", new_seed_file) ;
-    seed_filenames[seed_files_num] = (char *) malloc(sizeof(char) * (strlen(new_seed_file) + 1)) ;
-    strncpy(seed_filenames[seed_files_num], new_seed_file, strlen(new_seed_file)) ;
+    seed_filenames[seed_files_num] = (char *) malloc(sizeof(char) * (new_filename_len + 1)) ;
+    strncpy(seed_filenames[seed_files_num], new_seed_file, new_filename_len) ;
+    seed_filenames[seed_files_num][new_filename_len] = 0x0 ;
     seed_files_num++ ;
 
-    char new_seed_path[PATH_MAX] ;
-    sprintf(new_seed_path, "%s/%s", fuzargs.seed_dir, new_seed_file) ;
+    char new_seed_path[PATH_MAX] = "" ;
+    strncpy(new_seed_path, fuzargs.seed_dir, strlen(fuzargs.seed_dir)) ;
+    new_seed_path[strlen(fuzargs.seed_dir)] = 0x0 ;
+    if (new_seed_path[strlen(new_seed_path) - 1] != '/') {
+        strcat(new_seed_path, "/") ;
+    }
+    strcat(new_seed_path, new_seed_file) ;
 
     FILE * fp = fopen(new_seed_path, "wb") ;
     if (fp == 0x0) {
@@ -640,18 +643,13 @@ update_corpus (char * input, int input_len)
     }
 
     fclose(fp) ;
-
-    printf("################## SEEDS ################\n") ;
-    for (int i = 0; i < seed_files_num; i++) {
-        printf("[%d]%s\n", i, seed_filenames[i]) ;
-    }
 }
 
 double
 fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_t * cov_sets) 
 {
-    int input_size = fuzargs.f_char_start + 1 ; // TODO -> mutation ?
-    char * input = (char *) malloc(sizeof(char) * input_size) ;    
+    char * input = (char *) malloc(sizeof(char) * BUF_PAGE_UNIT) ;    
+    printf("input: %p\n", input) ;
 
     clock_t start = clock() ;
     
@@ -663,7 +661,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_
                     input_len = fuzz_input(&fuzargs, input) ;   // TODO. input as a first param.
                     break ;
                 case MUTATION:
-                    input_len = mutate_input(input, input_size, &fuzargs, seed_filenames[i % seed_files_num]) ;
+                    input_len = mutate_input(&input, BUF_PAGE_UNIT, &fuzargs, seed_filenames[i % seed_files_num]) ;
                     break ;
             }
         }
@@ -679,7 +677,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_
             get_accumulated_covs(cov_sets, i) ;
 
             if (is_cov_grow && fuzz_type == MUTATION) { // TODO. if not mutation
-                // update_corpus(input, input_len) ;
+                update_corpus(input, input_len) ;
             }
         }
 
@@ -808,7 +806,7 @@ remove_temp_dir ()
 {
     for (int fd = 0; fd < 3; fd++) {
         for (int i = 0; i < trials; i++) {
-            char path[RESULT_PATH_MAX] ;
+            char path[RESULT_PATH_MAX] = "" ;
             get_path(path, i, fd) ;
             if (remove(path) == -1) {
                 perror("remove_temp_dir: remove") ;
@@ -890,7 +888,8 @@ fuzzer_main (test_config_t * config)
         cov_sets = (covset_t *) malloc(sizeof(covset_t) * covargs.source_num) ;
 
         for (int i = 0; i < covargs.source_num; i++) {
-            strcpy(cov_sets[i].filepath, covargs.source_paths[i]) ;
+            strncpy(cov_sets[i].filepath, covargs.source_paths[i], strlen(covargs.source_paths[i])) ;
+            cov_sets[i].filepath[strlen(covargs.source_paths[i])] = 0x0 ;
             
             cov_sets[i].len = get_total_line_cnt(covargs.source_paths[i]) ;
             cov_sets[i].set = (coverage_t *) malloc(sizeof(coverage_t) * cov_sets[i].len) ;

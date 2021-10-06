@@ -8,6 +8,8 @@
 void
 set_configs (test_config_t * config)
 {
+    config->covargs.coverage_on = 1 ;
+
     strcpy(config->runargs.binary_path, "../../lib/cJSON/json_test") ;
     config->covargs.source_num = 1 ;
     strcpy(config->covargs.source_dir, "../../lib/cJSON/") ;
@@ -28,35 +30,41 @@ free_conf_source_paths (test_config_t * config)
     free(config->covargs.source_paths) ;
 }
 
-int
-main (int argc, char * argv[])
+void
+execute_fuzzer (int trials, fuztype_t fuzz_type, char * csv_filename)
 {
     test_config_t config ;
     init_config(&config) ;
     set_configs(&config) ;
 
+    config.trials = trials ;
+    config.fuzz_type = fuzz_type ;
+    strcpy(config.covargs.csv_filename, csv_filename) ;
+
+    fuzzer_main(&config) ;
+
+    free_conf_source_paths(&config) ;
+}
+
+int
+main (int argc, char * argv[])
+{
     int opt ;
-    while ((opt = getopt(argc, argv, "t:m:")) != -1) {
+    int trials = 10 ;
+    while ((opt = getopt(argc, argv, "t:")) != -1) {
         switch(opt) {
             case 't':
-                config.trials = atoi(optarg) ;
+                trials = atoi(optarg) ;
                 break ;
         }
     }
 
-    config.covargs.coverage_on = 1 ;
-   
-    strcpy(config.covargs.csv_filename, "random.csv") ;
-    config.fuzz_type = RANDOM ;
     // for (int i = 0; i < 10; i++) {
-        fuzzer_main(&config) ;
+        execute_fuzzer(trials, RANDOM, "random.csv") ;
+    // }
+    // for (int i = 0; i < 10; i++) {
+        execute_fuzzer(trials, MUTATION, "mutation.csv") ;
     // }
 
-    strcpy(config.covargs.csv_filename, "mutation.csv") ;
-    config.fuzz_type = MUTATION ;
-    // for (int i = 0; i < 10; i++) {
-        fuzzer_main(&config) ;
-    // }
-    
-    free_conf_source_paths(&config) ;
+    return 0 ;
 }

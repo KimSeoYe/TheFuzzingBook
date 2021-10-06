@@ -207,8 +207,8 @@ read_gcov_file (coverage_t * cov, covset_t * cov_set, char * source_path)
         cov_set->set[branch_result[i]].branch = 1 ;
     }
 
-    // free(line_rresuesult) ;
-    // free(branch_lt) ;
+    // free(line_result) ;
+    // free(branch_result) ;
     return is_cov_grow ;
 }
 
