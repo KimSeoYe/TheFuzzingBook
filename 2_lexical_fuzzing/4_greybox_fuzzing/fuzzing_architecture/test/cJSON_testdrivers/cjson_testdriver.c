@@ -51,20 +51,24 @@ main (int argc, char * argv[])
 {
     int opt ;
     int trials = 10 ;
-    while ((opt = getopt(argc, argv, "t:")) != -1) {
+    int loop_trials = 10 ;
+    while ((opt = getopt(argc, argv, "t:l:")) != -1) {
         switch(opt) {
             case 't':
                 trials = atoi(optarg) ;
                 break ;
+            case 'l':
+                loop_trials = atoi(optarg) ;
+                break ;
         }
     }
 
-    // for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < loop_trials; i++) {
         execute_fuzzer(trials, RANDOM, "random.csv") ;
-    // }
-    // for (int i = 0; i < 10; i++) {
+    }
+    for (int i = 0; i < loop_trials; i++) {
         execute_fuzzer(trials, MUTATION, "mutation.csv") ;
-    // }
+    }
 
     return 0 ;
 }
