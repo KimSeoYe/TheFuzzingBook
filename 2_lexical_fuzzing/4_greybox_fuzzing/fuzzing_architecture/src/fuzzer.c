@@ -793,7 +793,20 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, covs
 }
 
 
-///////////////////////////////////// Fuzzer Completion /////////////////////////////////////
+///////////////////////////////////// Fuzzer Main /////////////////////////////////////
+
+void
+allocate_contents (content_t * contents)
+{
+    contents->input_contents = (char **) malloc(sizeof(char *) * trials) ;
+    contents->stdout_contents = (char **) malloc(sizeof(char *) * trials) ;
+    contents->stderr_contents = (char **) malloc(sizeof(char *) * trials) ;
+    for (int i = 0; i < trials; i++) {
+        contents->input_contents[i] = (char *) malloc(sizeof(char) * CONTENTS_MAX) ;
+        contents->stdout_contents[i] = (char *) malloc(sizeof(char) * CONTENTS_MAX) ;
+        contents->stderr_contents[i] = (char *) malloc(sizeof(char) * CONTENTS_MAX) ;
+    }
+}
 
 void
 free_parsed_args ()
@@ -854,18 +867,17 @@ free_source_paths ()
     free(covargs.source_paths) ;
 }
 
-///////////////////////////////////// Fuzzer Main /////////////////////////////////////
-
 void
-allocate_contents (content_t * contents)
+reset_seeds ()
 {
-    contents->input_contents = (char **) malloc(sizeof(char *) * trials) ;
-    contents->stdout_contents = (char **) malloc(sizeof(char *) * trials) ;
-    contents->stderr_contents = (char **) malloc(sizeof(char *) * trials) ;
-    for (int i = 0; i < trials; i++) {
-        contents->input_contents[i] = (char *) malloc(sizeof(char) * CONTENTS_MAX) ;
-        contents->stdout_contents[i] = (char *) malloc(sizeof(char) * CONTENTS_MAX) ;
-        contents->stderr_contents[i] = (char *) malloc(sizeof(char) * CONTENTS_MAX) ;
+    for (int i = 0; i < seed_files_num; i++) {
+        if (strncmp(seed_filenames[i], "mutated_", 8) == 0) {
+            char seed_path[PATH_MAX] ;
+            get_seed_path(seed_path, fuzargs.seed_dir, seed_filenames[i]) ; 
+            if (remove(seed_path) == -1) {
+                perror("reset_seeds: remove") ;
+            }
+        }
     }
 }
 
@@ -919,7 +931,13 @@ fuzzer_main (test_config_t * config)
         }
     }
 
-    if (fuzz_type == MUTATION) free_seed_filenames() ;
+    if (fuzz_type == MUTATION) {
+        free_seed_filenames() ;
+        if (covargs.coverage_on) {
+            reset_seeds() ;
+        }
+    }
+
     if (covargs.source_num != 0) free_source_paths() ;
 
     free(return_codes) ;
