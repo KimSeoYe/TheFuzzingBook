@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "../../include/fuzzer.h"
 
@@ -63,12 +64,24 @@ main (int argc, char * argv[])
         }
     }
 
+    clock_t rand_start = clock() ;
     for (int i = 0; i < loop_trials; i++) {
         execute_fuzzer(trials, RANDOM, "random.csv") ;
     }
+    clock_t rand_end = clock() ;
+
+    clock_t mut_start = clock() ;
     for (int i = 0; i < loop_trials; i++) {
         execute_fuzzer(trials, MUTATION, "mutation.csv") ;
     }
+    clock_t mut_end = clock() ;
+
+    printf("\n=======================================================\n") ;
+    printf("TOTAL TIME\n") ;
+    printf("=======================================================\n") ;
+    printf("RANDOM: %.3f s\n", (double)(rand_end - rand_start) / CLOCKS_PER_SEC) ;
+    printf("MUTATION: %.3f s\n", (double)(mut_end - mut_start) / CLOCKS_PER_SEC) ;
+    printf("=======================================================\n") ;
 
     return 0 ;
 }

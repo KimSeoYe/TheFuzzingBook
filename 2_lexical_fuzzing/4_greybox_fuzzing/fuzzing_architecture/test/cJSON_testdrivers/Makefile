@@ -19,4 +19,4 @@ JI_testdriver: JI_testdriver.c $(SRCS)
 	$(CC) -o JI_testdriver JI_testdriver.c $(SRCS)
 
 clean:
-	rm -rf $(EXECS) $(OBJS) *.csv tmp.*
+	rm -rf $(EXECS) $(OBJS) *.csv tmp.* seed_cjson/mutated_* seed_JI/mutated_*
