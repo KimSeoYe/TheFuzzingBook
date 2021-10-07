@@ -431,6 +431,7 @@ write_output_files (content_t contents, int trial, int fd){
 void
 save_results(content_t contents, int trial)
 {
+    close(stdin_pipes[0]) ;
     close(stdin_pipes[1]) ;
     close(stdout_pipes[1]) ;
     close(stderr_pipes[1]) ;
