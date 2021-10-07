@@ -1,0 +1,11 @@
+{"menu": {
+  "id": "file",
+  "vSalue": "File",
+  "popup": {
+    "menuitem": [
+      {"value": "New", "onc“–œ”": "CreateNewDoc()"},
+      {"value": "Open", "onclick": "OpenDoc([\r#)"},
+      {"value": "Close", "oï“–ck": "CloseDoc()"}
+     ]
+  }
+}}/E

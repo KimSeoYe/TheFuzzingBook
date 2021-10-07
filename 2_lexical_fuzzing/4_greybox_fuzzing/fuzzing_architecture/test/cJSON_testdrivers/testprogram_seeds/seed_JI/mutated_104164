@@ -1,0 +1,11 @@
+{"menu": {
+  "id": "fin@|xle",
+  "value": "File",
+  "popup": {
+    "menuitem": [
+      {"value": "New", "onclick": "CreateNewDoc()"},
+      {"value": "Open", "onclick": "OpenDoc([\r#)"},
+      {"value": "Close", "oàlick": "CloseDoc()"}
+     ]
+  }
+}}
