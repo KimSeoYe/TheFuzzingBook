@@ -14,6 +14,10 @@ get_total_line_cnt (char * source_path)
     int cnt = 0 ;
 
     FILE * fp = fopen(source_path, "rb") ;
+    if (fp == 0x0) {
+        perror("get_total_line_cnt: fopen") ;
+        exit(1) ;
+    }
     char * buf = 0x0 ;
     size_t line_max = 0 ;
     while(getline(&buf, &line_max, fp) > 0) {   // Q.
@@ -136,6 +140,10 @@ get_src_cnts (char * source_path, covarg_t * covargs)
     cnt.branch = 0 ;
 
     FILE * fp = fopen(gcov_file, "rb") ;
+    if (fp == 0x0) {
+        perror("get_src_cnts: fopen") ;
+        exit(1) ;
+    }
     char * buf = 0x0 ;
     size_t line_max = 0 ;
     while(getline(&buf, &line_max, fp) > 0) {   // Q.
