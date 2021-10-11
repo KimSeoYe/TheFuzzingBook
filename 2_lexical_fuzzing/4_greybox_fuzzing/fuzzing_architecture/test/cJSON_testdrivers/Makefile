@@ -1,6 +1,6 @@
 CC=gcc
-TARGETS=parse_testdriver.c cjson_testdriver.c JI_testdriver.c MJ_testdriver.c JY_testdriver.c WS_testdriver.c
-EXECS=parse_testdriver cjson_testdriver JI_testdriver MJ_testdriver JY_testdriver WS_testdriver
+TARGETS=parse_testdriver.c cjson_testdriver.c JI_testdriver.c MJ_testdriver.c JY_testdriver.c WS_testdriver.c SY_testdriver.c
+EXECS=parse_testdriver cjson_testdriver JI_testdriver MJ_testdriver JY_testdriver WS_testdriver SY_testdriver
 OBJS=config.o fuzzer.o fuzz_input.o gcov_runner.o mutate.o
 SRCS= ../../src/config.c  ../../src/fuzzer.c  ../../src/fuzz_input.c  ../../src/gcov_runner.c  ../../src/mutate.c
 
@@ -11,6 +11,9 @@ all: $(TARGETS) $(SRCS)
 
 cjson_testdriver: cjson_testdriver.c $(SRCS)
 	$(CC) -o cjson_testdriver cjson_testdriver.c $(SRCS)
+
+SY_testdriver: SY_testdriver.c $(SRCS)
+	$(CC) -o SY_testdriver SY_testdriver.c $(SRCS)
 
 JI_testdriver: JI_testdriver.c $(SRCS)
 	$(CC) -o JI_testdriver JI_testdriver.c $(SRCS)

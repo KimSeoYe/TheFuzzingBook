@@ -19,7 +19,7 @@ set_configs (test_config_t * config)
     config->covargs.source_paths[0] = (char *) malloc(sizeof(char) * PATH_MAX) ;
     strcpy(config->covargs.source_paths[0], "../../lib/cJSON/testprograms/cJSON.c") ;
 
-    strcpy(config->fuzargs.seed_dir, "./seed_JI") ;
+    strcpy(config->fuzargs.seed_dir, "./testprogram_seeds/seed_JI") ;
 }
 
 void
@@ -66,13 +66,13 @@ main (int argc, char * argv[])
 
     clock_t rand_start = clock() ;
     for (int i = 0; i < loop_trials; i++) {
-        execute_fuzzer(trials, RANDOM, "random.csv") ;
+        execute_fuzzer(trials, RANDOM, "ji_random.csv") ;
     }
     clock_t rand_end = clock() ;
 
     clock_t mut_start = clock() ;
     for (int i = 0; i < loop_trials; i++) {
-        execute_fuzzer(trials, MUTATION, "mutation.csv") ;
+        execute_fuzzer(trials, MUTATION, "ji_mutation.csv") ;
     }
     clock_t mut_end = clock() ;
 
