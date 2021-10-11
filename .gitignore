@@ -1,0 +1,4 @@
+## TheFuzzingBook.git Ignore Files ##
+
+.DS_Store
+.vscode
