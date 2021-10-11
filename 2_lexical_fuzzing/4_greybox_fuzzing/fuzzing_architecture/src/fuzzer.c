@@ -935,7 +935,7 @@ fuzzer_main (test_config_t * config)
     if (fuzz_type == MUTATION) {
         free_seed_filenames() ;
         if (covargs.coverage_on) {
-            reset_seeds() ;
+            // reset_seeds() ;
         }
     }
 

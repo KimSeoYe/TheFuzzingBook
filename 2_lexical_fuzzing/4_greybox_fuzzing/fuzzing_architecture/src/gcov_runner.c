@@ -161,6 +161,7 @@ read_gcov_file (coverage_t * cov, covset_t * cov_set, char * source_path)
 {
     char gcov_file[PATH_MAX] ;
     sprintf(gcov_file, "%s.gcov", source_path) ;
+    printf("gcov_path: %s\n", gcov_file) ;
     
     FILE * fp = fopen(gcov_file, "r") ;
     if (fp == 0x0) {
