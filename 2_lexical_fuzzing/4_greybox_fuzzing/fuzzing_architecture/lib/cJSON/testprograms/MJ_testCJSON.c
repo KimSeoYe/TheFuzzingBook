@@ -3,7 +3,8 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <cjson/cJSON.h>
+// #include <cjson/cJSON.h>
+#include "cJSON.h"
 
 int Parse_Print_Minify(const uint8_t* data, size_t size); /* required by C89 */
 

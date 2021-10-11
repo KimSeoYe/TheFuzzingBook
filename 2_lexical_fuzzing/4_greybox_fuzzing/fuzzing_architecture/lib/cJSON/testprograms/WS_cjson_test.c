@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <cjson/cJSON.h>
+// #include <cjson/cJSON.h>
+#include "cJSON.h"
 
 #define BUF_SIZE 4096
 #define NAME_SIZE 128

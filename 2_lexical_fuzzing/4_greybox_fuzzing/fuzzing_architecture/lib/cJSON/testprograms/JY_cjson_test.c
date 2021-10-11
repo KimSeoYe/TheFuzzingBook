@@ -4,7 +4,8 @@
 #include <string.h>
 #include <assert.h>
 
-#include <cjson/cJSON.h>
+// #include <cjson/cJSON.h>
+#include "cJSON.h"
 
  
 void test_type(cJSON * obj){
