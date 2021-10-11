@@ -700,7 +700,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_
 ///////////////////////////////////// Fuzzer Summary /////////////////////////////////////
 
 void
-write_csv_file (coverage_t total_src_cnts)
+write_csv_file ()
 {
 #ifdef DEBUG
     printf("\n\nACCUMULATED RESULT : LINE\n") ;
@@ -718,13 +718,14 @@ write_csv_file (coverage_t total_src_cnts)
         perror("write_csv_file: fopen") ;
     }
 
-    fprintf(fp, "line_cov") ;
+    // fprintf(fp, "line_cov") ;
+    // for (int i = 0; i < trials; i++) {
+    //     fprintf(fp, ",%d", accumulated_cov_list[i].line) ;
+    // }
+    // fprintf(fp, "\n") ;
+    fprintf(fp, "branch_cov") ;
     for (int i = 0; i < trials; i++) {
-        fprintf(fp, ",%f", (double)accumulated_cov_list[i].line / total_src_cnts.line * 100) ;
-    }
-    fprintf(fp, "\nbranch_cov") ;
-    for (int i = 0; i < trials; i++) {
-        fprintf(fp, ",%f", (double)accumulated_cov_list[i].branch / total_src_cnts.branch * 100) ;
+        fprintf(fp, ",%d", accumulated_cov_list[i].branch) ;
     }
     fprintf(fp, "\n") ;
 
@@ -793,7 +794,7 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, covs
     printf("=======================================================\n") ;
 
     if (covargs.coverage_on) {
-        write_csv_file(total_src_cnts) ;
+        write_csv_file() ;
     }
 }
 
