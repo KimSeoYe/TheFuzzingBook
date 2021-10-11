@@ -6,8 +6,11 @@ SRCS= ../../src/config.c  ../../src/fuzzer.c  ../../src/fuzz_input.c  ../../src/
 
 all: $(TARGETS) $(SRCS)
 	$(CC) -o cjson_testdriver cjson_testdriver.c $(SRCS)
+	$(CC) -o SY_testdriver SY_testdriver.c $(SRCS)
 	$(CC) -o JI_testdriver JI_testdriver.c $(SRCS)
 	$(CC) -o MJ_testdriver MJ_testdriver.c $(SRCS)
+	$(CC) -o JY_testdriver JY_testdriver.c $(SRCS)
+	$(CC) -o WS_testdriver WS_testdriver.c $(SRCS)
 
 cjson_testdriver: cjson_testdriver.c $(SRCS)
 	$(CC) -o cjson_testdriver cjson_testdriver.c $(SRCS)
