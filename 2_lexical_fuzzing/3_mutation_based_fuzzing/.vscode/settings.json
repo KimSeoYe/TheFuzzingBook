@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "config.h": "c",
+        "time.h": "c",
+        "__node_handle": "c"
+    }
+}
