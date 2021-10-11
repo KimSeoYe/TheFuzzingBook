@@ -1,34 +1,35 @@
 CC=gcc
-TARGETS=parse_testdriver.c cjson_testdriver.c JI_testdriver.c MJ_testdriver.c JY_testdriver.c WS_testdriver.c SY_testdriver.c
-EXECS=parse_testdriver cjson_testdriver JI_testdriver MJ_testdriver JY_testdriver WS_testdriver SY_testdriver
+TARGETS=parse_testdriver.c cjson_testdriver.c testdriver_JI.c testdriver_MJ.c testdriver_JY.c testdriver_WS.c testdriver_SY.c
+EXECS=parse_testdriver cjson_testdriver testdriver_JI testdriver_MJ testdriver_JY testdriver_WS testdriver_SY
 OBJS=config.o fuzzer.o fuzz_input.o gcov_runner.o mutate.o
 SRCS= ../../src/config.c  ../../src/fuzzer.c  ../../src/fuzz_input.c  ../../src/gcov_runner.c  ../../src/mutate.c
 
 all: $(TARGETS) $(SRCS)
 	$(CC) -o cjson_testdriver cjson_testdriver.c $(SRCS)
-	$(CC) -o SY_testdriver SY_testdriver.c $(SRCS)
-	$(CC) -o JI_testdriver JI_testdriver.c $(SRCS)
-	$(CC) -o MJ_testdriver MJ_testdriver.c $(SRCS)
-	$(CC) -o JY_testdriver JY_testdriver.c $(SRCS)
-	$(CC) -o WS_testdriver WS_testdriver.c $(SRCS)
+	$(CC) -o testdriver_SY testdriver_SY.c $(SRCS)
+	$(CC) -o testdriver_JI testdriver_JI.c $(SRCS)
+	$(CC) -o testdriver_MJ testdriver_MJ.c $(SRCS)
+	$(CC) -o testdriver_JY testdriver_JY.c $(SRCS)
+	$(CC) -o testdriver_WS testdriver_WS.c $(SRCS)
 
 cjson_testdriver: cjson_testdriver.c $(SRCS)
 	$(CC) -o cjson_testdriver cjson_testdriver.c $(SRCS)
 
-SY_testdriver: SY_testdriver.c $(SRCS)
-	$(CC) -o SY_testdriver SY_testdriver.c $(SRCS)
+testdriver_SY: testdriver_SY.c $(SRCS)
+	$(CC) -o testdriver_SY testdriver_SY.c $(SRCS)
 
-JI_testdriver: JI_testdriver.c $(SRCS)
-	$(CC) -o JI_testdriver JI_testdriver.c $(SRCS)
+testdriver_JI: testdriver_JI.c $(SRCS)
+	$(CC) -o testdriver_JI testdriver_JI.c $(SRCS)
 
-MJ_testdriver: MJ_testdriver.c $(SRCS)
-	$(CC) -o MJ_testdriver MJ_testdriver.c $(SRCS)
+testdriver_MJ: testdriver_MJ.c $(SRCS)
+	$(CC) -o testdriver_MJ testdriver_MJ.c $(SRCS)
 
-JY_testdriver: JY_testdriver.c $(SRCS)
-	$(CC) -o JY_testdriver JY_testdriver.c $(SRCS)
+testdriver_JY: testdriver_JY.c $(SRCS)
+	$(CC) -o testdriver_JY testdriver_JY.c $(SRCS)
 
-WS_testdriver: WS_testdriver.c $(SRCS)
-	$(CC) -o WS_testdriver WS_testdriver.c $(SRCS)
+testdriver_WS: testdriver_WS.c $(SRCS)
+	$(CC) -o testdriver_WS testdriver_WS.c $(SRCS)
 
 clean:
-	rm -rf $(EXECS) $(OBJS) *.csv tmp.* seed_cjson/mutated_* seed_JI/mutated_* seed_JY/mutated_* seed_MJ/mutated_* seed_WS/mutated_*
+	rm -rf $(EXECS) $(OBJS) *.csv tmp.* 
+	rm -rf seed_cjson/mutated_* testprogram_seeds/seed_SY/mutated_* testprogram_seeds/seed_JI/mutated_* testprogram_seeds/seed_JY/mutated_* testprogram_seeds/seed_MJ/mutated_* testprogram_seeds/seed_WS/mutated_*

@@ -63,24 +63,8 @@ main (int argc, char * argv[])
                 break ;
         }
     }
-
-    clock_t rand_start = clock() ;
-    for (int i = 0; i < loop_trials; i++) {
-        execute_fuzzer(trials, RANDOM, "sy_random.csv") ;
-    }
-    clock_t rand_end = clock() ;
-
-    clock_t mut_start = clock() ;
-    for (int i = 0; i < loop_trials; i++) {
-        execute_fuzzer(trials, MUTATION, "sy_mutation.csv") ;
-    }
-    clock_t mut_end = clock() ;
-
-    printf("\n=======================================================\n") ;
-    printf("TOTAL TIME\n") ;
-    printf("=======================================================\n") ;
-    printf("RANDOM: %.3f s\n", (double)(rand_end - rand_start) / CLOCKS_PER_SEC) ;
-    printf("MUTATION: %.3f s\n", (double)(mut_end - mut_start) / CLOCKS_PER_SEC) ;
-    printf("=======================================================\n") ;
+ 
+    execute_fuzzer(trials, MUTATION, "sy_mutation.csv") ;
+    
     return 0 ;
 }
