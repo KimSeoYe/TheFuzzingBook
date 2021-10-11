@@ -38,6 +38,7 @@ static int cmd_args_num = 2 ;
 
 static char ** seed_filenames ;
 static int seed_files_num ;
+static int initial_seeds_num ;
 
 static coverage_t accumulated_cov = { 0, } ;
 static coverage_t * accumulated_cov_list = 0x0 ;
@@ -227,6 +228,7 @@ read_seed_dir ()
         }
     }
     seed_files_num = num_files ;
+    initial_seeds_num = num_files ;
 
     closedir(dir_ptr) ;
 }
@@ -559,12 +561,15 @@ fuzz_argument (content_t contents, fuzarg_t * fuzargs, int trial)
     for (i = cmd_args_num - 1; i < cmd_args_num + fuzzed_args_num - 1; i++) {
         int args_size = fuzargs->f_max_len + 1 ; // TODO. mutation ?
         parsed_args[i] = (char *) malloc(sizeof(char) * args_size) ; 
+    
+        int is_initial = 0 ;
         switch (fuzz_type) {
             case RANDOM: 
                 parsed_args_lengths[i] = fuzz_input(fuzargs, parsed_args[i]) ;
                 break ;
             case MUTATION:
-                parsed_args_lengths[i] = mutate_input(&parsed_args[i], args_size, fuzargs, seed_filenames[trial % seed_files_num]) ;   
+                if (trial < initial_seeds_num) is_initial = 1 ;
+                parsed_args_lengths[i] = mutate_input(&parsed_args[i], args_size, fuzargs, seed_filenames[trial % seed_files_num], is_initial) ;   
                 break ;
         }
     }
@@ -656,13 +661,16 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_
     
     for (int i = 0; i < trials; i++) {
         int input_len = 0 ;
+        int is_initial = 0 ;
+
         if (fuzz_option == STD_IN) {
             switch (fuzz_type) {
                 case RANDOM: 
                     input_len = fuzz_input(&fuzargs, input) ;   // TODO. input as a first param.
                     break ;
                 case MUTATION:
-                    input_len = mutate_input(&input, BUF_PAGE_UNIT, &fuzargs, seed_filenames[i % seed_files_num]) ;
+                    if (i < initial_seeds_num) is_initial = 1 ;
+                    input_len = mutate_input(&input, BUF_PAGE_UNIT, &fuzargs, seed_filenames[i % seed_files_num], is_initial) ;
                     break ;
             }
         }

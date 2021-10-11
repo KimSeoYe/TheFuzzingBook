@@ -23,6 +23,6 @@ int mutate (char * dst, int dst_len, char * seed, int seed_len) ;
 
 void get_seed_path (char * dst, char * dir_name, char * file_name) ;
 
-int mutate_input (char ** dst, int dst_len, fuzarg_t * fuzargs, char * seed_filename) ;
+int mutate_input (char ** dst, int dst_len, fuzarg_t * fuzargs, char * seed_filename, int is_initial) ;
 
 #endif

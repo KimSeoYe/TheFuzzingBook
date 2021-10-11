@@ -361,7 +361,7 @@ get_seed_path (char * dst, char * dir_name, char * file_name)
 }
 
 int
-mutate_input (char ** dst, int dst_len, fuzarg_t * fuzargs, char * seed_filename)
+mutate_input (char ** dst, int dst_len, fuzarg_t * fuzargs, char * seed_filename, int is_initial)
 { 
     char seed_path[PATH_MAX] ;
     get_seed_path(seed_path, fuzargs->seed_dir, seed_filename) ;    
@@ -398,7 +398,15 @@ mutate_input (char ** dst, int dst_len, fuzarg_t * fuzargs, char * seed_filename
     
     fclose(fp) ;
     
-    int mutate_len = mutate(*dst, dst_len, seed_input, total_len) ;
+    int mutate_len = 0 ;
+
+    if (is_initial) {
+        memcpy(*dst, seed_input, total_len) ;
+        mutate_len = total_len ;
+    }
+    else {
+        mutate_len = mutate(*dst, dst_len, seed_input, total_len) ;
+    }
     
     free(seed_input) ;
     
