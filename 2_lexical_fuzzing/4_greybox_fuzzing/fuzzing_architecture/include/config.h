@@ -5,7 +5,7 @@
 #define ARG_MAX 1024
 
 typedef enum fuzopt { STD_IN = 0, ARGUMENT, FILE_CONTENTS } fuzopt_t ;
-typedef enum fuztype { RANDOM = 0, MUTATION } fuztype_t ;
+typedef enum fuztype { RANDOM = 0, MUTATION, GREYBOX } fuztype_t ;
 
 typedef struct fuzarg {
     int f_min_len ;     // minimum length of fuzzer input

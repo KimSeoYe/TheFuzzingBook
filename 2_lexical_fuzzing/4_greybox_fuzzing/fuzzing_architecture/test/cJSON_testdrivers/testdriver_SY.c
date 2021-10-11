@@ -53,7 +53,10 @@ main (int argc, char * argv[])
     int opt ;
     int trials = 10 ;
     int loop_trials = 10 ;
-    while ((opt = getopt(argc, argv, "t:l:")) != -1) {
+    fuztype_t fuzz_type = RANDOM ;
+    char csv_filename[PATH_MAX] ;
+
+    while ((opt = getopt(argc, argv, "t:l:mg")) != -1) {
         switch(opt) {
             case 't':
                 trials = atoi(optarg) ;
@@ -61,10 +64,18 @@ main (int argc, char * argv[])
             case 'l':
                 loop_trials = atoi(optarg) ;
                 break ;
+            case 'm':
+                fuzz_type = MUTATION ;
+                strcpy(csv_filename, "result_sy_mut.csv") ;
+                break ;
+            case 'g':
+                fuzz_type = GREYBOX ;
+                strcpy(csv_filename, "result_sy_grey.csv") ;
+                break ;
         }
     }
  
-    execute_fuzzer(trials, MUTATION, "sy_mutation.csv") ;
+    execute_fuzzer(trials, fuzz_type, csv_filename) ;
     
     return 0 ;
 }

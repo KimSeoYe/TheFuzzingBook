@@ -52,13 +52,13 @@ print_status ()
     printf("FUZZER STATUS\n") ;
     printf("=======================================================\n") ;
     printf("# TRIALS: %d\n", trials) ;
-    printf("# FUZZ TYPE (0: RANDOM, 1: MUTATION) : %d\n", fuzz_type) ;
+    printf("# FUZZ TYPE (0: RANDOM, 1: MUTATION, 2: GREYBOX) : %d\n", fuzz_type) ;
     printf("# FUZZ OPTION (0: STD_IN, 1: ARGUMENT, 2: FILE_CONTENTS): %d\n", fuzz_option) ;
     printf("# FUZZED ARGS NUM: %d\n", fuzzed_args_num) ;
     printf("# FUZARGS\n") ;
     printf("\t- f_min_len: %d / f_max_len: %d\n", fuzargs.f_min_len, fuzargs.f_max_len) ;
     printf("\t- f_char_start: %d / f_char_range: %d\n", fuzargs.f_char_start, fuzargs.f_char_range) ;
-    if (fuzz_type == 1) {
+    if (fuzz_type == MUTATION || fuzz_type == GREYBOX) {
         printf("\t- seed_dir: %s\n", fuzargs.seed_dir) ;
     }
     printf("# RUNARGS\n") ;
@@ -82,7 +82,7 @@ copy_status (test_config_t * config)
     trials = config->trials ;
 
     fuzz_type = config->fuzz_type ;
-    if (fuzz_type == MUTATION) {
+    if (fuzz_type == MUTATION || fuzz_type == GREYBOX) {
         if (realpath(config->fuzargs.seed_dir, fuzargs.seed_dir) == 0x0) {
             perror("copy_status: realpath: fuzargs.seed_dir") ;
             exit(1) ;
@@ -284,7 +284,7 @@ fuzzer_init (test_config_t * config)
     }
 #endif
 
-    if (fuzz_type == MUTATION) read_seed_dir() ;
+    if (fuzz_type == MUTATION || fuzz_type == GREYBOX) read_seed_dir() ;
 
     create_temp_dir() ;
 }
@@ -563,14 +563,12 @@ fuzz_argument (content_t contents, fuzarg_t * fuzargs, int trial)
         parsed_args[i] = (char *) malloc(sizeof(char) * args_size) ; 
     
         int is_initial = 0 ;
-        switch (fuzz_type) {
-            case RANDOM: 
-                parsed_args_lengths[i] = fuzz_input(fuzargs, parsed_args[i]) ;
-                break ;
-            case MUTATION:
-                if (trial < initial_seeds_num) is_initial = 1 ;
-                parsed_args_lengths[i] = mutate_input(&parsed_args[i], args_size, fuzargs, seed_filenames[trial % seed_files_num], is_initial) ;   
-                break ;
+        if (fuzz_type == RANDOM) {
+            parsed_args_lengths[i] = fuzz_input(fuzargs, parsed_args[i]) ;
+        }
+        else if (fuzz_type == MUTATION || fuzz_type == GREYBOX) {
+            if (trial < initial_seeds_num) is_initial = 1 ;
+            parsed_args_lengths[i] = mutate_input(&parsed_args[i], args_size, fuzargs, seed_filenames[trial % seed_files_num], is_initial) ;   
         }
     }
     parsed_args[i] = 0x0 ;
@@ -664,14 +662,12 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_
         int is_initial = 0 ;
 
         if (fuzz_option == STD_IN) {
-            switch (fuzz_type) {
-                case RANDOM: 
-                    input_len = fuzz_input(&fuzargs, input) ;   // TODO. input as a first param.
-                    break ;
-                case MUTATION:
-                    if (i < initial_seeds_num) is_initial = 1 ;
-                    input_len = mutate_input(&input, BUF_PAGE_UNIT, &fuzargs, seed_filenames[i % seed_files_num], is_initial) ;
-                    break ;
+            if (fuzz_type == RANDOM) {
+                input_len = fuzz_input(&fuzargs, input) ;   // TODO. input as a first param.
+            }
+            else if (fuzz_type == MUTATION || fuzz_type == GREYBOX) {
+                if (i < initial_seeds_num) is_initial = 1 ;
+                input_len = mutate_input(&input, BUF_PAGE_UNIT, &fuzargs, seed_filenames[i % seed_files_num], is_initial) ;
             }
         }
         else if (fuzz_option == ARGUMENT) fuzz_argument(contents, &fuzargs, i) ;
@@ -685,7 +681,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_
 
             get_accumulated_covs(cov_sets, i) ;
 
-            if (is_cov_grow && fuzz_type == MUTATION) { // TODO. if not mutation
+            if (is_cov_grow && fuzz_type == GREYBOX) { // TODO. if not mutation
                 update_corpus(input, input_len) ;
             }
         }
@@ -940,7 +936,7 @@ fuzzer_main (test_config_t * config)
         }
     }
 
-    if (fuzz_type == MUTATION) {
+    if (fuzz_type == MUTATION || fuzz_type == GREYBOX) {
         free_seed_filenames() ;
         if (covargs.coverage_on) {
             // reset_seeds() ;
