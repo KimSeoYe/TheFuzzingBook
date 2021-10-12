@@ -11,13 +11,13 @@ set_configs (test_config_t * config)
 {
     config->covargs.coverage_on = 1 ;
 
-    strcpy(config->runargs.binary_path, "../../lib/cJSON/testprograms/SY_json_test") ;
+    strcpy(config->runargs.binary_path, "../../lib/cJSON/SY/SY_json_test") ;
     config->covargs.source_num = 1 ;
-    strcpy(config->covargs.source_dir, "../../lib/cJSON/testprograms/") ;
+    strcpy(config->covargs.source_dir, "../../lib/cJSON/SY/") ;
 
     config->covargs.source_paths = (char **) malloc(sizeof(char *) * config->covargs.source_num) ;
     config->covargs.source_paths[0] = (char *) malloc(sizeof(char) * PATH_MAX) ;
-    strcpy(config->covargs.source_paths[0], "../../lib/cJSON/testprograms/cJSON.c") ;
+    strcpy(config->covargs.source_paths[0], "../../lib/cJSON/SY/cJSON.c") ;
 
     strcpy(config->fuzargs.seed_dir, "./testprogram_seeds/seed_SY") ;
 }
@@ -55,6 +55,7 @@ main (int argc, char * argv[])
     int loop_trials = 10 ;
     fuztype_t fuzz_type = RANDOM ;
     char csv_filename[PATH_MAX] ;
+    strcpy(csv_filename, "result.csv") ;
 
     while ((opt = getopt(argc, argv, "t:l:mg")) != -1) {
         switch(opt) {
