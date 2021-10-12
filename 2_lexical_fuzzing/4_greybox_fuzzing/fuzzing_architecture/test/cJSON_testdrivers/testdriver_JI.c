@@ -53,7 +53,10 @@ main (int argc, char * argv[])
     int opt ;
     int trials = 10 ;
     int loop_trials = 10 ;
-    while ((opt = getopt(argc, argv, "t:l:")) != -1) {
+    fuztype_t fuzz_type = RANDOM ;
+    char csv_filename[PATH_MAX] ;
+
+    while ((opt = getopt(argc, argv, "t:l:mg")) != -1) {
         switch(opt) {
             case 't':
                 trials = atoi(optarg) ;
@@ -61,26 +64,18 @@ main (int argc, char * argv[])
             case 'l':
                 loop_trials = atoi(optarg) ;
                 break ;
+            case 'm':
+                fuzz_type = MUTATION ;
+                strcpy(csv_filename, "result_ji_mut.csv") ;
+                break ;
+            case 'g':
+                fuzz_type = GREYBOX ;
+                strcpy(csv_filename, "result_ji_grey.csv") ;
+                break ;
         }
     }
-
-    clock_t rand_start = clock() ;
-    for (int i = 0; i < loop_trials; i++) {
-        execute_fuzzer(trials, RANDOM, "ji_random.csv") ;
-    }
-    clock_t rand_end = clock() ;
-
-    clock_t mut_start = clock() ;
-    for (int i = 0; i < loop_trials; i++) {
-        execute_fuzzer(trials, MUTATION, "ji_mutation.csv") ;
-    }
-    clock_t mut_end = clock() ;
-
-    printf("\n=======================================================\n") ;
-    printf("TOTAL TIME\n") ;
-    printf("=======================================================\n") ;
-    printf("RANDOM: %.3f s\n", (double)(rand_end - rand_start) / CLOCKS_PER_SEC) ;
-    printf("MUTATION: %.3f s\n", (double)(mut_end - mut_start) / CLOCKS_PER_SEC) ;
-    printf("=======================================================\n") ;
+ 
+    execute_fuzzer(trials, fuzz_type, csv_filename) ;
+    
     return 0 ;
 }

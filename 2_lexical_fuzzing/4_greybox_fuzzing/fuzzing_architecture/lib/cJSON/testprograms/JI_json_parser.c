@@ -1,9 +1,7 @@
-// #include <cjson/cJSON.h>
+#include "cJSON.h" 
 #include <stdlib.h> 
 #include <stdio.h> 
 #include <string.h> 
-
-#include "cJSON.h"
 
 #define BUFF_SIZE 4096
 
@@ -34,11 +32,8 @@ void copyItems(cJSON * json, cJSON * new_json) {
                         new_obj->valuestring = (char *)cJSON_malloc(sizeof(char) * valuestring_length) ;
                         
                         memcpy(new_obj->valuestring, ci->valuestring, valuestring_length) ; new_obj->valuestring[valuestring_length] = 0x0 ;   
-                        // cJSON_AddItemToObject(new_obj, new_obj->valuestring, string); 
                         printf("[ValueString]: %s, \n", new_obj->valuestring) ; 
                     } else if(cJSON_IsNumber(obj_item)) { 
-                        // cJSON * number = cJSON_CreateNumber(obj_item->valuedouble); 
-                        // double num = cJSON_SetNumberHelper(new_obj, obj_item->valuedouble) ;
                         new_obj->valueint = ci->valueint ; 
                         new_obj->valuedouble = ci->valuedouble ; 
 
