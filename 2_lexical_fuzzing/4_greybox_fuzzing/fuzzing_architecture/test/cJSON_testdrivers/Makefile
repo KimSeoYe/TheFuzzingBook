@@ -5,15 +5,11 @@ OBJS=config.o fuzzer.o fuzz_input.o gcov_runner.o mutate.o
 SRCS= ../../src/config.c  ../../src/fuzzer.c  ../../src/fuzz_input.c  ../../src/gcov_runner.c  ../../src/mutate.c
 
 all: $(TARGETS) $(SRCS)
-	$(CC) -o cjson_testdriver cjson_testdriver.c $(SRCS)
 	$(CC) -o testdriver_SY testdriver_SY.c $(SRCS)
 	$(CC) -o testdriver_JI testdriver_JI.c $(SRCS)
 	$(CC) -o testdriver_MJ testdriver_MJ.c $(SRCS)
 	$(CC) -o testdriver_JY testdriver_JY.c $(SRCS)
 	$(CC) -o testdriver_WS testdriver_WS.c $(SRCS)
-
-cjson_testdriver: cjson_testdriver.c $(SRCS)
-	$(CC) -o cjson_testdriver cjson_testdriver.c $(SRCS)
 
 testdriver_SY: testdriver_SY.c $(SRCS)
 	$(CC) -o testdriver_SY testdriver_SY.c $(SRCS)
