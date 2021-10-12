@@ -598,6 +598,8 @@ get_accumulated_covs (covset_t * cov_sets, int trial)
         }
     }
 
+    printf("TOTAL BRANCH [%d]: %d\n", trial, total_branch_coverage) ;
+
     accumulated_cov_list[trial].line = total_line_coverage ;
     accumulated_cov_list[trial].branch = total_branch_coverage ;
 }
@@ -699,10 +701,12 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_
 
 ///////////////////////////////////// Fuzzer Summary /////////////////////////////////////
 
+// #define PRINT_COV
+
 void
 write_csv_file ()
 {
-#ifdef DEBUG
+#ifdef PRINT_COV
     printf("\n\nACCUMULATED RESULT : LINE\n") ;
     for (int i = 0; i < trials; i++) {
         printf("%d ", accumulated_cov_list[i].line) ;
@@ -905,6 +909,7 @@ fuzzer_main (test_config_t * config)
 
     if (covargs.coverage_on) {
         accumulated_cov_list = (coverage_t *) malloc(sizeof(coverage_t) * trials) ;
+        memset(accumulated_cov_list, 0, sizeof(coverage_t) * trials) ;
 
         cov_sets = (covset_t *) malloc(sizeof(covset_t) * covargs.source_num) ;
 

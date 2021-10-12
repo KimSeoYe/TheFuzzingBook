@@ -67,11 +67,11 @@ main (int argc, char * argv[])
                 break ;
             case 'm':
                 fuzz_type = MUTATION ;
-                strcpy(csv_filename, "result_ji_mut.csv") ;
+                strcpy(csv_filename, "result_mj_mut.csv") ;
                 break ;
             case 'g':
                 fuzz_type = GREYBOX ;
-                strcpy(csv_filename, "result_ji_grey.csv") ;
+                strcpy(csv_filename, "result_mj_grey.csv") ;
                 break ;
         }
     }
