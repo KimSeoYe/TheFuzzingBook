@@ -681,7 +681,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_
 
             get_accumulated_covs(cov_sets, i) ;
 
-            if (is_cov_grow && fuzz_type == GREYBOX) { // TODO. if not mutation
+            if (is_cov_grow && fuzz_type == GREYBOX) { 
                 update_corpus(input, input_len) ;
             }
         }
