@@ -44,8 +44,10 @@ set_configs (test_config_t * config)
     strcpy(config->covargs.source_paths[0], "../lib/simple_postfix_calculator/simple_postfix_calculator.c") ;
     strcpy(config->covargs.source_dir, "../lib/simple_postfix_calculator/") ;
 
-    config->fuzargs.f_char_start = 0 ;
-    config->fuzargs.f_char_range = 255 ;
+    config->fuzargs.f_min_len = 5 ;
+    config->fuzargs.f_max_len = 30 ;
+    config->fuzargs.f_char_start = 33 ;
+    config->fuzargs.f_char_range = 27 ;
     
     config->oracle = calculator_oracle ;
 }
