@@ -756,9 +756,12 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, covs
     }
 
     for (int i = 0; i < trials; i++) {
-        printf("(CompletedProcess(target='%s', args='%s', ", runargs.binary_path, runargs.cmd_args) ;
-        printf("returncode='%d', input='%s', stdout='%s', stderr='%s', result='%s'))\n", return_codes[i], contents.input_contents[i], contents.stdout_contents[i], contents.stderr_contents[i], result_strings[results[i]]) ;
-        
+
+        if (results[i] == FAIL) {
+            printf("(CompletedProcess(target='%s', args='%s', ", runargs.binary_path, runargs.cmd_args) ;
+            printf("returncode='%d', input='%s', stdout='%s', stderr='%s', result='%s'))\n", return_codes[i], contents.input_contents[i], contents.stdout_contents[i], contents.stderr_contents[i], result_strings[results[i]]) ;
+        }
+
         switch(results[i]) {
             case PASS:
                 pass_cnt++ ;
