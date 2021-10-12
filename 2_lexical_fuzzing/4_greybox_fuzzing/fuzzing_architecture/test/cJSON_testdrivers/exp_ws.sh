@@ -5,14 +5,14 @@ make testdriver_WS
 trial=5000
 
 mut_start=$(date +%s)
-for i in {1..5}
+for i in 1 2 3 4 5
 do  
    ./testdriver_WS -m -t $trial
 done
 mut_end=$(date +%s)
 
 grey_start=$(date +%s)
-for i in {1..5}
+for i in 1 2 3 4 5
 do  
    ./testdriver_WS -g -t $trial
    rm ./testprogram_seeds/seed_WS/mutated_*
