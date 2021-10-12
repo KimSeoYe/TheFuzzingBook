@@ -1,0 +1,17 @@
+{
+    "object1": "Awesome 4K",
+    "object2": [
+        {
+            "child_object1": 1280,
+            "child_object2": 720
+        },
+        {
+            "child_object1": 1920,
+            "child_object2": 1080
+        },
+        {
+            "child_object1": 3840,
+            "child_object2": 2160
+        }
+    ],
+}
