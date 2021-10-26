@@ -517,6 +517,28 @@ oracle_run (int return_code, int trial)   // Q. useless..?
 
 ///////////////////////////////////// Fuzzer Loop /////////////////////////////////////
 
+int
+choose_seed (int seeds_cnt)
+{  
+    int sum_energy = 0 ;
+
+    for (int i = 0; i < seeds_cnt; i++) {
+        sum_energy += seeds[i].energy ;
+    }
+
+    int choice = rand() % sum_energy ;
+
+    int accumulate = 0 ;
+    for (int i = 0; i < seeds_cnt; i++) {
+        accumulate += seeds[i].energy ;
+        if (choice < accumulate) {
+            return i ;
+        }
+    }
+
+    return 0 ;
+}
+
 void
 write_fuzzed_args_to_file (FILE * fp)
 {
@@ -569,8 +591,14 @@ fuzz_argument (content_t contents, fuzarg_t * fuzargs, int trial)
             parsed_args_lengths[i] = fuzz_input(fuzargs, parsed_args[i]) ;
         }
         else if (fuzz_type == MUTATION || fuzz_type == GREYBOX) {
-            if (trial < initial_seeds_num) is_initial = 1 ;
-            parsed_args_lengths[i] = mutate_input(&parsed_args[i], args_size, fuzargs, seeds[trial % seed_files_num].seed_filename, is_initial) ;   
+            if (trial < initial_seeds_num) {
+                is_initial = 1 ;
+                parsed_args_lengths[i] = mutate_input(&parsed_args[i], args_size, fuzargs, seeds[trial].seed_filename, is_initial) ;   
+            }
+            else {
+                int choice = choose_seed(seed_files_num) ;
+                parsed_args_lengths[i] = mutate_input(&parsed_args[i], args_size, fuzargs, seeds[choice].seed_filename, is_initial) ;   
+            }
         }
     }
     parsed_args[i] = 0x0 ;
@@ -654,6 +682,7 @@ update_corpus (char * input, int input_len)
     fclose(fp) ;
 }
 
+
 double
 fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_t * cov_sets) 
 {
@@ -670,8 +699,14 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_
                 input_len = fuzz_input(&fuzargs, input) ;   // TODO. input as a first param.
             }
             else if (fuzz_type == MUTATION || fuzz_type == GREYBOX) {
-                if (i < initial_seeds_num) is_initial = 1 ;
-                input_len = mutate_input(&input, BUF_PAGE_UNIT, &fuzargs, seeds[i % seed_files_num].seed_filename, is_initial) ;
+                if (i < initial_seeds_num) {
+                    is_initial = 1 ;
+                    input_len = mutate_input(&input, BUF_PAGE_UNIT, &fuzargs, seeds[i].seed_filename, is_initial) ;
+                }
+                else {
+                    int choice = choose_seed(seed_files_num) ;
+                    input_len = mutate_input(&input, BUF_PAGE_UNIT, &fuzargs, seeds[choice].seed_filename, is_initial) ;
+                }
             }
         }
         else if (fuzz_option == ARGUMENT) fuzz_argument(contents, &fuzargs, i) ;
@@ -724,11 +759,6 @@ write_csv_file ()
         perror("write_csv_file: fopen") ;
     }
 
-    // fprintf(fp, "line_cov") ;
-    // for (int i = 0; i < trials; i++) {
-    //     fprintf(fp, ",%d", accumulated_cov_list[i].line) ;
-    // }
-    // fprintf(fp, "\n") ;
     fprintf(fp, "branch_cov") ;
     for (int i = 0; i < trials; i++) {
         fprintf(fp, ",%d", accumulated_cov_list[i].branch) ;
