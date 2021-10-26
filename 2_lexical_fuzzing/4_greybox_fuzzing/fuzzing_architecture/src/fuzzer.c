@@ -733,7 +733,13 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_
         }
         else if (fuzz_option == ARGUMENT) choice = fuzz_argument(contents, &fuzargs, i) ;
         
-        if (fuzz_type == MUTATION || fuzz_type == GREYBOX) frequencies[choice]++ ;
+        if (fuzz_type == GREYBOX) {
+            frequencies[choice]++ ;
+
+            // TODO. assign energy based on "coverage" ?
+            seeds[choice].energy = INITIAL_E / pow(frequencies[choice], 0.5) ;
+            printf("UPDATED: %d: %d\n", choice, seeds[choice].energy) ;
+        }
 
         return_codes[i] = run(contents, input, input_len, i) ;
 
@@ -745,7 +751,6 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_
             get_accumulated_covs(cov_sets, i) ;
 
             if (is_cov_grow && fuzz_type == GREYBOX) { 
-                seeds[choice].energy = INITIAL_E / pow(frequencies[choice], 0.8) ;
                 update_corpus(input, input_len) ;
             }
         }
@@ -843,6 +848,7 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, covs
         }
     }
 
+#ifdef DEBUG
     printf("\n=======================================================\n") ;
     printf("ENERGIES\n") ;
     printf("=======================================================\n") ;
@@ -850,6 +856,7 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, covs
         printf("[%d] %d\n", i, seeds[i].energy) ;
     }
     printf("=======================================================\n") ;
+#endif
     
     printf("\n=======================================================\n") ;
     printf("TOTAL SUMMARY\n") ;
