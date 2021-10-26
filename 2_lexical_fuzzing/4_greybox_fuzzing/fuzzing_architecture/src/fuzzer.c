@@ -790,9 +790,9 @@ write_csv_file ()
         perror("write_csv_file: fopen") ;
     }
 
-    fprintf(fp, "branch_cov") ;
+    fprintf(fp, "branch_cov,\n") ;
     for (int i = 0; i < trials; i++) {
-        fprintf(fp, ",%d", accumulated_cov_list[i].branch) ;
+        fprintf(fp, "%d,\n", accumulated_cov_list[i].branch) ;
     }
     fprintf(fp, "\n") ;
 

@@ -57,7 +57,7 @@ main (int argc, char * argv[])
     char csv_filename[PATH_MAX] ;
     strcpy(csv_filename, "result.csv") ;
 
-    while ((opt = getopt(argc, argv, "t:l:mg")) != -1) {
+    while ((opt = getopt(argc, argv, "t:l:m:g:")) != -1) {
         switch(opt) {
             case 't':
                 trials = atoi(optarg) ;
@@ -67,11 +67,11 @@ main (int argc, char * argv[])
                 break ;
             case 'm':
                 fuzz_type = MUTATION ;
-                strcpy(csv_filename, "result_sy_mut.csv") ;
+                strcpy(csv_filename, optarg) ;
                 break ;
             case 'g':
                 fuzz_type = GREYBOX ;
-                strcpy(csv_filename, "result_sy_grey.csv") ;
+                strcpy(csv_filename, optarg) ;
                 break ;
         }
     }
