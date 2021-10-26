@@ -45,6 +45,8 @@ static int initial_seeds_num ;
 static coverage_t accumulated_cov = { 0, } ;
 static coverage_t * accumulated_cov_list = 0x0 ;
 
+int * choices ;
+
 ///////////////////////////////////// Fuzzer Init /////////////////////////////////////
 
 void
@@ -643,8 +645,6 @@ get_accumulated_covs (covset_t * cov_sets, int trial)
         }
     }
 
-    printf("TOTAL BRANCH [%d]: %d\n", trial, total_branch_coverage) ;
-
     accumulated_cov_list[trial].line = total_line_coverage ;
     accumulated_cov_list[trial].branch = total_branch_coverage ;
 }
@@ -732,13 +732,14 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_
             }
         }
         else if (fuzz_option == ARGUMENT) choice = fuzz_argument(contents, &fuzargs, i) ;
+
+        choices[i] = choice ;
         
         if (fuzz_type == GREYBOX) {
             frequencies[choice]++ ;
 
             // TODO. assign energy based on "coverage" ?
             seeds[choice].energy = INITIAL_E / pow(frequencies[choice], 0.5) ;
-            printf("UPDATED: %d: %d\n", choice, seeds[choice].energy) ;
         }
 
         return_codes[i] = run(contents, input, input_len, i) ;
@@ -850,6 +851,14 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, covs
 
 #ifdef DEBUG
     printf("\n=======================================================\n") ;
+    printf("CHOICES\n") ;
+    printf("=======================================================\n") ;
+    for (int i = 0; i < trials; i++) {
+        printf("[%d] %d\n", i, choices[i]) ;
+    }
+    printf("=======================================================\n") ;
+
+    printf("\n=======================================================\n") ;
     printf("ENERGIES\n") ;
     printf("=======================================================\n") ;
     for (int i = 0; i < seed_files_num; i++) {
@@ -953,6 +962,8 @@ fuzzer_main (test_config_t * config)
 
     int * return_codes = (int *) malloc(sizeof(int) * trials) ;
     result_t * results = (result_t *) malloc(sizeof(result_t) * trials) ;
+
+    choices = (int *) malloc(sizeof(int) * trials) ;
     
     content_t contents ;
     allocate_contents(&contents) ;
@@ -979,13 +990,12 @@ fuzzer_main (test_config_t * config)
             
             id_sets[i].len = (int)pow(2, 16) ;
             id_sets[i].set = (coverage_t *) malloc(sizeof(coverage_t) * id_sets[i].len) ;
-
             memset(id_sets[i].set, 0, sizeof(coverage_t) * id_sets[i].len) ;
         }        
     }
 
     double exec_time = fuzzer_loop(return_codes, results, contents, cov_sets, id_sets) ;
-    fuzzer_summary(return_codes, results, contents, cov_sets, exec_time) ;
+    fuzzer_summary(return_codes, results, contents, cov_sets, exec_time) ; 
 
     if (covargs.coverage_on) {  
         for (int i = 0; i < covargs.source_num; i++) {
@@ -1013,6 +1023,7 @@ fuzzer_main (test_config_t * config)
 
     free(return_codes) ;
     free(results) ;
+    free(choices) ;
     free_parsed_args() ;
     free(parsed_args_lengths) ;
     remove_temp_dir() ;  
