@@ -7,7 +7,7 @@ trial=60000
 mut_updated_seeds=(0 0 0 0 0)
 
 mut_start=$(date +%s)
-for i in 1 2 3 4 5
+for i in {1..5}
 do  
    ./testdriver_SY -m -t $trial
    mut_updated_seeds[${i}]=$(ls -l ./testprogram_seeds/seed_SY/mutated_* | wc -l)
@@ -18,7 +18,7 @@ mut_end=$(date +%s)
 grey_updated_seeds=(0 0 0 0 0)
 
 grey_start=$(date +%s)
-for i in 1 2 3 4 5
+for i in {1..5}
 do  
    ./testdriver_SY -g -t $trial
    grey_updated_seeds[${i}]=$(ls -l ./testprogram_seeds/seed_SY/mutated_* | wc -l)
@@ -32,7 +32,7 @@ echo "RANDOM MUTATION"
 echo "-------------------------------------------------------"
 echo "TIME: $(($mut_end-$mut_start))sec"
 printf "%s" "UPDATED SEEDS: "
-for i in 1 2 3 4 5
+for i in {1..5}
 do
    printf "%d " "${mut_updated_seeds[i]}"
 done
@@ -41,7 +41,7 @@ echo "GREYBOX"
 echo "-------------------------------------------------------"
 echo "TIME: $(($grey_end-$grey_start))sec"
 printf "%s" "UPDATED SEEDS: "
-for i in 1 2 3 4 5
+for i in {1..5}
 do
    printf "%d " "${grey_updated_seeds[i]}"
 done
