@@ -2,7 +2,7 @@
 
 make testdriver_SY
 
-trial=5000
+trial=60000
 
 mut_start=$(date +%s)
 for i in 1 2 3 4 5
