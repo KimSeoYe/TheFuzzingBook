@@ -178,7 +178,8 @@ read_gcov_file (coverage_t * cov, covset_t * cov_set, char * source_path)
     char buf[LINE_MAX] ;
     for (int branch_num = 0 ; fgets(buf, LINE_MAX, fp) > 0; ) { // TODO. what if, branch num is more than line num?
         if (strncmp(buf, "branch", 6) == 0) {
-            if (strstr(buf, "taken") != 0x0) {
+            char * taken_ptr = 0x0 ;
+            if ((taken_ptr = strstr(buf, "taken")) != 0x0 && atoi(taken_ptr + strlen("taken ")) != 0) {
                 branch_result[cov->branch++] = branch_num ;
             }
             branch_num++ ;
