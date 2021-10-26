@@ -704,7 +704,7 @@ update_corpus (char * input, int input_len)
 }
 
 double
-fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_t * cov_sets) 
+fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_t * cov_sets, idset_t * id_sets) 
 {
     char * input = (char *) malloc(sizeof(char) * BUF_PAGE_UNIT) ;    
 
@@ -746,7 +746,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_
         int is_cov_grow = 0 ;
         if (covargs.coverage_on) {
             coverage_t cov ;
-            is_cov_grow = get_coverage(&cov, cov_sets, &covargs) ; // TODO. covargs to pointer
+            is_cov_grow = get_coverage(&cov, cov_sets, id_sets, &covargs) ; // TODO. covargs to pointer
 
             get_accumulated_covs(cov_sets, i) ;
 
@@ -958,12 +958,14 @@ fuzzer_main (test_config_t * config)
     allocate_contents(&contents) ;
 
     covset_t * cov_sets ;
+    idset_t * id_sets ;
 
     if (covargs.coverage_on) {
         accumulated_cov_list = (coverage_t *) malloc(sizeof(coverage_t) * trials) ;
         memset(accumulated_cov_list, 0, sizeof(coverage_t) * trials) ;
 
         cov_sets = (covset_t *) malloc(sizeof(covset_t) * covargs.source_num) ;
+        id_sets = (idset_t *) malloc(sizeof(idset_t) * covargs.source_num) ;
 
         for (int i = 0; i < covargs.source_num; i++) {
             strncpy(cov_sets[i].filepath, covargs.source_paths[i], strlen(covargs.source_paths[i])) ;
@@ -973,18 +975,26 @@ fuzzer_main (test_config_t * config)
             cov_sets[i].set = (coverage_t *) malloc(sizeof(coverage_t) * cov_sets[i].len) ;
 
             memset(cov_sets[i].set, 0, sizeof(coverage_t) * cov_sets[i].len) ;
+
+            
+            id_sets[i].len = (int)pow(2, 16) ;
+            id_sets[i].set = (coverage_t *) malloc(sizeof(coverage_t) * id_sets[i].len) ;
+
+            memset(id_sets[i].set, 0, sizeof(coverage_t) * id_sets[i].len) ;
         }        
     }
 
-    double exec_time = fuzzer_loop(return_codes, results, contents, cov_sets) ;
+    double exec_time = fuzzer_loop(return_codes, results, contents, cov_sets, id_sets) ;
     fuzzer_summary(return_codes, results, contents, cov_sets, exec_time) ;
 
     if (covargs.coverage_on) {  
         for (int i = 0; i < covargs.source_num; i++) {
             remove_gcov_file(runargs.binary_path, covargs.source_paths[i]) ;
             free(cov_sets[i].set) ;
+            free(id_sets[i].set) ;
         }
         free(cov_sets) ;
+        free(id_sets) ;
     }
     else {
         if (covargs.source_num != 0) {
