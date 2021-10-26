@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <dirent.h>
+#include <math.h>
 
 #include "../include/fuzzer.h"
 #include "../include/fuzz_input.h"
@@ -37,6 +38,7 @@ static int * parsed_args_lengths = 0x0 ;
 static int cmd_args_num = 2 ;
 
 static seed_t * seeds ;
+static int * frequencies ;
 static int seed_files_num ;
 static int initial_seeds_num ;
 
@@ -212,6 +214,8 @@ read_seed_dir ()
     }
 
     seeds = (seed_t *) malloc(sizeof(seed_t) * SEED_CNT_MAX) ;
+    frequencies = (int *) malloc(sizeof(int) * SEED_CNT_MAX) ;
+    memset(frequencies, 0, sizeof(int) * SEED_CNT_MAX) ;
 
     while ((entry = readdir(dir_ptr)) != 0x0) {
         if (num_files != 0 && num_files % SEED_CNT_MAX == 0) {
@@ -220,12 +224,19 @@ read_seed_dir ()
                 perror("read_seed_dir: realloc") ;
                 break ;
             }
+
+            frequencies = realloc(frequencies, sizeof(seed_t) * (num_files / SEED_CNT_MAX + 1) * SEED_CNT_MAX) ;
+            if (frequencies == 0x0) {
+                perror("read_seed_dir: realloc") ;
+                break ;
+            }
+            memset(frequencies, 0, sizeof(seed_t) * (num_files / SEED_CNT_MAX + 1) * SEED_CNT_MAX) ;
         } 
 
         if (entry->d_name[0] != '.') {  // TODO. more condition ?
             strncpy(seeds[num_files].seed_filename, entry->d_name, strlen(entry->d_name)) ;
             seeds[num_files].seed_filename[strlen(entry->d_name)] = 0x0 ;
-            seeds[num_files].energy = 1 ;
+            seeds[num_files].energy = INITIAL_E ;
             num_files++ ;
         }
     }
@@ -578,9 +589,10 @@ write_input_args_file (content_t contents, int trial)
     fclose(in_fp) ;
 }
 
-void
+int
 fuzz_argument (content_t contents, fuzarg_t * fuzargs, int trial)
 {
+    int choice = 0 ;
     int i ;
     for (i = cmd_args_num - 1; i < cmd_args_num + fuzzed_args_num - 1; i++) {
         int args_size = fuzargs->f_max_len + 1 ; // TODO. mutation ?
@@ -593,10 +605,11 @@ fuzz_argument (content_t contents, fuzarg_t * fuzargs, int trial)
         else if (fuzz_type == MUTATION || fuzz_type == GREYBOX) {
             if (trial < initial_seeds_num) {
                 is_initial = 1 ;
-                parsed_args_lengths[i] = mutate_input(&parsed_args[i], args_size, fuzargs, seeds[trial].seed_filename, is_initial) ;   
+                choice = trial ;
+                parsed_args_lengths[i] = mutate_input(&parsed_args[i], args_size, fuzargs, seeds[choice].seed_filename, is_initial) ;   
             }
             else {
-                int choice = choose_seed(seed_files_num) ;
+                choice = choose_seed(seed_files_num) ;
                 parsed_args_lengths[i] = mutate_input(&parsed_args[i], args_size, fuzargs, seeds[choice].seed_filename, is_initial) ;   
             }
         }
@@ -613,6 +626,8 @@ fuzz_argument (content_t contents, fuzarg_t * fuzargs, int trial)
 #endif
 
     write_input_args_file (contents, trial) ;
+    
+    return choice ;
 }
 
 void
@@ -649,11 +664,17 @@ update_corpus (char * input, int input_len)
             perror("update_corpus: realloc") ;
             exit(1) ;
         }
+        frequencies = realloc(frequencies, sizeof(seed_t) * (seed_files_num / SEED_CNT_MAX + 1) * SEED_CNT_MAX) ;
+        if (seeds == 0x0) {
+            perror("update_corpus: realloc") ;
+            exit(1) ;
+        }
+        memset(frequencies, 0, sizeof(seed_t) * (seed_files_num / SEED_CNT_MAX + 1) * SEED_CNT_MAX) ;
     }
 
     strncpy(seeds[seed_files_num].seed_filename, new_seed_file, new_filename_len) ;
     seeds[seed_files_num].seed_filename[new_filename_len] = 0x0 ;
-    seeds[seed_files_num].energy = 1 ;
+    seeds[seed_files_num].energy = INITIAL_E ;
     seed_files_num++ ;
 
     char new_seed_path[PATH_MAX] = "" ;
@@ -682,7 +703,6 @@ update_corpus (char * input, int input_len)
     fclose(fp) ;
 }
 
-
 double
 fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_t * cov_sets) 
 {
@@ -693,6 +713,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_
     for (int i = 0; i < trials; i++) {
         int input_len = 0 ;
         int is_initial = 0 ;
+        int choice = 0 ;
 
         if (fuzz_option == STD_IN) {
             if (fuzz_type == RANDOM) {
@@ -701,15 +722,18 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_
             else if (fuzz_type == MUTATION || fuzz_type == GREYBOX) {
                 if (i < initial_seeds_num) {
                     is_initial = 1 ;
-                    input_len = mutate_input(&input, BUF_PAGE_UNIT, &fuzargs, seeds[i].seed_filename, is_initial) ;
+                    choice = i ;
+                    input_len = mutate_input(&input, BUF_PAGE_UNIT, &fuzargs, seeds[choice].seed_filename, is_initial) ;
                 }
                 else {
-                    int choice = choose_seed(seed_files_num) ;
+                    choice = choose_seed(seed_files_num) ;
                     input_len = mutate_input(&input, BUF_PAGE_UNIT, &fuzargs, seeds[choice].seed_filename, is_initial) ;
                 }
             }
         }
-        else if (fuzz_option == ARGUMENT) fuzz_argument(contents, &fuzargs, i) ;
+        else if (fuzz_option == ARGUMENT) choice = fuzz_argument(contents, &fuzargs, i) ;
+        
+        if (fuzz_type == MUTATION || fuzz_type == GREYBOX) frequencies[choice]++ ;
 
         return_codes[i] = run(contents, input, input_len, i) ;
 
@@ -721,6 +745,7 @@ fuzzer_loop (int * return_codes, result_t * results, content_t contents, covset_
             get_accumulated_covs(cov_sets, i) ;
 
             if (is_cov_grow && fuzz_type == GREYBOX) { 
+                seeds[choice].energy = INITIAL_E / pow(frequencies[choice], 0.8) ;
                 update_corpus(input, input_len) ;
             }
         }
@@ -817,6 +842,14 @@ fuzzer_summary (int * return_codes, result_t * results, content_t contents, covs
             }
         }
     }
+
+    printf("\n=======================================================\n") ;
+    printf("ENERGIES\n") ;
+    printf("=======================================================\n") ;
+    for (int i = 0; i < seed_files_num; i++) {
+        printf("[%d] %d\n", i, seeds[i].energy) ;
+    }
+    printf("=======================================================\n") ;
     
     printf("\n=======================================================\n") ;
     printf("TOTAL SUMMARY\n") ;
@@ -956,6 +989,7 @@ fuzzer_main (test_config_t * config)
 
     if (fuzz_type == MUTATION || fuzz_type == GREYBOX) {
         free(seeds) ;
+        free(frequencies) ;
     }
 
     if (covargs.source_num != 0) free_source_paths() ;

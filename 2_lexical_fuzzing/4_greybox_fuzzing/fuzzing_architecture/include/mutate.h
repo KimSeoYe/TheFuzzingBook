@@ -3,9 +3,10 @@
 
 #include "../include/config.h"
 
+#define INITIAL_E 100
+
 typedef struct _seed {
     char seed_filename[PATH_MAX] ;
-    // char * data ; 
     int energy ;
 } seed_t ;
 
