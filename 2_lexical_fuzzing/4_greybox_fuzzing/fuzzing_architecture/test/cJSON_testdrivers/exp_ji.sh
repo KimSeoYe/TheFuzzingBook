@@ -25,16 +25,13 @@ grey_end=$(date +%s)
 
 echo ""
 echo "======================================================="
-echo "RANDOM MUTATION"
-echo "-------------------------------------------------------"
-echo "TIME: $(($mut_end-$mut_start))sec"
-echo "\n======================================================="
-echo "GREYBOX"
-echo "-------------------------------------------------------"
-echo "TIME: $(($grey_end-$grey_start))sec"
+echo "RANDOM MUTATION TIME: $(($mut_end-$mut_start))sec"
+echo "GREYBOX TIME: $(($grey_end-$grey_start))sec"
 printf "%s" "UPDATED SEEDS: "
 for i in {1..5}
 do
    printf "%d " "${grey_updated_seeds[i]}"
 done
-echo "\n=======================================================\n"
+echo ""
+echo "======================================================="
+echo ""

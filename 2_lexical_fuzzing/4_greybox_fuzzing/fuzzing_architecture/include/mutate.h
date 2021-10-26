@@ -3,6 +3,12 @@
 
 #include "../include/config.h"
 
+typedef struct _seed {
+    char seed_filename[PATH_MAX] ;
+    // char * data ; 
+    int energy ;
+} seed_t ;
+
 int flip_bits (char * dst, int dst_len, char * seed, int seed_len, int position) ;
 
 int delete_bytes (char * dst, int dst_len, char * seed, int seed_len, int position) ;
